@@ -1,1 +1,3 @@
-# ctrl-alt-defeat_Project
+# Image Viewer and Editor Application
+
+By: Ctrl+Alt+Defeat
