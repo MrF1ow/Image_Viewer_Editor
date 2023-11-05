@@ -1,5 +1,6 @@
 import os
 from tkinter import filedialog  # pip install tk
+import cv2 as cv
 
 
 class FileManager:
@@ -22,10 +23,15 @@ class FileManager:
         if file_path:
             self.file = file_path  # Update file attribute with path of file selected
 
+    def find_file(self, path):
+        file_path = path
+        if file_path:
+            self.file = file_path
+
     # this should be an option
     def save_file(self, content):
         if self.file:
-            content.save(self.file)  # Overwrites existing file with new edits
+            cv.imwrite(self.file, content)  # Overwrites existing file with new edits
 
     @staticmethod
     def save_as_file(content):
@@ -43,7 +49,7 @@ class FileManager:
             defaultextension=".png", filetypes=valid_file_types)
 
         if file_path:
-            content.save(file_path)  # Saves the file in that destination
+            cv.imwrite(file_path, content)  # Saves the file in that destination
 
     def delete_file(self):
         if self.file:
