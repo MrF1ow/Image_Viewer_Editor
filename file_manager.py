@@ -1,5 +1,4 @@
 import os
-from tkinter import Tk
 from tkinter import filedialog  # pip install tk
 
 
@@ -53,9 +52,5 @@ class FileManager:
                 self.file = None  # Clear the file attribute
             except OSError:
                 print(f"Error: {OSError}")
-
-
-
-
 
 
