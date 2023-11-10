@@ -26,7 +26,8 @@ class AppOptions(Frame):
         if fm.file is not None:
             self.master.file_location = fm.file
             image = cv.imread(fm.file)
-            self.master.original_image = image.copy()
+            self.master.master.original_image = image.copy()
+            self.master.master.processed_image = image.copy()
             self.master.master.image_viewer.display_image(image)
 
     def save_button_click(self, event):

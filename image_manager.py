@@ -19,7 +19,7 @@ class ImageManager(Frame):
 
     def display_image(self, img=None):
         if img is None:
-            image = self.master.processed_image.copy() #this uses the processed image if none is given
+            image = self.master.master.processed_image.copy() #this uses the processed image if none is given
         else:
             image = img
 
