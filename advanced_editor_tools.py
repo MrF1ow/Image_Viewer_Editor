@@ -1,10 +1,10 @@
+import cv2 as cv
+
+class AdvancedEditorTools():
+    def init(self, file):
+        self.file = file
 
 
-class EditorTools:
-    def __init__(self) -> None:
-        pass
-    
-    def set_brightness(desired_saturation: int) -> None:
-        if 0 <= desired_saturation <= 100:
-            pass
-            
+    def set_brightness(self, desired_brightness: int):
+        if 0 <= desired_brightness <= 100:
+            self.image_properties.brightness(desired_brightness)
