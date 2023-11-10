@@ -27,7 +27,7 @@ class AppOptions(Frame):
             self.master.file_location = fm.file
             image = cv.imread(fm.file)
             self.master.original_image = image.copy()
-            self.master.image_viewer.display_image(image)
+            self.master.master.image_viewer.display_image(image)
 
     def save_button_click(self, event):
         fm = FileManager()
