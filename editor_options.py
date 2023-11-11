@@ -3,6 +3,7 @@ from tkinter import Frame, Button, TOP, LEFT, RIGHT, BOTTOM, Toplevel
 from PIL import Image, ImageTk
 from image_properties import ImageProperties
 from advanced_editor_tools import AdvancedEditorTools
+from resize_window import ResizeWindow
 
 
 class EditorOptions(Frame):
@@ -28,6 +29,10 @@ class EditorOptions(Frame):
         self.rotate_button = Button(self, text="Rotate")
         self.rotate_button.bind("<ButtonRelease>", self.rotate_image)
         self.rotate_button.grid(row=1, column=1, sticky="se", columnspan=2)
+
+        self.resize_button = Button(self, text="Resize")
+        self.resize_button.bind("<ButtonRelease>", self._open_resize)
+        self.resize_button.grid(row=2, column=0, sticky="w")
 
     # this function opens the place where we are going to have all the sliders for our advanced editor tools
     def _open_advanced_edits(self, event):
@@ -99,3 +104,8 @@ class EditorOptions(Frame):
         self.master.master.processed_image = numpy_image
         # Display the rotated image in the image viewer
         self.master.master.image_viewer.display_image(numpy_image)
+
+    def _open_resize(self, event):
+        self.master.master.resize_window = ResizeWindow(master=self.master)
+        self.master.master.resize_window.grab_set()
+
