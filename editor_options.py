@@ -31,6 +31,7 @@ class EditorOptions(Frame):
 
     # this function opens the place where we are going to have all the sliders for our advanced editor tools
     def _open_advanced_edits(self, event):
+        # initializes the AdvancedEditorTools
         self.master.master.advanced_tools = AdvancedEditorTools(master=self.master)
         self.master.master.advanced_tools.grab_set()
 
