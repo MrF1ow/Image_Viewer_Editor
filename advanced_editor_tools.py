@@ -33,23 +33,31 @@ class AdvancedEditorTools(Toplevel):
 
     def _show_editor_tools(self, event):
         # Apply brightness
+        # retrieves the value from the slider
         brightness_factor = self.brightness_scale.get()
+        # applies the actual brightness change
         self.processing_image = cv2.convertScaleAbs(self.original_image, alpha=brightness_factor)
+        # updates the brightness value
         ImageProperties.brightness = brightness_factor
 
         # Apply blur
         blur_size = self.blur_scale.get()
+        # this is how distorted each pixel will become
         kernel_size = (blur_size, blur_size)
+        # the kernel size had to be a positive, ODD number
         kernel_size = tuple(size + 1 if size % 2 == 0 else size for size in kernel_size)
+        # applies the actual blur
         self.processing_image = cv2.blur(self.processing_image, kernel_size)
+        # updates the blur value
         ImageProperties.blur_size = blur_size
 
         # Update displayed image
         self.update_displayed_image(self.processing_image)
 
+    # this function actually sets the newly processed imaged as the image of the application
     def _apply_edits_to_image(self):
         self.master.master.processed_image = self.processing_image
-        self.destroy()
+        self.destroy() # closes the AdvancedEditorTools (destructor pretty much)
 
     def update_displayed_image(self, img=None):
         self.master.master.image_viewer.display_image(img=img)
