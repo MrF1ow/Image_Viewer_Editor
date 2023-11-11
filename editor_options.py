@@ -105,7 +105,6 @@ class EditorOptions(Frame):
         # Display the rotated image in the image viewer
         self.master.master.image_viewer.display_image(numpy_image)
 
-    # need to make it so that it can grayscale when other edits are applied
     def _apply_grayscale_to_image(self, event):
         image = self.master.master.processed_image
         if not ImageProperties.is_grayscaled:

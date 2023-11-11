@@ -27,7 +27,7 @@ class FileManager:
                 # Gets the first frame from the gif
                 cap = cv.VideoCapture(file_path)
                 ret, first_frame = cap.read()
-                cap.release() 
+                cap.release()
 
                 if ret:
                     # Puts the frame into a temporary directory
@@ -35,7 +35,7 @@ class FileManager:
                     temp_file_path = os.path.join(temp_dir, "first_frame.png")
                     cv.imwrite(temp_file_path, first_frame)
                     file_path = temp_file_path
-                else: 
+                else:
                     print("Error: Could not read first frame from GIF")
 
             self.file = file_path  # Update file attribute with path of file selected
@@ -48,7 +48,8 @@ class FileManager:
     # this should be an option
     def save_file(self, content):
         if self.file:
-            cv.imwrite(self.file, content)  # Overwrites existing file with new edits
+            # Overwrites existing file with new edits
+            cv.imwrite(self.file, content)
 
     @staticmethod
     def save_as_file(content):
@@ -66,7 +67,8 @@ class FileManager:
             defaultextension=".png", filetypes=valid_file_types)
 
         if file_path:
-            cv.imwrite(file_path, content)  # Saves the file in that destination
+            # Saves the file in that destination
+            cv.imwrite(file_path, content)
 
     def delete_file(self):
         if self.file:
@@ -75,5 +77,3 @@ class FileManager:
                 self.file = None  # Clear the file attribute
             except OSError:
                 print(f"Error: {OSError}")
-
-

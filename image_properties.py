@@ -10,7 +10,8 @@ class ImageProperties:
     image_height: int=0
 
     rotation: int=0
-    brightness: int=1
+    brightness: int=0
+    contrast: int=1
 
     blur_size: int=0
 

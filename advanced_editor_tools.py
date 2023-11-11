@@ -15,8 +15,12 @@ class AdvancedEditorTools(Toplevel):
         self.brightness_label = Label(self, text="Brightness")
         # slider with range of -1 to 1
         # the command parameter is used to select a function that will be called everytime there is a change in the value of the slider
-        self.brightness_scale = Scale(self, from_=0, to_=2, length=250,
+        self.brightness_scale = Scale(self, from_=0, to_=100, length=250,
                                       resolution=0.1, orient=HORIZONTAL, command=self._show_editor_tools)
+
+        self.contrast_label = Label(self, text="Contrast")
+        self.contrast_scale = Scale(self, from_=1, to_=127, length=250,
+                                    resolution=1, orient=HORIZONTAL, command=self._show_editor_tools)
 
         self.blur_label = Label(self, text="Blur")
         self.blur_scale = Scale(self, from_=0, to_=100, length=250,
@@ -34,9 +38,13 @@ class AdvancedEditorTools(Toplevel):
         self.brightness_scale.set(ImageProperties.brightness)
         self.blur_scale.set(ImageProperties.blur_size)
         self.hue_scale.set(ImageProperties.hue)
+        self.contrast_scale.set(ImageProperties.contrast)
 
+        # this is how they are structured on the popup
         self.brightness_label.pack()
         self.brightness_scale.pack()
+        self.contrast_label.pack()
+        self.contrast_scale.pack()
         self.blur_label.pack()
         self.blur_scale.pack()
         self.hue_label.pack()
@@ -44,14 +52,17 @@ class AdvancedEditorTools(Toplevel):
         self.apply_button.pack()
 
     def _show_editor_tools(self, event):
-        # Apply brightness
+        # Apply brightness/contrast
+
         # retrieves the value from the slider
         brightness_factor = self.brightness_scale.get()
+        contrast_factor = self.contrast_scale.get()
         # applies the actual brightness change
         self.processing_image = cv2.convertScaleAbs(
-            self.original_image, alpha=brightness_factor)
+            self.original_image, alpha=contrast_factor, beta=brightness_factor)
         # updates the brightness value
         ImageProperties.brightness = brightness_factor
+        ImageProperties.contrast = contrast_factor
 
         # Apply blur
         blur_size = self.blur_scale.get()
