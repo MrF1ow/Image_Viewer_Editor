@@ -3,6 +3,7 @@ from tkinter import Frame, Button, TOP, LEFT, RIGHT, BOTTOM, Toplevel
 from PIL import Image, ImageTk
 from image_properties import ImageProperties
 from advanced_editor_tools import AdvancedEditorTools
+import cv2
 
 
 class EditorOptions(Frame):
@@ -28,6 +29,10 @@ class EditorOptions(Frame):
         self.rotate_button = Button(self, text="Rotate")
         self.rotate_button.bind("<ButtonRelease>", self.rotate_image)
         self.rotate_button.grid(row=1, column=1, sticky="se", columnspan=2)
+
+        self.apply_grayscale = Button(self, text="GrayScale")
+        self.apply_grayscale.bind("<ButtonRelease>", self._apply_grayscale_to_image)
+        self.apply_grayscale.grid(row = 2, column=0, sticky="nw", columnspan=2)
 
     # this function opens the place where we are going to have all the sliders for our advanced editor tools
     def _open_advanced_edits(self, event):
@@ -99,3 +104,18 @@ class EditorOptions(Frame):
         self.master.master.processed_image = numpy_image
         # Display the rotated image in the image viewer
         self.master.master.image_viewer.display_image(numpy_image)
+
+    # need to make it so that it can grayscale when other edits are applied
+    def _apply_grayscale_to_image(self, event):
+        image = self.master.master.processed_image
+        if not ImageProperties.is_grayscaled:
+            grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            ImageProperties.is_grayscaled = True
+        else:
+            grayscale_image = image
+            ImageProperties.is_grayscaled = False
+
+        self.update_displayed_image(grayscale_image)
+
+    def update_displayed_image(self, img=None):
+        self.master.master.image_viewer.display_image(img=img)
