@@ -36,8 +36,7 @@ class AppOptions(Frame):
         fm.find_file(path)
 
         if fm.file is not None:
-            image = cv.imread(fm.file)
-            fm.save_file(image)
+            fm.save_file(self.master.master.processed_image)
 
     def save_as_button_click(self, event):
         fm = FileManager()
@@ -45,6 +44,5 @@ class AppOptions(Frame):
         fm.find_file(path)
 
         if fm.file is not None:
-            image = cv.imread(fm.file)
-            fm.save_as_file(image)
+            fm.save_as_file(self.master.master.processed_image)
 
