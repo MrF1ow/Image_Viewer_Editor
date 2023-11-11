@@ -1,6 +1,7 @@
 import os
 from tkinter import filedialog  # pip install tk
 import cv2 as cv
+import tempfile
 
 
 class FileManager:
@@ -21,6 +22,22 @@ class FileManager:
             filetypes=valid_file_types)  # Prompt user to select image
 
         if file_path:
+            if file_path.endswith(".gif"):
+
+                # Gets the first frame from the gif
+                cap = cv.VideoCapture(file_path)
+                ret, first_frame = cap.read()
+                cap.release() 
+
+                if ret:
+                    # Puts the frame into a temporary directory
+                    temp_dir = tempfile.mkdtemp()
+                    temp_file_path = os.path.join(temp_dir, "first_frame.png")
+                    cv.imwrite(temp_file_path, first_frame)
+                    file_path = temp_file_path
+                else: 
+                    print("Error: Could not read first frame from GIF")
+
             self.file = file_path  # Update file attribute with path of file selected
 
     def find_file(self, path):
