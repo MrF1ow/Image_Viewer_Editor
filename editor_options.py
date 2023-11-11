@@ -1,8 +1,8 @@
 import numpy as np
-from tkinter import Frame, Button, TOP, LEFT, RIGHT, BOTTOM
-from advanced_editor_tools import AdvancedEditorTools
+from tkinter import Frame, Button, TOP, LEFT, RIGHT, BOTTOM, Toplevel
 from PIL import Image, ImageTk
 from image_properties import ImageProperties
+from advanced_editor_tools import AdvancedEditorTools
 
 
 class EditorOptions(Frame):
@@ -10,11 +10,11 @@ class EditorOptions(Frame):
         Frame.__init__(self, master=master)
 
         # creates the button
-        self.brightness_button = Button(self, text="Brightness")
+        self.advanced_edits_button = Button(self, text="Advanced Edits")
         # binds the button to the function
-        self.brightness_button.bind("<ButtonRelease>", self.brightness_button)
+        self.advanced_edits_button.bind("<ButtonRelease>", self._open_advanced_edits)
         # this puts it on the top left
-        self.brightness_button.grid(row=0, column=0, sticky="w")
+        self.advanced_edits_button.grid(row=0, column=0, sticky="w")
 
         self.horz_flip_button = Button(self, text="Horz Flip")
         self.horz_flip_button.bind(
@@ -29,9 +29,10 @@ class EditorOptions(Frame):
         self.rotate_button.bind("<ButtonRelease>", self.rotate_image)
         self.rotate_button.grid(row=1, column=1, sticky="se", columnspan=2)
 
-    def brightness_button(self, event):
-        brightness_value = 20
-        AdvancedEditorTools.set_brightness(brightness_value)
+    # this function opens the place where we are going to have all the sliders for our advanced editor tools
+    def _open_advanced_edits(self, event):
+        self.master.master.advanced_tools = AdvancedEditorTools(master=self.master)
+        self.master.master.advanced_tools.grab_set()
 
 
     def horizontal_flip_image(self, event):

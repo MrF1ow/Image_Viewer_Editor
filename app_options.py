@@ -47,4 +47,4 @@ class AppOptions(Frame):
         if fm.file is not None:
             image = cv.imread(fm.file)
             fm.save_as_file(image)
-        
+

@@ -9,8 +9,6 @@ class ImageManager(Frame):
                        width=960, height=540)
 
         self.current_image = None  # store currently displayed image
-        self.x = 0  # x-coord (for fliping later??)
-        self.y = 0  # y-coord
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
         self.canvas = Canvas(self, bg="black", width=960, height=540)
@@ -43,6 +41,8 @@ class ImageManager(Frame):
                 new_height = self.winfo_height()
                 new_width = int(new_height * (width / height))
 
+
+        # need to figure out for portraits
         if new_width > 0 and new_height > 0:
             # resizes image to fit
             self.current_image = cv2.resize(image, (new_width, new_height))
