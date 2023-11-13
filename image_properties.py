@@ -5,6 +5,7 @@ class ImageProperties:
     is_flipped_horz: bool=False
     is_flipped_vert: bool=False
     is_grayscaled: bool=False
+    is_sepia = False
 
     image_width: int=0
     image_height: int=0
@@ -16,3 +17,5 @@ class ImageProperties:
     blur_size: int=0
 
     hue: float=0
+    
+    
