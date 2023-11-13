@@ -12,6 +12,7 @@ class ImageProperties:
     rotation: int=0
     brightness: int=0
     contrast: int=1
+    saturation: int=0
 
     blur_size: int=0
 
