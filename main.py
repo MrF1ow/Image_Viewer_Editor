@@ -4,10 +4,6 @@ from app_options import AppOptions # tried to make a button
 from image_manager import ImageManager
 from editor_options import EditorOptions
 
-# ok so here is the explanation of this lovely feature in python I learned today: pretty much since
-# we are passing in the tkinter Tk class into Main, it allows Main to inherit all of the abilities of
-# tkinter, but also be able to modify them. This is also the reason why you'll see Frame passed into
-# the other classes
 class Main(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -17,7 +13,9 @@ class Main(tk.Tk):
         self.processed_image = None
 
         self.advanced_tools = None
+        self.resize_window = None
         self.crop_tools = None
+
 
         # this just sets the title of the application
         self.title("Image Editor")
