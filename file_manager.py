@@ -1,7 +1,7 @@
 import os
-from tkinter import filedialog  # pip install tk
+from tkinter import filedialog, simpledialog  # pip install tk
 import cv2 as cv
-import tempfile
+import imageio # pip install imageio
 
 
 class FileManager:
@@ -30,22 +30,28 @@ class FileManager:
                 cap.release()
 
                 if ret:
-                    # Puts the frame into a temporary directory
-                    temp_dir = tempfile.mkdtemp()
-                    temp_file_path = os.path.join(temp_dir, "first_frame.png")
-                    cv.imwrite(temp_file_path, first_frame)
-                    file_path = temp_file_path
+                    directory, file_name = os.path.split(file_path)
+                    name, ext = os.path.splitext(file_name)
+                    new_file_path = os.path.join(directory, f'{name}_first_frame.png')
+
+                    # Prompt confirmation to user to create new image from GIF.
+                    result = simpledialog.messagebox.askokcancel("Importing GIF", f"Creating PNG of first frame from select GIF to {new_file_path}")
+                    if not result:
+                        return
+                    
+                    cv.imwrite(new_file_path, first_frame)
+                    file_path = new_file_path
                 else:
                     print("Error: Could not read first frame from GIF")
 
             self.file = file_path  # Update file attribute with path of file selected
 
     def find_file(self, path):
+        # Get a file that already exists
         file_path = path
         if file_path:
             self.file = file_path
 
-    # this should be an option
     def save_file(self, content):
         if self.file:
             # Overwrites existing file with new edits
@@ -55,6 +61,7 @@ class FileManager:
     def save_as_file(content):
 
         valid_file_types = [
+            ("Image Files", "*.png *.jpeg *.jpg *.gif *.bmp *.tiff"),
             ("PNG files", "*.png"),
             ("JPEG files", "*.jpg"),
             ("GIF files", "*.gif"),
@@ -67,8 +74,18 @@ class FileManager:
             defaultextension=".png", filetypes=valid_file_types)
 
         if file_path:
-            # Saves the file in that destination
-            cv.imwrite(file_path, content)
+            if file_path.endswith("gif"):
+                # Opencv cant sasve images as GIF. Imageio is used to save.
+                imageio.mimsave(file_path, [content])
+
+                # Change color values from RBG to BGR
+                image_rgb = imageio.imread(file_path)
+                image_bgr = cv.cvtColor(image_rgb, cv.COLOR_RGB2BGR)
+                imageio.mimsave(file_path, [image_bgr]) # Save the image again with correct colors.
+
+            else:
+                # Saves the file in that destination
+                cv.imwrite(file_path, content)
 
     def delete_file(self):
         if self.file:
