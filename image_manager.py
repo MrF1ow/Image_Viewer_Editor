@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import cv2
 import math
 from image_properties import ImageProperties
+import numpy as np
 
 
 class ImageManager(Frame):
@@ -19,7 +20,8 @@ class ImageManager(Frame):
 
     def display_image(self, img=None):
         if img is None:
-            image = self.master.master.processed_image.copy() #this uses the processed image if none is given
+            # this uses the processed image if none is given
+            image = self.master.master.processed_image.copy()
         else:
             image = img
 
@@ -44,11 +46,12 @@ class ImageManager(Frame):
                 new_width = int(math.floor(new_height * (width / height)))
 
         self.current_image = cv2.resize(image, (new_width, new_height))
-        self.current_image = ImageTk.PhotoImage(Image.fromarray(self.current_image))
+        self.current_image = ImageTk.PhotoImage(
+            Image.fromarray(self.current_image))
 
         self.canvas.config(width=new_width, height=new_height)
-        self.canvas.create_image(new_width / 2, new_height / 2, anchor="center", image=self.current_image)
+        self.canvas.create_image(
+            new_width / 2, new_height / 2, anchor="center", image=self.current_image)
 
         ImageProperties.image_height = new_height
         ImageProperties.image_width = new_width
-
