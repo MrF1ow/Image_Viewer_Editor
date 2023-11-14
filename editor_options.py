@@ -34,6 +34,12 @@ class EditorOptions(Frame):
 
         self.apply_grayscale = Button(self, text="GrayScale")
         self.apply_grayscale.bind("<ButtonRelease>", self._apply_grayscale_to_image)
+        self.apply_grayscale.grid(row = 2, column=0, sticky="nw", columnspan=2)
+        
+        self.apply_sepia = Button(self, text="Sepia")
+        self.apply_sepia.bind("<ButtonRelease>", self._apply_sepia_to_image)
+        self.apply_sepia.grid(row=2, column=1, sticky="nw", columnspan=2)
+
         self.apply_grayscale.grid(row=2, column=0, sticky="nw", columnspan=2)
 
         self.crop_button = Button(self, text="Crop")
@@ -45,7 +51,7 @@ class EditorOptions(Frame):
         # initializes the AdvancedEditorTools
         self.master.master.advanced_tools = AdvancedEditorTools(master=self.master)
         self.master.master.advanced_tools.grab_set()
-
+        
     def horizontal_flip_image(self, event):
         # Get the processed image from the master
         image = self.master.master.processed_image
@@ -108,6 +114,7 @@ class EditorOptions(Frame):
         # Display the rotated image in the image viewer
         self.master.master.image_viewer.display_image(numpy_image)
 
+
     def _apply_grayscale_to_image(self, event):
         image = self.master.master.processed_image
         if not ImageProperties.is_grayscaled:
@@ -118,6 +125,25 @@ class EditorOptions(Frame):
             ImageProperties.is_grayscaled = False
 
         self.update_displayed_image(grayscale_image)
+        
+        
+    def _apply_sepia_to_image(self, event):
+        image = self.master.master.processed_image
+        if not ImageProperties.is_sepia:
+            # Applying Sepia to the uploaded image.
+            array_image = np.array(image, dtype=np.float64) # Converting the image to a numpy array representing pixels.
+            sepia_filter = np.array([[0.272, 0.534, 0.131],
+                                    [0.349, 0.686, 0.168],
+                                    [0.393, 0.769, 0.189]]) # Sepia converter values (constants). 
+            sepia_image = np.dot(array_image, sepia_filter.T).clip(0,255).astype(np.uint8) # Performs dot prodcut with array_image and transposed sepia_filter. Also ensures valid range and data type for pixels. 
+            sepia_image = np.array(sepia_image, dtype=np.uint8) # Converting the sepia_image into valid np array. Common step to ensure proper data type. 
+            ImageProperties.is_sepia = True 
+        else: 
+            sepia_image = image
+            ImageProperties.is_sepia = False
+
+        self.update_displayed_image(sepia_image)
+
 
     def update_displayed_image(self, img=None):
         self.master.master.image_viewer.display_image(img=img)
