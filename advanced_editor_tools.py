@@ -12,27 +12,27 @@ class AdvancedEditorTools(Toplevel):
         self.original_image = self.master.master.original_image
         self.processing_image = self.master.master.processed_image
 
-        self.brightness_label = Label(self, text="Brightness")
         # slider with range of -1 to 1
         # the command parameter is used to select a function that will be called everytime there is a change in the value of the slider
         self.brightness_scale = Scale(self, from_=0, to_=100, length=250,
                                       resolution=0.1, orient=HORIZONTAL, command=self._show_editor_tools)
+        self.brightness_label = Label(self, text="Brightness")
 
         self.contrast_label = Label(self, text="Contrast")
         self.contrast_scale = Scale(self, from_=1, to_=127, length=250,
                                     resolution=1, orient=HORIZONTAL, command=self._show_editor_tools)
 
-        self.blur_label = Label(self, text="Blur")
         self.blur_scale = Scale(self, from_=0, to_=100, length=250,
                                 resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+        self.blur_label = Label(self, text="Blur")
 
-        self.hue_label = Label(self, text="Hue")
         self.hue_scale = Scale(self, from_=0, to_=179, length=250,
                                resolution=1, orient=HORIZONTAL, command=self._show_editor_tools)
+        self.hue_label = Label(self, text="Hue")
 
-        self.saturation_label = Label(self, text="Saturation")
         self.saturation_scale = Scale(self, from_=0, to_=255, length=250,
                                       resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+        self.saturation_label = Label(self, text="Saturation")
 
 
         self.apply_button = Button(self, text="Apply")

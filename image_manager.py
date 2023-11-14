@@ -32,6 +32,9 @@ class ImageManager(Frame):
         height, width, channels = image.shape
         ratio = height / width
 
+        ImageProperties.altered_image_height = height
+        ImageProperties.altered_image_width = width
+
         new_height = height
         new_width = width
 
@@ -53,5 +56,7 @@ class ImageManager(Frame):
         self.canvas.create_image(
             new_width / 2, new_height / 2, anchor="center", image=self.current_image)
 
-        ImageProperties.image_height = new_height
-        ImageProperties.image_width = new_width
+    def _set_height_width(self, img=None):
+        height, width, channels = img.shape
+        ImageProperties.original_image_height = height
+        ImageProperties.original_image_width = width

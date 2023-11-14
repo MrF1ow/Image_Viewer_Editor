@@ -15,10 +15,10 @@ class ResizeWindow(Toplevel):
         #Creates the entry for the width input
         self.width = Entry(self)
         #Inserts the currrently stored values from image properties
-        self.width.insert(0, str(ImageProperties.image_width))
+        self.width.insert(0, str(ImageProperties.altered_image_width))
         #Packs the widget
         self.width.pack()
-        
+
         #Exactly the same as width, but for height.
         Label(self, text="Height").pack()
         self.height = Entry(self)

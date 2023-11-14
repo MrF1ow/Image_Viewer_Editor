@@ -43,3 +43,4 @@ class Main(tk.Tk):
         # this is where the image is actually displayed
         self.image_viewer = ImageManager(master=main_frame)
         self.image_viewer.pack(fill=tk.BOTH, padx=20, pady=10, expand=1)
+

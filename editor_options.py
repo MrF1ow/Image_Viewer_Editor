@@ -35,18 +35,18 @@ class EditorOptions(Frame):
         self.resize_button = Button(self, text="Resize")
         self.resize_button.bind("<ButtonRelease>", self._open_resize)
         self.resize_button.grid(row=2, column=0, sticky="w")
-       
+
         self.apply_grayscale = Button(self, text="GrayScale")
         self.apply_grayscale.bind("<ButtonRelease>", self._apply_grayscale_to_image)
-        self.apply_grayscale.grid(row = 2, column=0, sticky="nw", columnspan=2)
-        
+        self.apply_grayscale.grid(row = 2, column=1, sticky="nw", columnspan=2)
+
         self.apply_sepia = Button(self, text="Sepia")
         self.apply_sepia.bind("<ButtonRelease>", self._apply_sepia_to_image)
-        self.apply_sepia.grid(row=2, column=1, sticky="nw", columnspan=2)
+        self.apply_sepia.grid(row=3, column=0, sticky="nw", columnspan=2)
 
         self.crop_button = Button(self, text="Crop")
         self.crop_button.bind("<ButtonRelease>", self._open_crop_settings)
-        self.crop_button.grid(row=2, column=2, sticky='e', columnspan=2)
+        self.crop_button.grid(row=3, column=1, sticky='e', columnspan=2)
 
 
     # this function opens the place where we are going to have all the sliders for our advanced editor tools
@@ -54,7 +54,7 @@ class EditorOptions(Frame):
         # initializes the AdvancedEditorTools
         self.master.master.advanced_tools = AdvancedEditorTools(master=self.master)
         self.master.master.advanced_tools.grab_set()
-        
+
     def horizontal_flip_image(self, event):
         # Get the processed image from the master
         image = self.master.master.processed_image
