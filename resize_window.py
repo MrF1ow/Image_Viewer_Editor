@@ -22,7 +22,7 @@ class ResizeWindow(Toplevel):
         #Exactly the same as width, but for height.
         Label(self, text="Height").pack()
         self.height = Entry(self)
-        self.height.insert(0, str(ImageProperties.image_height))
+        self.height.insert(0, str(ImageProperties.altered_image_height))
         self.height.pack()
 
         #Applies the resize by calling the apply resize function
