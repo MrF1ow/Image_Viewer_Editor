@@ -3,7 +3,9 @@ from tkinter import Frame, Button, TOP, LEFT, RIGHT, BOTTOM, Toplevel
 from PIL import Image, ImageTk
 from image_properties import ImageProperties
 from advanced_editor_tools import AdvancedEditorTools
+from crop_options import CropOptions
 import cv2
+
 
 
 class EditorOptions(Frame):
@@ -38,15 +40,18 @@ class EditorOptions(Frame):
         self.apply_sepia.bind("<ButtonRelease>", self._apply_sepia_to_image)
         self.apply_sepia.grid(row=2, column=1, sticky="nw", columnspan=2)
 
+        self.apply_grayscale.grid(row=2, column=0, sticky="nw", columnspan=2)
+
+        self.crop_button = Button(self, text="Crop")
+        self.crop_button.bind("<ButtonRelease>", self._open_crop_settings)
+        self.crop_button.grid(row=2, column=2, sticky='e', columnspan=2)
 
     # this function opens the place where we are going to have all the sliders for our advanced editor tools
     def _open_advanced_edits(self, event):
         # initializes the AdvancedEditorTools
         self.master.master.advanced_tools = AdvancedEditorTools(master=self.master)
         self.master.master.advanced_tools.grab_set()
-
-
-
+        
     def horizontal_flip_image(self, event):
         # Get the processed image from the master
         image = self.master.master.processed_image
@@ -70,7 +75,6 @@ class EditorOptions(Frame):
         # Display the flipped image in the image viewer
         self.master.master.image_viewer.display_image(numpy_image)
 
-
     def vertical_flip_image(self, event):
         # Get the processed image from the master
         image = self.master.master.processed_image
@@ -93,7 +97,6 @@ class EditorOptions(Frame):
         self.master.master.processed_image = numpy_image
         # Display the flipped image in the image viewer
         self.master.master.image_viewer.display_image(numpy_image)
-
 
     def rotate_image(self, event):
         # Get the processed image from the master
@@ -144,3 +147,7 @@ class EditorOptions(Frame):
 
     def update_displayed_image(self, img=None):
         self.master.master.image_viewer.display_image(img=img)
+
+    def _open_crop_settings(self, event):
+        self.master.master.crop_tools = CropOptions(master=self.master)
+        self.master.master.crop_tools.grab_set()

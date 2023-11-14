@@ -30,6 +30,11 @@ class AdvancedEditorTools(Toplevel):
         self.hue_scale = Scale(self, from_=0, to_=179, length=250,
                                resolution=1, orient=HORIZONTAL, command=self._show_editor_tools)
 
+        self.saturation_label = Label(self, text="Saturation")
+        self.saturation_scale = Scale(self, from_=0, to_=255, length=250,
+                                      resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+
+
         self.apply_button = Button(self, text="Apply")
         self.apply_button = Button(
             self, text="Apply", command=self._apply_edits_to_image)
@@ -39,6 +44,7 @@ class AdvancedEditorTools(Toplevel):
         self.blur_scale.set(ImageProperties.blur_size)
         self.hue_scale.set(ImageProperties.hue)
         self.contrast_scale.set(ImageProperties.contrast)
+        self.saturation_scale.set(ImageProperties.saturation)
 
         # this is how they are structured on the popup
         self.brightness_label.pack()
@@ -49,6 +55,8 @@ class AdvancedEditorTools(Toplevel):
         self.blur_scale.pack()
         self.hue_label.pack()
         self.hue_scale.pack()
+        self.saturation_label.pack()
+        self.saturation_scale.pack()
         self.apply_button.pack()
 
     def _show_editor_tools(self, event):
@@ -80,6 +88,10 @@ class AdvancedEditorTools(Toplevel):
         hue_value = self.hue_scale.get()
         self._change_hue(hue_value)
 
+        # Apply saturation
+        saturation_value = self.saturation_scale.get()
+        self._change_saturation(saturation_value)
+
         # Update displayed image
         self.update_displayed_image(self.processing_image)
 
@@ -100,6 +112,20 @@ class AdvancedEditorTools(Toplevel):
 
         # Update the hue value in ImageProperties (you may need to define ImageProperties class)
         ImageProperties.hue = hue_value
+
+    def _change_saturation(self, saturation_value):
+        # Convert image to HSV
+        hsv_image = cv2.cvtColor(self.processing_image, cv2.COLOR_BGR2HSV)
+
+        # Saturation values range 0 - 255
+        hsv_image[:, :, 1] += saturation_value
+
+        # Update properties saturation value
+        ImageProperties.saturation = hsv_image[:, :, 1]
+
+        # Convert back to BGR
+        self.processing_image = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
+
 
     def update_displayed_image(self, img=None):
         self.master.master.image_viewer.display_image(img=img)

@@ -17,6 +17,7 @@ class Main(tk.Tk):
         self.processed_image = None
 
         self.advanced_tools = None
+        self.crop_tools = None
 
         # this just sets the title of the application
         self.title("Image Editor")
