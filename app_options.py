@@ -4,7 +4,7 @@ import cv2 as cv
 
 class AppOptions(Frame):
     def __init__(self, master=None):
-        Frame.__init__(self, master=master)
+        Frame.__init__(self, master=master, bg="#6b6b6b")
 
         self.file_options_button = Button(self, text="File", command=self._show_file_menu)
         self.file_options_button.pack(side=LEFT)

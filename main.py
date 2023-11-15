@@ -16,12 +16,13 @@ class Main(tk.Tk):
         self.resize_window = None
         self.crop_tools = None
 
+        self.configure(bg="#6b6b6b")
 
         # this just sets the title of the application
         self.title("Image Editor")
 
         # this is used just as the frame to contain everything else
-        main_frame = tk.Frame(self)
+        main_frame = tk.Frame(self, bg="#6b6b6b")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # this is the file options (Save As, Save, New...etc)

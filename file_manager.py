@@ -1,7 +1,7 @@
 import os
 from tkinter import filedialog, simpledialog  # pip install tk
 import cv2 as cv
-import imageio # pip install imageio
+import imageio  # pip install imageio
 
 
 class FileManager:
@@ -32,13 +32,15 @@ class FileManager:
                 if ret:
                     directory, file_name = os.path.split(file_path)
                     name, ext = os.path.splitext(file_name)
-                    new_file_path = os.path.join(directory, f'{name}_first_frame.png')
+                    new_file_path = os.path.join(
+                        directory, f'{name}_first_frame.png')
 
                     # Prompt confirmation to user to create new image from GIF.
-                    result = simpledialog.messagebox.askokcancel("Importing GIF", f"Creating PNG of first frame from select GIF to {new_file_path}")
+                    result = simpledialog.messagebox.askokcancel(
+                        "Importing GIF", f"Creating PNG of first frame from select GIF to {new_file_path}")
                     if not result:
                         return
-                    
+
                     cv.imwrite(new_file_path, first_frame)
                     file_path = new_file_path
                 else:
@@ -81,7 +83,8 @@ class FileManager:
                 # Change color values from RBG to BGR
                 image_rgb = imageio.imread(file_path)
                 image_bgr = cv.cvtColor(image_rgb, cv.COLOR_RGB2BGR)
-                imageio.mimsave(file_path, [image_bgr]) # Save the image again with correct colors.
+                # Save the image again with correct colors.
+                imageio.mimsave(file_path, [image_bgr])
 
             else:
                 # Saves the file in that destination

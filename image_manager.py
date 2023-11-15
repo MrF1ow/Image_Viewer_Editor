@@ -8,7 +8,7 @@ import numpy as np
 
 class ImageManager(Frame):
     def __init__(self, master=None):
-        Frame.__init__(self, master=master, bg="grey",
+        Frame.__init__(self, master=master, bg="black",
                        width=1440, height=810)
 
         self.current_image = None  # store currently displayed image
@@ -55,8 +55,3 @@ class ImageManager(Frame):
         self.canvas.config(width=new_width, height=new_height)
         self.canvas.create_image(
             new_width / 2, new_height / 2, anchor="center", image=self.current_image)
-
-    def _set_height_width(self, img=None):
-        height, width, channels = img.shape
-        ImageProperties.original_image_height = height
-        ImageProperties.original_image_width = width

@@ -1,4 +1,4 @@
-from tkinter import Toplevel, Label, Scale, HORIZONTAL, Button, RIGHT
+from tkinter import Toplevel, Label, Scale, TOP, HORIZONTAL, Button, RIGHT, LEFT, BOTTOM
 from PIL import Image, ImageTk, ImageFilter
 from image_properties import ImageProperties
 import cv2
@@ -11,6 +11,7 @@ class AdvancedEditorTools(Toplevel):
 
         self.original_image = self.master.master.original_image
         self.processing_image = self.master.master.processed_image
+        self.displaying_processed_image = True
 
         # slider with range of -1 to 1
         # the command parameter is used to select a function that will be called everytime there is a change in the value of the slider
@@ -23,7 +24,7 @@ class AdvancedEditorTools(Toplevel):
                                     resolution=1, orient=HORIZONTAL, command=self._show_editor_tools)
 
         self.blur_scale = Scale(self, from_=0, to_=100, length=250,
-                                resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+                                resolution=1, orient=HORIZONTAL, command=self._show_editor_tools)
         self.blur_label = Label(self, text="Blur")
 
         self.hue_scale = Scale(self, from_=0, to_=179, length=250,
@@ -34,10 +35,15 @@ class AdvancedEditorTools(Toplevel):
                                       resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
         self.saturation_label = Label(self, text="Saturation")
 
-
-        self.apply_button = Button(self, text="Apply")
         self.apply_button = Button(
             self, text="Apply", command=self._apply_edits_to_image)
+
+        self.cancel_button = Button(self, text="Cancel")
+        self.cancel_button.bind("<ButtonRelease>", self._cancel_edits_to_image)
+
+        self.preview_button = Button(self, text="Preview")
+        self.preview_button.bind(
+            "<ButtonRelease>", self._preview_edits_on_image)
 
         # set the initial value of the scale
         self.brightness_scale.set(ImageProperties.brightness)
@@ -57,7 +63,9 @@ class AdvancedEditorTools(Toplevel):
         self.hue_scale.pack()
         self.saturation_label.pack()
         self.saturation_scale.pack()
-        self.apply_button.pack()
+        self.preview_button.pack(side=LEFT, anchor='center')
+        self.cancel_button.pack(side=LEFT, anchor='center')
+        self.apply_button.pack(side=LEFT, anchor='center')
 
     def _show_editor_tools(self, event):
         # Apply brightness/contrast
@@ -69,8 +77,6 @@ class AdvancedEditorTools(Toplevel):
         self.processing_image = cv2.convertScaleAbs(
             self.original_image, alpha=contrast_factor, beta=brightness_factor)
         # updates the brightness value
-        ImageProperties.brightness = brightness_factor
-        ImageProperties.contrast = contrast_factor
 
         # Apply blur
         blur_size = self.blur_scale.get()
@@ -81,8 +87,6 @@ class AdvancedEditorTools(Toplevel):
                             2 == 0 else size for size in kernel_size)
         # applies the actual blur
         self.processing_image = cv2.blur(self.processing_image, kernel_size)
-        # updates the blur value
-        ImageProperties.blur_size = blur_size
 
         # Apply Hue Alteration
         hue_value = self.hue_scale.get()
@@ -95,11 +99,6 @@ class AdvancedEditorTools(Toplevel):
         # Update displayed image
         self.update_displayed_image(self.processing_image)
 
-    # this function actually sets the newly processed imaged as the image of the application
-    def _apply_edits_to_image(self):
-        self.master.master.processed_image = self.processing_image
-        self.destroy()  # closes the AdvancedEditorTools (destructor pretty much)
-
     def _change_hue(self, hue_value):
         # Convert image to HSV
         hsv_image = cv2.cvtColor(self.processing_image, cv2.COLOR_BGR2HSV)
@@ -110,9 +109,6 @@ class AdvancedEditorTools(Toplevel):
         # Convert back to BGR
         self.processing_image = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
 
-        # Update the hue value in ImageProperties (you may need to define ImageProperties class)
-        ImageProperties.hue = hue_value
-
     def _change_saturation(self, saturation_value):
         # Convert image to HSV
         hsv_image = cv2.cvtColor(self.processing_image, cv2.COLOR_BGR2HSV)
@@ -120,12 +116,34 @@ class AdvancedEditorTools(Toplevel):
         # Saturation values range 0 - 255
         hsv_image[:, :, 1] += saturation_value
 
-        # Update properties saturation value
-        ImageProperties.saturation = hsv_image[:, :, 1]
-
         # Convert back to BGR
         self.processing_image = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
 
-
     def update_displayed_image(self, img=None):
         self.master.master.image_viewer.display_image(img=img)
+
+        # this function actually sets the newly processed imaged as the image of the application
+    def _apply_edits_to_image(self):
+        self.master.master.processed_image = self.processing_image
+        ImageProperties.brightness = self.brightness_scale.get()
+        ImageProperties.contrast = self.contrast_scale.get()
+        ImageProperties.blur_size = self.blur_scale.get()
+        ImageProperties.hue = self.hue_scale.get()
+        ImageProperties.saturation = self.saturation_scale.get()
+
+        hsv_image = cv2.cvtColor(self.processing_image, cv2.COLOR_BGR2HSV)
+        ImageProperties.saturation = hsv_image[:, :, 1]
+
+        self.destroy()  # closes the AdvancedEditorTools (destructor pretty much)
+
+    def _preview_edits_on_image(self, event):
+        if self.displaying_processed_image:
+            self.update_displayed_image(self.original_image)
+            self.displaying_processed_image = False
+        else:
+            self.update_displayed_image(self.processing_image)
+            self.displaying_processed_image = True
+
+    def _cancel_edits_to_image(self, event):
+        self.update_displayed_image(self.original_image)
+        self.destroy()

@@ -10,7 +10,7 @@ import cv2
 
 class EditorOptions(Frame):
     def __init__(self, master=None):
-        Frame.__init__(self, master=master)
+        Frame.__init__(self, master=master, bg="#6b6b6b")
 
         # creates the button
         self.advanced_edits_button = Button(self, text="Advanced Edits")
