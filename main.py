@@ -3,6 +3,7 @@ from tkinter import ttk
 from app_options import AppOptions # tried to make a button
 from image_manager import ImageManager
 from editor_options import EditorOptions
+from history_of_edits import History
 
 class Main(tk.Tk):
     def __init__(self):
@@ -14,7 +15,9 @@ class Main(tk.Tk):
 
         self.advanced_tools = None
         self.resize_window = None
-        self.crop_tools = None
+        self.in_crop_mode = False
+
+        self.history = []
 
         self.configure(bg="#6b6b6b")
 
@@ -33,15 +36,23 @@ class Main(tk.Tk):
         separator1 = ttk.Separator(master=main_frame, orient=tk.HORIZONTAL)
         separator1.pack(fill=tk.X, padx=10, pady=5)
 
-        # this is the editor options (Hue, Crop, Brighness)
-        # JUST THE BUTTONS
+        # Pack EditorOptions on the left
         self.editor_options = EditorOptions(master=main_frame)
         self.editor_options.pack(side=tk.LEFT, fill=tk.Y, padx=20, pady=10)
 
-        separator2 = ttk.Separator(master=main_frame, orient=tk.VERTICAL)
-        separator2.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+        # Create a separator between EditorOptions and ImageViewer
+        separator4 = ttk.Separator(master=main_frame, orient=tk.VERTICAL)
+        separator4.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
-        # this is where the image is actually displayed
+        # Display the image_viewer
         self.image_viewer = ImageManager(master=main_frame)
-        self.image_viewer.pack(fill=tk.BOTH, padx=20, pady=10, expand=1)
+        self.image_viewer.pack(side=tk.LEFT, fill=tk.BOTH, padx=20, pady=10, expand=True)
+
+        # Create a separator between ImageViewer and HistoryOfEdits
+        separator5 = ttk.Separator(master=main_frame, orient=tk.VERTICAL)
+        separator5.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+
+        # Pack HistoryOfEdits on the right
+        self.history_of_edits = History(master=main_frame)
+        self.history_of_edits.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
