@@ -1,5 +1,6 @@
 from tkinter import Frame, Button, LEFT, Menu
 from file_manager import FileManager
+from image_properties import ImageProperties
 import cv2 as cv
 
 class AppOptions(Frame):
@@ -18,7 +19,6 @@ class AppOptions(Frame):
         self.edit_options_button.pack(side=LEFT)
 
         self.edit_menu = Menu(self, tearoff=0)
-        #add undo and redo once implemented
         self.edit_menu.add_command(label="Batch Processing")
 
     def _show_file_menu(self, event=None):
@@ -36,6 +36,12 @@ class AppOptions(Frame):
             image = cv.imread(fm.file)
             self.master.master.original_image = image.copy()
             self.master.master.processed_image = image.copy()
+            height, width, channels = image.shape
+            ImageProperties.original_image_height = height
+            ImageProperties.original_image_height = width
+            ImageProperties.altered_image_height = height
+            ImageProperties.altered_image_width = width
+            self.master.master.editor_options.original_image = image.copy()
             self.master.master.image_viewer.display_image(image)
 
     def save_button_click(self, event=None):
