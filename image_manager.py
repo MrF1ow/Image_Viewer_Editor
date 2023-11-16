@@ -10,7 +10,7 @@ import numpy as np
 class ImageManager(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="black",
-                       width=1440, height=810)
+                       width=720, height=405)
 
         self.current_image = None  # store currently displayed image
         self.crop_start_x = 0
@@ -21,7 +21,7 @@ class ImageManager(Frame):
         self.ratio = 0
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
-        self.canvas = Canvas(self, bg="black",  width=1440, height=810)
+        self.canvas = Canvas(self, bg="black",  width=720, height=405)
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
 
