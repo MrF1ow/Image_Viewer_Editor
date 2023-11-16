@@ -8,7 +8,7 @@ class ImageProperties:
     is_flipped_horz: bool=False
     is_flipped_vert: bool=False
     is_grayscaled: bool=False
-    is_sepia = bool=False
+    is_sepia: bool=False
     is_cropped: bool=False
 
     original_image_width: int=0
