@@ -25,9 +25,9 @@ class ImageProperties:
     blur: int=0
     hue: float=50
 
-    crop_start_x: int = 0
-    crop_start_y: int = 0
-    crop_end_x: int = 0
-    crop_end_y: int = 0
+    crop_start_x: float = 0
+    crop_start_y: float = 0
+    crop_end_x: float = 0
+    crop_end_y: float = 0
     crop_ratio: float = 0.0
 

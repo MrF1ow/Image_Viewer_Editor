@@ -18,23 +18,23 @@ class AdvancedEditorTools(Toplevel):
         # slider with range of -1 to 1
         # the command parameter is used to select a function that will be called everytime there is a change in the value of the slider
         self.brightness_scale = Scale(self, from_=0, to_=100, length=250,
-                                      resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+                                      resolution=5, orient=HORIZONTAL, command=self._change_brightness_value)
         self.brightness_label = Label(self, text="Brightness")
 
         self.contrast_scale = Scale(self, from_=0, to_=100, length=250,
-                                    resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+                                    resolution=5, orient=HORIZONTAL, command=self._change_contrast_value)
         self.contrast_label = Label(self, text="Contrast")
 
         self.blur_scale = Scale(self, from_=0, to_=100, length=250,
-                                resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+                                resolution=5, orient=HORIZONTAL, command=self._change_blur_value)
         self.blur_label = Label(self, text="Blur")
 
         self.hue_scale = Scale(self, from_=0, to_=100, length=250,
-                               resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+                               resolution=5, orient=HORIZONTAL, command=self._change_hue_value)
         self.hue_label = Label(self, text="Hue")
 
         self.saturation_scale = Scale(self, from_=0, to_=100, length=250,
-                                      resolution=5, orient=HORIZONTAL, command=self._show_editor_tools)
+                                      resolution=5, orient=HORIZONTAL, command=self._change_saturation_value)
         self.saturation_label = Label(self, text="Saturation")
 
         self.apply_button = Button(
@@ -85,30 +85,25 @@ class AdvancedEditorTools(Toplevel):
     def _convert_hue(self, num):
         return int(num * 3.58 - 179)
 
-    def _show_editor_tools(self, event):
-
-        self._change_brightness_value(event)
-        self._change_contrast_value(event)
-        self._change_blur_value(event)
-        self._change_hue_value(event)
-        self._change_saturation_value(event)
-
-        self._update_image_property_values()
-
     def _change_blur_value(self, event):
         ImageProperties.blur = self.blur_scale.get()
+        self.update_displayed_image()
 
     def _change_hue_value(self, event):
         ImageProperties.hue = self.hue_scale.get()
+        self.update_displayed_image()
 
     def _change_saturation_value(self, event):
         ImageProperties.saturation = self.saturation_scale.get()
+        self.update_displayed_image()
 
     def _change_brightness_value(self, event):
         ImageProperties.brightness = self.brightness_scale.get()
+        self.update_displayed_image()
 
     def _change_contrast_value(self, event):
         ImageProperties.contrast = self.contrast_scale.get()
+        self.update_displayed_image()
 
     def _apply_blur_to_image(self, img=None):
         image=img
@@ -157,6 +152,7 @@ class AdvancedEditorTools(Toplevel):
 
         # this function actually sets the newly processed imaged as the image of the application
     def _confirm_edits_to_image(self):
+        self._insert_into_history()
         self.destroy()  # closes the AdvancedEditorTools (destructor pretty much)
 
     def _preview_edits_on_image(self, event):
@@ -169,13 +165,13 @@ class AdvancedEditorTools(Toplevel):
 
     def _cancel_edits_to_image(self, event):
         self._reset_advanced_image_properties()
-        self._update_image_property_values()
+        self.update_displayed_image()
         self.destroy()
 
     def _clear_edits_to_image(self, event):
         self._reset_advanced_image_properties()
         self._set_scale_values()
-        self._update_image_property_values()
+        self.update_displayed_image()
 
     def _reset_advanced_image_properties(self):
         ImageProperties.brightness = self.pre_image_properties.brightness
@@ -203,17 +199,59 @@ class AdvancedEditorTools(Toplevel):
 
         return image
 
-    def _update_image_property_values(self):
+    def update_displayed_image(self):
         self.master.master.image_viewer._apply_all_edits()
 
-    def _insert_into_history(self, property_name, scale):
-        new_value = scale.get()
-        setattr(ImageProperties, property_name, new_value)
-        title = f"{property_name.capitalize()} Changed to {new_value}"
+    def _check_undo_performed(self):
+        if self.master.master.undo_performed:
+            self.master.master.history_of_edits._clear_after_edit()
+
+    def _insert_into_history(self):
+        """
+        Inserts a new edit instance into the history array and updates the history listbox.
+
+        Args:
+            title (str): Title for the edit instance.
+            property_name (str): Name of the property to be updated in ImageProperties.
+            new_value (any): New value to be set for the specified property.
+
+        Returns:
+            None
+        """
+        title = f"Advanced Edits:\nBrightness: {ImageProperties.brightness},\nContrast: {ImageProperties.contrast},\nSaturation: {ImageProperties.saturation},\nBlur: {ImageProperties.blur},\nHue: {ImageProperties.hue}"
+        edit_instance = self._make_edit_instance(title)
+        self._check_undo_performed()
+        self.history_arr = self.master.master.history
+        self.history_arr.append(edit_instance)
+        self.master.master.history_of_edits.update_history_list()
+        self.master.master.history_of_edits._set_indices()
+
+    def _make_edit_instance(self, title):
+        """
+        Creates an edit instance with the current ImageProperties values.
+        """
         edit_instance = ImageProperties(
             title=title,
             time=str(time.strftime('%H:%M:%S')),
-             **{property_name: new_value}
+            is_flipped_horz=ImageProperties.is_flipped_horz,
+            is_flipped_vert=ImageProperties.is_flipped_vert,
+            is_grayscaled=ImageProperties.is_grayscaled,
+            is_sepia=ImageProperties.is_sepia,
+            is_cropped=ImageProperties.is_cropped,
+            original_image_height=ImageProperties.original_image_height,
+            original_image_width=ImageProperties.original_image_width,
+            altered_image_height=ImageProperties.altered_image_height,
+            altered_image_width=ImageProperties.altered_image_width,
+            rotation=ImageProperties.rotation,
+            brightness=ImageProperties.brightness,
+            contrast=ImageProperties.contrast,
+            saturation=ImageProperties.saturation,
+            blur=ImageProperties.blur,
+            hue=ImageProperties.hue,
+            crop_start_x=ImageProperties.crop_start_x,
+            crop_start_y=ImageProperties.crop_start_y,
+            crop_end_x=ImageProperties.crop_end_x,
+            crop_end_y=ImageProperties.crop_end_y,
+            crop_ratio=ImageProperties.crop_ratio
         )
-        self.history_arr.append(edit_instance)
-        self.master.master.history_of_edits.update_history_listbox()
+        return edit_instance

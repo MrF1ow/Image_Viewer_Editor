@@ -91,31 +91,8 @@ class ImageManager(Frame):
 
         self.rectangle_id = self.canvas.create_rectangle(self.crop_start_x, self.crop_start_y,
                                                          self.crop_end_x, self.crop_end_y, width=3, outline="red")
-    def _end_crop(self, event):
-        if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
-            start_x = int(self.crop_start_x * self.ratio)
-            start_y = int(self.crop_start_y * self.ratio)
-            end_x = int(self.crop_end_x * self.ratio)
-            end_y = int(self.crop_end_y * self.ratio)
-        elif self.crop_start_x > self.crop_end_x and self.crop_start_y <= self.crop_end_y:
-            start_x = int(self.crop_end_x * self.ratio)
-            start_y = int(self.crop_start_y * self.ratio)
-            end_x = int(self.crop_start_x * self.ratio)
-            end_y = int(self.crop_end_y * self.ratio)
-        elif self.crop_start_x <= self.crop_end_x and self.crop_start_y > self.crop_end_y:
-            start_x = int(self.crop_start_x * self.ratio)
-            start_y = int(self.crop_end_y * self.ratio)
-            end_x = int(self.crop_end_x * self.ratio)
-            end_y = int(self.crop_start_y * self.ratio)
-        else:
-            start_x = int(self.crop_end_x * self.ratio)
-            start_y = int(self.crop_end_y * self.ratio)
-            end_x = int(self.crop_start_x * self.ratio)
-            end_y = int(self.crop_start_y * self.ratio)
 
-        x = slice(start_x, end_x, 1)
-        y = slice(start_y, end_y, 1)
-
+    def _set_crop_coordinates(self, start_x, start_y, end_x, end_y):
         ImageProperties.is_cropped = True
         ImageProperties.crop_start_x = start_x
         ImageProperties.crop_start_y = start_y
@@ -123,8 +100,43 @@ class ImageManager(Frame):
         ImageProperties.crop_end_y = end_y
         ImageProperties.crop_ratio = self.ratio
 
-        self.master.master.processed_image = self.master.master.processed_image[y, x]
-        self.display_image(self.master.master.processed_image)
+    def _end_crop(self, event):
+        self._set_crop_coordinates(self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y)
+        if ImageProperties.crop_start_x <= ImageProperties.crop_end_x and ImageProperties.crop_start_y <= ImageProperties.crop_end_y:
+            start_x = int(ImageProperties.crop_start_x * ImageProperties.crop_ratio)
+            start_y = int(ImageProperties.crop_start_y * ImageProperties.crop_ratio)
+            end_x = int(ImageProperties.crop_end_x * ImageProperties.crop_ratio)
+            end_y = int(ImageProperties.crop_end_y * ImageProperties.crop_ratio)
+        elif ImageProperties.crop_start_x > ImageProperties.crop_end_x and ImageProperties.crop_start_y <= ImageProperties.crop_end_y:
+            start_x = int(ImageProperties.crop_end_x * ImageProperties.crop_ratio)
+            start_y = int(ImageProperties.crop_start_y * ImageProperties.crop_ratio)
+            end_x = int(ImageProperties.crop_start_x * ImageProperties.crop_ratio)
+            end_y = int(ImageProperties.crop_end_y * ImageProperties.crop_ratio)
+        elif ImageProperties.crop_start_x <= ImageProperties.crop_end_x and ImageProperties.crop_start_y > ImageProperties.crop_end_y:
+            start_x = int(ImageProperties.crop_start_x * ImageProperties.crop_ratio)
+            start_y = int(ImageProperties.crop_end_y * ImageProperties.crop_ratio)
+            end_x = int(ImageProperties.crop_end_x * ImageProperties.crop_ratio)
+            end_y = int(ImageProperties.crop_start_y * ImageProperties.crop_ratio)
+        else:
+            start_x = int(ImageProperties.crop_end_x * ImageProperties.crop_ratio)
+            start_y = int(ImageProperties.crop_end_y * ImageProperties.crop_ratio)
+            end_x = int(ImageProperties.crop_start_x * ImageProperties.crop_ratio)
+            end_y = int(ImageProperties.crop_start_y * ImageProperties.crop_ratio)
+
+        # x = slice(start_x, end_x, 1)
+        # y = slice(start_y, end_y, 1)
+
+        # return image[y, x]
+
+        # self.master.master.processed_image = self.master.master.processed_image[y, x]
+        # self.display_image(self.master.master.processed_image)
+
+    def _finalize_crop(self, img=None, start_x=None, start_y=None, end_x=None, end_y=None):
+        image = img
+        x = slice(start_x, end_x, 1)
+        y = slice(start_y, end_y, 1)
+        return image[y, x]
+
 
     # gotta figure this one
     def _revert_crop_coordinates(self):
@@ -151,6 +163,7 @@ class ImageManager(Frame):
         image = self.master.master.editor_options._apply_all_basic_edits(image)
         if self.master.master.advanced_tools is not None:
             image = self.master.master.advanced_tools._apply_all_advanced_edits(image)
+        self._end_crop(event=None, img=image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 

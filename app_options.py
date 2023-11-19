@@ -2,41 +2,52 @@ from tkinter import Frame, Button, LEFT, Menu, Label, Scale, Toplevel
 from file_manager import FileManager
 from image_properties import ImageProperties
 import cv2
+import time
+
 
 class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
 
-        self.file_options_button = Button(self, text="File", command=self._show_file_menu)
+        self.file_options_button = Button(
+            self, text="File", command=self._show_file_menu)
         self.file_options_button.pack(side=LEFT)
 
         self.file_menu = Menu(self, tearoff=0)
         self.file_menu.add_command(label="New", command=self.new_button_click)
-        self.file_menu.add_command(label="Save", command=self.save_button_click)
-        self.file_menu.add_command(label="Save As", command=self.save_as_button_click)
+        self.file_menu.add_command(
+            label="Save", command=self.save_button_click)
+        self.file_menu.add_command(
+            label="Save As", command=self.save_as_button_click)
 
-        self.edit_options_button = Button(self, text="Edit", command=self._show_edit_menu)
+        self.edit_options_button = Button(
+            self, text="Edit", command=self._show_edit_menu)
         self.edit_options_button.pack(side=LEFT)
 
         self.edit_menu = Menu(self, tearoff=0)
         self.edit_menu.add_command(label="Batch Processing")
-        
+
         # SETTINGS
-        self.settings_menu_button = Button(self, text="Settings", command=self._show_settings_menu)
+        self.settings_menu_button = Button(
+            self, text="Settings", command=self._show_settings_menu)
         self.settings_menu_button.pack(side="left")
         self.settings_menu = Menu(self, tearoff=0)
-        self.settings_menu.add_command(label="Set Current Filters As Default", command=self._set_current_filters_as_default)
-        self.settings_menu.add_command(label="Change Zoom Percentage", command=self._show_zoom_slider)
+        self.settings_menu.add_command(
+            label="Set Current Filters As Default", command=self._set_current_filters_as_default)
+        self.settings_menu.add_command(
+            label="Change Zoom Percentage", command=self._show_zoom_slider)
 
-        
     def _show_file_menu(self, event=None):
-        self.file_menu.post(self.file_options_button.winfo_rootx(), self.file_options_button.winfo_rooty() + self.file_options_button.winfo_height())
+        self.file_menu.post(self.file_options_button.winfo_rootx(
+        ), self.file_options_button.winfo_rooty() + self.file_options_button.winfo_height())
 
     def _show_edit_menu(self, event=None):
-        self.edit_menu.post(self.edit_options_button.winfo_rootx(), self.edit_options_button.winfo_rooty() + self.edit_options_button.winfo_height())
-        
+        self.edit_menu.post(self.edit_options_button.winfo_rootx(
+        ), self.edit_options_button.winfo_rooty() + self.edit_options_button.winfo_height())
+
     def _show_settings_menu(self, event=None):
-        self.settings_menu.post(self.settings_menu_button.winfo_rootx(), self.settings_menu_button.winfo_rooty() + self.settings_menu_button.winfo_height())    
+        self.settings_menu.post(self.settings_menu_button.winfo_rootx(
+        ), self.settings_menu_button.winfo_rooty() + self.settings_menu_button.winfo_height())
 
     def new_button_click(self, event=None):
         fm = FileManager()
@@ -52,6 +63,7 @@ class AppOptions(Frame):
             ImageProperties.original_image_height = width
             ImageProperties.altered_image_height = height
             ImageProperties.altered_image_width = width
+            self._insert_into_histroy()
             self.master.master.editor_options.original_image = image.copy()
             self.master.master.image_viewer.display_image(image)
 
@@ -71,38 +83,55 @@ class AppOptions(Frame):
         if fm.file is not None:
             fm.save_as_file(self.master.master.processed_image)
 
-    def _set_current_filters_as_default(self): # Allows the user to set the current filters on the image as the default fitlers applied to all images.
+    # Allows the user to set the current filters on the image as the default fitlers applied to all images.
+    def _set_current_filters_as_default(self):
         # call a function that applys all the current ImageProperties values to a config file
         print("Default values updates")
 
-
     def _show_zoom_slider(self):
-        # Creating the Zoom slider windo. 
+        # Creating the Zoom slider windo.
         zoom_slider_window = Toplevel(self)
         zoom_slider_window.title("Change Zoom Percentage")
-        
+
         # Initial Zoom value for the zoom scale. THIS VALUE SHOULD BE SET BASED ON THE CONFIG FILE ONCE THAT IS CREATED.
         self.current_default_zoom_percentage = 10
-        
-        # Creating the scale and specifying its attributes. 
-        zoom_scale = Scale(zoom_slider_window, from_=10, to_=150, orient="horizontal", label="Zoom Percentage", resolution=10)
-        zoom_scale.set(self.current_default_zoom_percentage) # Sets the initial Zoom value of the scale.
+
+        # Creating the scale and specifying its attributes.
+        zoom_scale = Scale(zoom_slider_window, from_=10, to_=150,
+                           orient="horizontal", label="Zoom Percentage", resolution=10)
+        # Sets the initial Zoom value of the scale.
+        zoom_scale.set(self.current_default_zoom_percentage)
         zoom_scale.pack()
 
         # Creating a reset button for the scale.
-        # Using Lambda function to set the zoom scale to a dfault value and destroy the window. 
-        reset_button = Button(zoom_slider_window, text="Reset", command=lambda: [zoom_scale.set(10), zoom_slider_window.destroy()]) # Once we have the config file, this value will not merely be 10. It will be the users default value from past use.
+        # Using Lambda function to set the zoom scale to a dfault value and destroy the window.
+        # Once we have the config file, this value will not merely be 10. It will be the users default value from past use.
+        reset_button = Button(zoom_slider_window, text="Reset", command=lambda: [
+                              zoom_scale.set(10), zoom_slider_window.destroy()])
         reset_button.pack(side="right")
-        
+
         # Creating an apply button for the scale.
         # Using Lambda function to print the current zoom value (for testing purposed) and close the window. Once the config file is created, we may need a full function to update the config file. To be determined!
-        apply_button = Button(zoom_slider_window, text="Apply", command=lambda: self._apply_new_default_zoom_percentage(zoom_scale, zoom_slider_window)) # Using lambda function to create a reference to the function to avoid errors in the function being called when the button is corrected instead of when the button is clicked.
+        # Using lambda function to create a reference to the function to avoid errors in the function being called when the button is corrected instead of when the button is clicked.
+        apply_button = Button(zoom_slider_window, text="Apply", command=lambda: self._apply_new_default_zoom_percentage(
+            zoom_scale, zoom_slider_window))
         apply_button.pack(side="right")
-          
-            
-    def _apply_new_default_zoom_percentage(self, zoom_scale, zoom_slider_window): # This function saves the new zoom percentage and destroys the window when the user applys the zoom slider. 
-        print(zoom_scale.get()) # Printing for testing.
+
+    # This function saves the new zoom percentage and destroys the window when the user applys the zoom slider.
+    def _apply_new_default_zoom_percentage(self, zoom_scale, zoom_slider_window):
+        print(zoom_scale.get())  # Printing for testing.
         # FAKE VARIABLE; use a real one when the config file is created.
-        configFileDefaultZoom = zoom_scale.get() # Setting the value in the config file to the new scale value. 
-        zoom_slider_window.destroy() # Destroying the window
-        
+        # Setting the value in the config file to the new scale value.
+        configFileDefaultZoom = zoom_scale.get()
+        zoom_slider_window.destroy()  # Destroying the window
+
+    def _insert_into_histroy(self):
+        # Inserts the current ImageProperties into the history array
+        title = "File Imported"
+        import_instance = ImageProperties(
+            title=title,
+            time=str(time.strftime('%H:%M:%S'))
+        )
+        self.master.master.history.append(import_instance)
+        self.master.master.history_of_edits._set_indices()
+        self.master.master.history_of_edits.update_history_list()

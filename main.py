@@ -16,7 +16,9 @@ class Main(tk.Tk):
         self.advanced_tools = None
         self.resize_window = None
         self.in_crop_mode = False
+        self.in_pan_mode = True
 
+        self.undo_performed = False
         self.history = []
 
         self.configure(bg="#6b6b6b")
@@ -55,4 +57,8 @@ class Main(tk.Tk):
         # Pack HistoryOfEdits on the right
         self.history_of_edits = History(master=main_frame)
         self.history_of_edits.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+
+        # Bindings
+        self.bind("<Control-z>", self.history_of_edits.undo_action)
+        self.bind('<Control-y>', self.history_of_edits.redo_action)
 
