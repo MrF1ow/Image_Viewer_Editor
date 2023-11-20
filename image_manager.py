@@ -21,9 +21,79 @@ class ImageManager(Frame):
         self.ratio = 0
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
+
         self.canvas = Canvas(self, bg="black",  width=720, height=405)
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
+        
+        #Starting coordinates for panning
+        self.start_x = 0
+        self.start_y = 0
+        
+        #Binding for panning
+        self.canvas.bind("<ButtonPress-1>", self._activate_pan)
+        self.canvas.bind("<B1-Motion>", self._pan_image)
+        #self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+        #Arroow key bindings for panning
+        self.master.master.bind("<Left>", self._pan_left)
+        self.master.master.bind("<Right>", self._pan_right)
+        self.master.master.bind("<Up>", self._pan_up)
+        self.master.master.bind("<Down>", self._pan_down)
+        
+    #Finds the click location
+    def _activate_pan(self, event):
+        if self.master.master.in_crop_mode:
+            return
+        if self.master.master.original_image is None:
+            return
+        if self.master.master.processed_image is None:
+            return  
+        
+        self.start_x = event.x
+        self.start_y = event.y
+    
+    #Shows the image drag and set destination coordinates
+    def _pan_image(self, event):             
+        dest_x = event.x - self.start_x
+        dest_y = event.y - self.start_y
+        
+        current_x, current_y = self.canvas.coords("all")
+        
+        if 0 <= current_x + dest_x <= self.canvas.winfo_width():
+            self.canvas.move("all", dest_x, 0)
+        if 0 <= current_y + dest_y <= self.canvas.winfo_height():
+            self.canvas.move("all", 0, dest_y)
+            
+        self.start_x = event.x
+        self.start_y = event.y       
+ 
+    #Functions for panning macros
+    def _pan_left(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_x-20 >= 0:
+            self.canvas.move("all", -20, 0)
+            self.start_x -= 20
+
+    def _pan_right(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_x+20 <= self.canvas.winfo_width():
+            self.canvas.move("all", 20, 0)
+            self.start_x += 20
+
+    def _pan_down(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_y+20 <= self.canvas.winfo_height():
+            self.canvas.move("all", 0, +20)
+            self.start_y += 20
+
+    def _pan_up(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_y-20 >= 0:
+            self.canvas.move("all", 0, -20)
+            self.start_y -= 20
+
+        
 
     def display_image(self, img=None):
         self.clear_canvas()
@@ -65,6 +135,7 @@ class ImageManager(Frame):
         self.canvas.config(width=new_width, height=new_height)
         self.canvas.create_image(
             new_width / 2, new_height / 2, anchor="center", image=self.current_image)
+        
 
     def _active_crop_mode(self, event):
         self.canvas.bind("<ButtonPress>", self._start_crop)
@@ -163,7 +234,7 @@ class ImageManager(Frame):
         image = self.master.master.editor_options._apply_all_basic_edits(image)
         if self.master.master.advanced_tools is not None:
             image = self.master.master.advanced_tools._apply_all_advanced_edits(image)
-        self._end_crop(event=None, img=image)
+        #self._end_crop(event=None, img=image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 
