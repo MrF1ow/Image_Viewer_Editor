@@ -93,8 +93,6 @@ class ImageManager(Frame):
             self.canvas.move("all", 0, -20)
             self.start_y -= 20
 
-        
-
     def display_image(self, img=None):
         self.clear_canvas()
         if img is None:
