@@ -25,7 +25,7 @@ class AppOptions(Frame):
         self.edit_options_button.pack(side=LEFT)
 
         self.edit_menu = Menu(self, tearoff=0)
-        self.edit_menu.add_command(label="Batch Processing")
+        self.edit_menu.add_command(label="Batch Processing", command=self.batch_processing_button_click)
 
         # SETTINGS
         self.settings_menu_button = Button(
@@ -82,6 +82,34 @@ class AppOptions(Frame):
 
         if fm.file is not None:
             fm.save_as_file(self.master.master.processed_image)
+
+    def batch_processing_button_click(self, event=None):
+        fm = FileManager()
+        fm.get_files()
+
+        if fm.batch_files is not None:
+            for i in fm.batch_files:
+                self.master.file_location = i
+                image = cv2.imread(i)
+                
+                self.master.master.original_image = image.copy()
+                self.master.master.processed_image = image.copy()
+                height, width, channels = image.shape
+                ImageProperties.original_image_height = height
+                ImageProperties.original_image_height = width
+                ImageProperties.altered_image_height = height
+                ImageProperties.altered_image_width = width
+                self.master.master.editor_options.original_image = image.copy()
+
+                self.master.master.image_viewer._apply_all_edits()
+
+                fm = FileManager()
+                path = self.master.file_location
+                fm.find_file(path)
+
+                if fm.file is not None:
+                    fm.save_file(self.master.master.processed_image)
+            
 
     # Allows the user to set the current filters on the image as the default fitlers applied to all images.
     def _set_current_filters_as_default(self):

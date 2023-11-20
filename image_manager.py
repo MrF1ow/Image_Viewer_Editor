@@ -163,7 +163,7 @@ class ImageManager(Frame):
         image = self.master.master.editor_options._apply_all_basic_edits(image)
         if self.master.master.advanced_tools is not None:
             image = self.master.master.advanced_tools._apply_all_advanced_edits(image)
-        self._end_crop(event=None, img=image)
+        self._end_crop(event=None)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 

@@ -7,6 +7,7 @@ import imageio  # pip install imageio
 class FileManager:
     def __init__(self):
         self.file = None
+        self.batch_files = None #Alternate variable for a list of batch processed files
 
     def get_file(self):
         valid_file_types = [
@@ -97,3 +98,43 @@ class FileManager:
                 self.file = None  # Clear the file attribute
             except OSError:
                 print(f"Error: {OSError}")
+    
+    def get_files(self):
+        valid_file_types = [
+            ("Image Files", "*.png *.jpeg *.jpg *.gif *.bmp *.tiff"),
+            ("PNG files", "*.png"),
+            ("JPEG files", "*.jpeg *.jpg"),
+            ("GIF files", "*.gif"),
+            ("BMP files", "*.bmp"),
+            ("TIFF files", "*.tiff")
+        ]
+
+        file_set = filedialog.askopenfilenames(
+            filetypes=valid_file_types)  # Prompt user to select images
+        
+        for i in file_set:
+            if i.endswith(".gif"):
+
+                # Gets the first frame from the gif
+                cap = cv.VideoCapture(i)
+                ret, first_frame = cap.read()
+                cap.release()
+
+                if ret:
+                    directory, file_name = os.path.split(i)
+                    name, ext = os.path.splitext(file_name)
+                    new_file_path = os.path.join(
+                        directory, f'{name}_first_frame.png')
+
+                    # Prompt confirmation to user to create new image from GIF.
+                    result = simpledialog.messagebox.askokcancel(
+                        "Importing GIF", f"Creating PNG of first frame from select GIF to {new_file_path}")
+                    if not result:
+                        return
+
+                    cv.imwrite(new_file_path, first_frame)
+                    i = new_file_path
+                else:
+                    print("Error: Could not read first frame from GIF")
+
+        self.batch_files = file_set
