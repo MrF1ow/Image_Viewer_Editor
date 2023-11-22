@@ -12,6 +12,7 @@ class Main(tk.Tk):
         self.file_location = ""
         self.original_image = None
         self.processed_image = None
+        self.image_properties = None
 
         self.advanced_tools = None
         self.resize_window = None
@@ -19,6 +20,7 @@ class Main(tk.Tk):
         self.in_pan_mode = True
 
         self.undo_performed = False
+        self.image_properties = None
         self.history = []
 
         self.configure(bg="#6b6b6b")
