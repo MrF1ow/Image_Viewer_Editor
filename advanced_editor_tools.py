@@ -11,9 +11,16 @@ class AdvancedEditorTools(Toplevel):
 
         self.original_image = self.master.master.original_image
         self.processing_image = self.master.master.processed_image
-        self.pre_image_properties = ImageProperties()
+
+        self.pre_image_properties = None
+        self.current_image_properties = None
+
         self.displaying_processed_image = True
+
         self.history_arr = self.master.master.history
+
+        self._set_pre_image_properties()
+        self._set_current_image_properties()
 
         # slider with range of -1 to 1
         # the command parameter is used to select a function that will be called everytime there is a change in the value of the slider
@@ -61,7 +68,7 @@ class AdvancedEditorTools(Toplevel):
         self.blur_label.pack()
         self.blur_scale.pack()
         # cannot change hue or saturation if the image is grayscaled
-        if ImageProperties.is_grayscaled == False:
+        if self.master.master.image_properties.is_grayscaled == False:
             self.hue_label.pack()
             self.hue_scale.pack()
             self.saturation_label.pack()
@@ -71,6 +78,58 @@ class AdvancedEditorTools(Toplevel):
         self.cancel_button.pack(side=LEFT)
         self.apply_button.pack(side=LEFT)
         self.clear_button.pack(side=LEFT)
+
+    def _set_pre_image_properties(self):
+        self.pre_image_properties = ImageProperties(
+            title=self.master.master.image_properties.title,
+            time=self.master.master.image_properties.time,
+            is_flipped_horz=self.master.master.image_properties.is_flipped_horz,
+            is_flipped_vert=self.master.master.image_properties.is_flipped_vert,
+            is_grayscaled=self.master.master.image_properties.is_grayscaled,
+            is_sepia=self.master.master.image_properties.is_sepia,
+            is_cropped=self.master.master.image_properties.is_cropped,
+            original_image_height=self.master.master.image_properties.original_image_height,
+            original_image_width=self.master.master.image_properties.original_image_width,
+            altered_image_height=self.master.master.image_properties.altered_image_height,
+            altered_image_width=self.master.master.image_properties.altered_image_width,
+            rotation=self.master.master.image_properties.rotation,
+            brightness=self.master.master.image_properties.brightness,
+            contrast=self.master.master.image_properties.contrast,
+            saturation=self.master.master.image_properties.saturation,
+            blur=self.master.master.image_properties.blur,
+            hue=self.master.master.image_properties.hue,
+            crop_start_x=self.master.master.image_properties.crop_start_x,
+            crop_start_y=self.master.master.image_properties.crop_start_y,
+            crop_end_x=self.master.master.image_properties.crop_end_x,
+            crop_end_y=self.master.master.image_properties.crop_end_y,
+            crop_ratio=self.master.master.image_properties.crop_ratio
+        )
+
+    def _set_current_image_properties(self):
+        self.current_image_properties = ImageProperties(
+            title=self.master.master.image_properties.title,
+            time=self.master.master.image_properties.time,
+            is_flipped_horz=self.master.master.image_properties.is_flipped_horz,
+            is_flipped_vert=self.master.master.image_properties.is_flipped_vert,
+            is_grayscaled=self.master.master.image_properties.is_grayscaled,
+            is_sepia=self.master.master.image_properties.is_sepia,
+            is_cropped=self.master.master.image_properties.is_cropped,
+            original_image_height=self.master.master.image_properties.original_image_height,
+            original_image_width=self.master.master.image_properties.original_image_width,
+            altered_image_height=self.master.master.image_properties.altered_image_height,
+            altered_image_width=self.master.master.image_properties.altered_image_width,
+            rotation=self.master.master.image_properties.rotation,
+            brightness=self.master.master.image_properties.brightness,
+            contrast=self.master.master.image_properties.contrast,
+            saturation=self.master.master.image_properties.saturation,
+            blur=self.master.master.image_properties.blur,
+            hue=self.master.master.image_properties.hue,
+            crop_start_x=self.master.master.image_properties.crop_start_x,
+            crop_start_y=self.master.master.image_properties.crop_start_y,
+            crop_end_x=self.master.master.image_properties.crop_end_x,
+            crop_end_y=self.master.master.image_properties.crop_end_y,
+            crop_ratio=self.master.master.image_properties.crop_ratio
+        )
 
     def _convert_brightness(self, num):
         return num * 2.54 - 127
@@ -86,29 +145,30 @@ class AdvancedEditorTools(Toplevel):
         return int(num * 3.58 - 179)
 
     def _change_blur_value(self, event):
-        ImageProperties.blur = self.blur_scale.get()
+        self.current_image_properties.blur = self.blur_scale.get()
         self.update_displayed_image()
 
     def _change_hue_value(self, event):
-        ImageProperties.hue = self.hue_scale.get()
+        self.current_image_properties.hue = self.hue_scale.get()
         self.update_displayed_image()
 
     def _change_saturation_value(self, event):
-        ImageProperties.saturation = self.saturation_scale.get()
+        self.current_image_properties.saturation = self.saturation_scale.get()
         self.update_displayed_image()
 
     def _change_brightness_value(self, event):
-        ImageProperties.brightness = self.brightness_scale.get()
+        self.current_image_properties.brightness = self.brightness_scale.get()
         self.update_displayed_image()
 
     def _change_contrast_value(self, event):
-        ImageProperties.contrast = self.contrast_scale.get()
+        self.current_image_properties.contrast = self.contrast_scale.get()
         self.update_displayed_image()
 
     def _apply_blur_to_image(self, img=None):
-        image=img
+        image = img
         # this is how distorted each pixel will become
-        kernel_size = (ImageProperties.blur, ImageProperties.blur)
+        kernel_size = (self.current_image_properties.blur,
+                       self.current_image_properties.blur)
         # the kernel size had to be a positive, ODD number
         kernel_size = tuple(size + 1 if size %
                             2 == 0 else size for size in kernel_size)
@@ -117,8 +177,8 @@ class AdvancedEditorTools(Toplevel):
         return image
 
     def _apply_hue_to_image(self, img=None):
-        image=img
-        hue_value = self._convert_hue(ImageProperties.hue)
+        image = img
+        hue_value = self._convert_hue(self.current_image_properties.hue)
         # Convert image to HSV
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         # Change the hue channel
@@ -131,7 +191,8 @@ class AdvancedEditorTools(Toplevel):
 
     def _apply_saturation_to_image(self, img=None):
         image = img
-        saturation_value = self._convert_saturation(ImageProperties.saturation)
+        saturation_value = self._convert_saturation(
+            self.current_image_properties.saturation)
         # Convert image to HSV
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -144,10 +205,13 @@ class AdvancedEditorTools(Toplevel):
 
     def _apply_brightness_and_contrast_to_image(self, img=None):
         image = img
-        brightness_factor = self._convert_brightness(ImageProperties.brightness)
-        contrast_factor = self._convert_contrast(ImageProperties.contrast)
+        brightness_factor = self._convert_brightness(
+            self.current_image_properties.brightness)
+        contrast_factor = self._convert_contrast(
+            self.current_image_properties.contrast)
         # applies the actual brightness change
-        image = cv2.convertScaleAbs(image, alpha=contrast_factor, beta=brightness_factor)
+        image = cv2.convertScaleAbs(
+            image, alpha=contrast_factor, beta=brightness_factor)
         return image
 
         # this function actually sets the newly processed imaged as the image of the application
@@ -157,10 +221,11 @@ class AdvancedEditorTools(Toplevel):
 
     def _preview_edits_on_image(self, event):
         if self.displaying_processed_image:
+            self.master.master.image_properties = self.pre_image_properties
             self.master.master.image_viewer.display_image(self.original_image)
             self.displaying_processed_image = False
         else:
-            self.master.master.image_viewer.display_image(self.processing_image)
+            self.update_displayed_image()
             self.displaying_processed_image = True
 
     def _cancel_edits_to_image(self, event):
@@ -174,24 +239,26 @@ class AdvancedEditorTools(Toplevel):
         self.update_displayed_image()
 
     def _reset_advanced_image_properties(self):
-        ImageProperties.brightness = self.pre_image_properties.brightness
-        ImageProperties.contrast = self.pre_image_properties.contrast
-        ImageProperties.saturation = self.pre_image_properties.saturation
-        ImageProperties.blur = self.pre_image_properties.blur
-        ImageProperties.hue = self.pre_image_properties.hue
+        self.master.master.image_properties.brightness = self.pre_image_properties.brightness
+        self.master.master.image_properties.contrast = self.pre_image_properties.contrast
+        self.master.master.image_properties.saturation = self.pre_image_properties.saturation
+        self.master.master.image_properties.blur = self.pre_image_properties.blur
+        self.master.master.image_properties.hue = self.pre_image_properties.hue
 
     def _set_scale_values(self):
-        self.brightness_scale.set(ImageProperties.brightness)
-        self.blur_scale.set(ImageProperties.blur)
-        self.hue_scale.set(ImageProperties.hue)
-        self.contrast_scale.set(ImageProperties.contrast)
-        self.saturation_scale.set(ImageProperties.saturation)
+        self.brightness_scale.set(
+            self.master.master.image_properties.brightness)
+        self.blur_scale.set(self.master.master.image_properties.blur)
+        self.hue_scale.set(self.master.master.image_properties.hue)
+        self.contrast_scale.set(self.master.master.image_properties.contrast)
+        self.saturation_scale.set(
+            self.master.master.image_properties.saturation)
 
     def _apply_all_advanced_edits(self, img=None):
         image = img
         image = self._apply_blur_to_image(image)
         image = self._apply_brightness_and_contrast_to_image(image)
-        if ImageProperties.is_grayscaled == False:
+        if self.master.master.image_properties.is_grayscaled == False:
             image = self._apply_hue_to_image(image)
             image = self._apply_saturation_to_image(image)
 
@@ -200,6 +267,7 @@ class AdvancedEditorTools(Toplevel):
         return image
 
     def update_displayed_image(self):
+        self.master.master.image_properties = self.current_image_properties
         self.master.master.image_viewer._apply_all_edits()
 
     def _check_undo_performed(self):
@@ -212,13 +280,13 @@ class AdvancedEditorTools(Toplevel):
 
         Args:
             title (str): Title for the edit instance.
-            property_name (str): Name of the property to be updated in ImageProperties.
+            property_name (str): Name of the property to be updated in self.master.master.image_properties.
             new_value (any): New value to be set for the specified property.
 
         Returns:
             None
         """
-        title = f"Advanced Edits:\nBrightness: {ImageProperties.brightness},\nContrast: {ImageProperties.contrast},\nSaturation: {ImageProperties.saturation},\nBlur: {ImageProperties.blur},\nHue: {ImageProperties.hue}"
+        title = f"Advanced Edits:\nBrightness: {self.master.master.image_properties.brightness},\nContrast: {self.master.master.image_properties.contrast},\nSaturation: {self.master.master.image_properties.saturation},\nBlur: {self.master.master.image_properties.blur},\nHue: {self.master.master.image_properties.hue}"
         edit_instance = self._make_edit_instance(title)
         self._check_undo_performed()
         self.history_arr = self.master.master.history
@@ -228,30 +296,30 @@ class AdvancedEditorTools(Toplevel):
 
     def _make_edit_instance(self, title):
         """
-        Creates an edit instance with the current ImageProperties values.
+        Creates an edit instance with the current self.master.master.image_properties values.
         """
         edit_instance = ImageProperties(
             title=title,
             time=str(time.strftime('%H:%M:%S')),
-            is_flipped_horz=ImageProperties.is_flipped_horz,
-            is_flipped_vert=ImageProperties.is_flipped_vert,
-            is_grayscaled=ImageProperties.is_grayscaled,
-            is_sepia=ImageProperties.is_sepia,
-            is_cropped=ImageProperties.is_cropped,
-            original_image_height=ImageProperties.original_image_height,
-            original_image_width=ImageProperties.original_image_width,
-            altered_image_height=ImageProperties.altered_image_height,
-            altered_image_width=ImageProperties.altered_image_width,
-            rotation=ImageProperties.rotation,
-            brightness=ImageProperties.brightness,
-            contrast=ImageProperties.contrast,
-            saturation=ImageProperties.saturation,
-            blur=ImageProperties.blur,
-            hue=ImageProperties.hue,
-            crop_start_x=ImageProperties.crop_start_x,
-            crop_start_y=ImageProperties.crop_start_y,
-            crop_end_x=ImageProperties.crop_end_x,
-            crop_end_y=ImageProperties.crop_end_y,
-            crop_ratio=ImageProperties.crop_ratio
+            is_flipped_horz=self.master.master.image_properties.is_flipped_horz,
+            is_flipped_vert=self.master.master.image_properties.is_flipped_vert,
+            is_grayscaled=self.master.master.image_properties.is_grayscaled,
+            is_sepia=self.master.master.image_properties.is_sepia,
+            is_cropped=self.master.master.image_properties.is_cropped,
+            original_image_height=self.master.master.image_properties.original_image_height,
+            original_image_width=self.master.master.image_properties.original_image_width,
+            altered_image_height=self.master.master.image_properties.altered_image_height,
+            altered_image_width=self.master.master.image_properties.altered_image_width,
+            rotation=self.master.master.image_properties.rotation,
+            brightness=self.master.master.image_properties.brightness,
+            contrast=self.master.master.image_properties.contrast,
+            saturation=self.master.master.image_properties.saturation,
+            blur=self.master.master.image_properties.blur,
+            hue=self.master.master.image_properties.hue,
+            crop_start_x=self.master.master.image_properties.crop_start_x,
+            crop_start_y=self.master.master.image_properties.crop_start_y,
+            crop_end_x=self.master.master.image_properties.crop_end_x,
+            crop_end_y=self.master.master.image_properties.crop_end_y,
+            crop_ratio=self.master.master.image_properties.crop_ratio
         )
         return edit_instance
