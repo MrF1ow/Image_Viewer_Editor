@@ -58,13 +58,13 @@ class AppOptions(Frame):
             image = cv2.imread(fm.file)
             self.master.master.original_image = image.copy()
             self.master.master.processed_image = image.copy()
+            self.master.master.image_properties = ImageProperties()
             height, width, channels = image.shape
-            ImageProperties.original_image_height = height
-            ImageProperties.original_image_height = width
-            ImageProperties.altered_image_height = height
-            ImageProperties.altered_image_width = width
-            self._insert_into_histroy()
-            self.master.master.editor_options.original_image = image.copy()
+            self.master.master.image_properties.original_image_height = height
+            self.master.master.image_properties.original_image_height = width
+            self.master.master.image_properties.altered_image_height = height
+            self.master.master.image_properties.altered_image_width = width
+            self._insert_into_history()
             self.master.master.image_viewer.display_image(image)
 
     def save_button_click(self, event=None):
@@ -85,7 +85,7 @@ class AppOptions(Frame):
 
     # Allows the user to set the current filters on the image as the default fitlers applied to all images.
     def _set_current_filters_as_default(self):
-        # call a function that applys all the current ImageProperties values to a config file
+        # call a function that applys all the current self.master.master.image_properties values to a config file
         print("Default values updates")
 
     def _show_zoom_slider(self):
@@ -125,8 +125,8 @@ class AppOptions(Frame):
         configFileDefaultZoom = zoom_scale.get()
         zoom_slider_window.destroy()  # Destroying the window
 
-    def _insert_into_histroy(self):
-        # Inserts the current ImageProperties into the history array
+    def _insert_into_history(self):
+        # Inserts the current self.master.master.image_properties into the history array
         title = "File Imported"
         import_instance = ImageProperties(
             title=title,
@@ -135,3 +135,13 @@ class AppOptions(Frame):
         self.master.master.history.append(import_instance)
         self.master.master.history_of_edits._set_indices()
         self.master.master.history_of_edits.update_history_list()
+
+    def _reset_all_edits(self):
+        # Resets all edits to the original image
+        self.master.master.processed_image = self.master.master.original_image
+        self.master.master.image_viewer.display_image(
+            self.master.master.processed_image)
+        self.master.master.editor_options.reset_all_edits()
+        self.master.master.editor_options.display_image(
+            self.master.master.processed_image)
+        self.master.master.image_properties = self.master.master.image_properties()
