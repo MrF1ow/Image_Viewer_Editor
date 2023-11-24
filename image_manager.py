@@ -32,9 +32,7 @@ class ImageManager(Frame):
 
         # use openCV to convert the image from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # getting the height and width of image (metadata???)
-        # read this to understand what channels are: https://medium.com/featurepreneur/understanding-the-concept-of-channels-in-an-image-6d59d4dafaa9
-        height, width, channels = image.shape
+        height, width = image.shape[:2]
         ratio = height / width
 
         self.master.master.image_properties.altered_image_height = height
@@ -157,10 +155,10 @@ class ImageManager(Frame):
 
     def _apply_all_edits(self):
         image = self.master.master.original_image
-        image = self.master.master.editor_options._apply_all_basic_edits(image)
         if self.master.master.advanced_tools is not None:
             image = self.master.master.advanced_tools._apply_all_advanced_edits(image)
         # self._end_crop()
+        image = self.master.master.editor_options._apply_all_basic_edits(image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 

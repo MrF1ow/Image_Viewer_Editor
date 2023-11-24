@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-from app_options import AppOptions # tried to make a button
+from app_options import AppOptions  # tried to make a button
 from image_manager import ImageManager
 from editor_options import EditorOptions
 from history_of_edits import History
+
 
 class Main(tk.Tk):
     def __init__(self):
@@ -15,13 +16,11 @@ class Main(tk.Tk):
         self.image_properties = None
 
         self.advanced_tools = None
-        self.resize_window = None
         self.in_crop_mode = False
-        self.in_pan_mode = True
 
         self.undo_performed = False
-        self.image_properties = None
         self.history = []
+        self.item_clicked = False
 
         self.configure(bg="#6b6b6b")
 
@@ -50,7 +49,8 @@ class Main(tk.Tk):
 
         # Display the image_viewer
         self.image_viewer = ImageManager(master=main_frame)
-        self.image_viewer.pack(side=tk.LEFT, fill=tk.BOTH, padx=20, pady=10, expand=True)
+        self.image_viewer.pack(side=tk.LEFT, fill=tk.BOTH,
+                               padx=20, pady=10, expand=True)
 
         # Create a separator between ImageViewer and HistoryOfEdits
         separator5 = ttk.Separator(master=main_frame, orient=tk.VERTICAL)
@@ -64,3 +64,6 @@ class Main(tk.Tk):
         self.bind("<Control-z>", self.history_of_edits.undo_action)
         self.bind('<Control-y>', self.history_of_edits.redo_action)
 
+        # this is how to have something happen when the user closes the application
+        # use this for saving before close
+        # self.bind("<Destroy>", self._on_destroy)

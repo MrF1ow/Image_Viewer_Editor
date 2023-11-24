@@ -175,8 +175,6 @@ class EditorOptions(Frame):
             grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
             grayscale_image = image
-
-
         return grayscale_image
 
     def _apply_sepia_to_image(self, img=None):
@@ -199,25 +197,36 @@ class EditorOptions(Frame):
 
     def _apply_rotation_to_image(self, img=None):
         image = img
+        angle = self.master.master.image_properties.rotation
         # Convert the numpy array of pixels to a Pillow image
         image = Image.fromarray(image)
 
-        # Rotate the image 90 degrees clockwise
+        # Rotate the image to degrees specified by the angle variable
         rotated_image = image.rotate(
-            self.master.master.image_properties.rotation, resample=Image.NEAREST, expand=True)
+            angle=angle, resample=Image.NEAREST, expand=True)
         # Convert the rotated image back to a numpy array
         numpy_image = np.array(rotated_image)
+
+        resize_height = self.master.master.image_properties.resize_image_height
+        resize_width = self.master.master.image_properties.resize_image_width
+
+        if angle == 90 or angle == 270:
+            self.master.master.image_properties.altered_image_height = resize_width
+            self.master.master.image_properties.altered_image_width = resize_height
+        elif angle == 180 or angle == 360 or angle == 0:
+            self.master.master.image_properties.altered_image_height = resize_height
+            self.master.master.image_properties.altered_image_width = resize_width
+
         return numpy_image
 
     def _apply_resize_to_image(self, img=None):
         image = img
-        # if self.master.master.image_properties.rotation == 90 or self.master.master.image_properties.rotation == 270:
-        #     resized_image = cv2.resize(image, (self.master.master.image_properties.altered_image_height, self.master.master.image_properties.altered_image_width))
-        # else:
-        #     resized_image = cv2.resize(image, (self.master.master.image_properties.altered_image_width, self.master.master.image_properties.altered_image_height))
-        resized_image = cv2.resize(image, (self.master.master.image_properties.altered_image_width, self.master.master.image_properties.altered_image_height))
-        return resized_image
+        # print(f"In Resize Function Altered Height: {self.master.master.image_properties.altered_image_height}")
+        # print(f"In Resize Function Altered Width: {self.master.master.image_properties.altered_image_width}")
+        resized_image = cv2.resize(image, (self.master.master.image_properties.altered_image_width,
+                                           self.master.master.image_properties.altered_image_height))
 
+        return resized_image
 
     def _reset_basic_image_properties(self):
         self.master.master.image_properties.is_flipped_horz = False
@@ -227,17 +236,15 @@ class EditorOptions(Frame):
         self.master.master.image_properties.rotation = 0
         self.master.master.image_properties.altered_image_height = self.master.master.image_properties.original_image_height
         self.master.master.image_properties.altered_image_width = self.master.master.image_properties.original_image_width
+        self.master.master.image_properties.resize_image_height = self.master.master.image_properties.original_image_height
+        self.master.master.image_properties.resize_image_width = self.master.master.image_properties.original_image_width
 
     def _reset_advanced_image_properties(self):
         self.master.master.image_properties.brightness = 50
         self.master.master.image_properties.contrast = 50
         self.master.master.image_properties.saturation = 0
         self.master.master.image_properties.blur_size = 0
-        self.master.master.image_properties.hue = 50
-
-    def _clear_basic_edits_to_image(self):
-        self._reset_basic_image_properties()
-        self.update_displayed_image()
+        self.master.master.image_properties.hue = 0
 
     def _clear_all_edits_to_image(self):
         self._reset_basic_image_properties()
@@ -249,8 +256,10 @@ class EditorOptions(Frame):
     def _open_resize_window(self):
 
         def _change_resize_values():
-            self.master.master.image_properties.altered_image_width = int(width.get())
-            self.master.master.image_properties.altered_image_height = int(height.get())
+            self.master.master.image_properties.resize_image_width = int(
+                width.get())
+            self.master.master.image_properties.resize_image_height = int(
+                height.get())
             title = f"Resize: {self.master.master.image_properties.altered_image_width}x{self.master.master.image_properties.altered_image_height}"
 
             self._insert_into_history(
@@ -264,13 +273,16 @@ class EditorOptions(Frame):
 
         Label(resize_window, text="Width").pack()
         width = Entry(resize_window)
-        width.insert(0, str(self.master.master.image_properties.altered_image_width))
+        width.insert(
+            0, str(self.master.master.image_properties.altered_image_width))
         width.pack()
         Label(resize_window, text="Height").pack()
         height = Entry(resize_window)
-        height.insert(0, str(self.master.master.image_properties.altered_image_height))
+        height.insert(
+            0, str(self.master.master.image_properties.altered_image_height))
         height.pack()
-        Button(resize_window, text="Apply Resize", command=_change_resize_values).pack()
+        Button(resize_window, text="Apply Resize",
+               command=_change_resize_values).pack()
 
     def update_displayed_image(self):
         self.master.master.image_viewer._apply_all_edits()
@@ -284,22 +296,13 @@ class EditorOptions(Frame):
 
     def _apply_all_basic_edits(self, img=None):
         image = img
+        image = self._apply_rotation_to_image(image)
+        image = self._apply_resize_to_image(image)
         image = self._apply_grayscale_to_image(image)
         image = self._apply_horizontal_flip_image(image)
         image = self._apply_vertical_flip_image(image)
         image = self._apply_sepia_to_image(image)
-        image = self._apply_resize_to_image(image)
-        print("resize applied")
-        print(f"Altered Image Height: {self.master.master.image_properties.altered_image_height}")
-        print(f"Altered Image Width: {self.master.master.image_properties.altered_image_width}")
-        height, width, channels = image.shape
-        print (f"Height and Width of resized Image: {height, width}")
-        image = self._apply_rotation_to_image(image)
-        print("rotation applied")
-        print(f"Altered Image Height: {self.master.master.image_properties.altered_image_height}")
-        print(f"Altered Image Width: {self.master.master.image_properties.altered_image_width}")
-        height, width, channels = image.shape
-        print (f"Height and Width of rotated Image: {height, width}")
+
         return image
 
     def _check_undo_performed(self):
@@ -319,9 +322,10 @@ class EditorOptions(Frame):
             None
         """
         edit_instance = self._make_edit_instance(title)
+        # print(f"Edit Instance Altered Height: {edit_instance.altered_image_height}")
+        # print(f"Edit Instance Altered Width: {edit_instance.altered_image_width}")
         self._check_undo_performed()
-        self.history_arr = self.master.master.history
-        self.history_arr.append(edit_instance)
+        self.master.master.history.append(edit_instance)
         self.master.master.history_of_edits.update_history_list()
         self.master.master.history_of_edits._set_indices()
 
@@ -341,6 +345,8 @@ class EditorOptions(Frame):
             original_image_width=self.master.master.image_properties.original_image_width,
             altered_image_height=self.master.master.image_properties.altered_image_height,
             altered_image_width=self.master.master.image_properties.altered_image_width,
+            resize_image_height=self.master.master.image_properties.resize_image_height,
+            resize_image_width=self.master.master.image_properties.resize_image_width,
             rotation=self.master.master.image_properties.rotation,
             brightness=self.master.master.image_properties.brightness,
             contrast=self.master.master.image_properties.contrast,

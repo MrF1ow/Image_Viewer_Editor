@@ -31,6 +31,9 @@ class History(Frame):
         for item in self.history_arr:
             self.history_tree.insert("", END, values=(item.title, item.time))
 
+        # Binds a click event to the Treeview
+        self.history_tree.bind("<ButtonRelease>", self._item_clicked)
+
         # Creates a frame for buttons related to undo and redo actions
         button_frame = Frame(history_frame, bg="#6b6b6b")
         button_frame.pack(side=BOTTOM, fill=X)
@@ -60,6 +63,8 @@ class History(Frame):
         self.master.master.image_properties.original_image_width = property_instance.original_image_width
         self.master.master.image_properties.altered_image_height = property_instance.altered_image_height
         self.master.master.image_properties.altered_image_width = property_instance.altered_image_width
+        self.master.master.image_properties.resize_image_height = property_instance.resize_image_height
+        self.master.master.image_properties.resize_image_width = property_instance.resize_image_width
         self.master.master.image_properties.rotation = property_instance.rotation
         self.master.master.image_properties.brightness = property_instance.brightness
         self.master.master.image_properties.contrast = property_instance.contrast
@@ -90,6 +95,17 @@ class History(Frame):
             self.update_displayed_image()
         else:
             print("No undo action to redo")
+
+    def _item_clicked(self, event=None):
+        # Handles a click on a history item by retrieving the property instance and setting the current index
+        item = self.history_tree.selection()[0]
+        index = self.history_tree.index(item)
+        self.current_index = index
+        if self.current_index > self.starting_index:
+            self.master.master.undo_performed = True
+        property_instance = self.history_arr[index]
+        self._set_image_properties(property_instance)
+        self.update_displayed_image()
 
     def update_history_list(self):
         # Clears the existing history items in the Treeview
