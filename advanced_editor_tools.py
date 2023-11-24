@@ -241,9 +241,14 @@ class AdvancedEditorTools(Toplevel):
     def _preview_edits_on_image(self, event):
         if self.displaying_processed_image:
             self.master.master.image_properties = self.pre_image_properties
-            self.master.master.image_viewer.display_image(self.original_image)
+            print(f"Pocessed Image Properties: {self.pre_image_properties}")
+            print(f"Image Properties Main: {self.master.master.image_properties}")
+            self.update_displayed_image()
+            print(f"Pocessed Image Properties: {self.pre_image_properties}")
+            print(f"Image Properties Main: {self.master.master.image_properties}")
             self.displaying_processed_image = False
         else:
+            self.master.master.image_properties = self.current_image_properties
             self.update_displayed_image()
             self.displaying_processed_image = True
 
