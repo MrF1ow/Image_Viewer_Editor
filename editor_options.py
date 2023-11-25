@@ -57,15 +57,10 @@ class EditorOptions(Frame):
         self.crop_button.grid(row=3, column=1, padx=5,
                               pady=5, sticky='e', columnspan=2)
 
-        self.clear_button = Button(self, text="Clear", width=button_width,
-                                   height=button_height, command=self._clear_basic_edits_to_image)
-        self.clear_button.grid(row=4, column=0, padx=5,
-                               pady=5, sticky="w", columnspan=2)
-
         self.clear_all_button = Button(self, text="Clear All", width=button_width,
                                        height=button_height, command=self._clear_all_edits_to_image)
         self.clear_all_button.grid(
-            row=4, column=1, padx=5, pady=5, sticky="e", columnspan=2)
+            row=4, column=0, padx=5, pady=5, sticky="w", columnspan=2)
 
     # this function opens the place where we are going to have all the sliders for our advanced editor tools
 
@@ -76,11 +71,11 @@ class EditorOptions(Frame):
         self.master.master.advanced_tools.grab_set()
 
     def _change_vertical_flip_value(self):
-        if ImageProperties.is_flipped_vert:
+        if self.master.master.image_properties.is_flipped_vert:
             # If it's flipped, revert back to the original
-            ImageProperties.is_flipped_vert = False
+            self.master.master.image_properties.is_flipped_vert = False
         else:
-            ImageProperties.is_flipped_vert = True
+            self.master.master.image_properties.is_flipped_vert = True
 
         title = "Flipped Vertically"
 
@@ -90,11 +85,11 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_horizontal_flip_value(self):
-        if ImageProperties.is_flipped_horz:
+        if self.master.master.image_properties.is_flipped_horz:
             # If it's flipped, revert back to the original
-            ImageProperties.is_flipped_horz = False
+            self.master.master.image_properties.is_flipped_horz = False
         else:
-            ImageProperties.is_flipped_horz = True
+            self.master.master.image_properties.is_flipped_horz = True
 
         title = "Flipped Horizontally"
 
@@ -104,12 +99,12 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_grayscale_value(self):
-        if ImageProperties.is_sepia == False:
-            if ImageProperties.is_grayscaled:
-                ImageProperties.is_grayscaled = False
+        if self.master.master.image_properties.is_sepia == False:
+            if self.master.master.image_properties.is_grayscaled:
+                self.master.master.image_properties.is_grayscaled = False
                 title = "Grayscale Removed"
             else:
-                ImageProperties.is_grayscaled = True
+                self.master.master.image_properties.is_grayscaled = True
                 title = "Grayscale Applied"
 
             self._insert_into_history(
@@ -118,12 +113,12 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_sepia_value(self):
-        if ImageProperties.is_grayscaled == False:
-            if ImageProperties.is_sepia:
-                ImageProperties.is_sepia = False
+        if self.master.master.image_properties.is_grayscaled == False:
+            if self.master.master.image_properties.is_sepia:
+                self.master.master.image_properties.is_sepia = False
                 title = "Sepia Removed"
             else:
-                ImageProperties.is_sepia = True
+                self.master.master.image_properties.is_sepia = True
                 title = "Sepia Applied"
 
             self._insert_into_history(
@@ -132,9 +127,9 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_rotation_value(self):
-        if ImageProperties.rotation == 360:
-            ImageProperties.rotation = 0
-        ImageProperties.rotation += 90
+        if self.master.master.image_properties.rotation == 360:
+            self.master.master.image_properties.rotation = 0
+        self.master.master.image_properties.rotation += 90
         title = "Rotation Applied"
 
         self._insert_into_history(
@@ -149,7 +144,7 @@ class EditorOptions(Frame):
         image = Image.fromarray(image)
 
         # Check if the image is already horizontally flipped
-        if ImageProperties.is_flipped_horz:
+        if self.master.master.image_properties.is_flipped_horz:
             flipped_image = image.transpose(method=Image.FLIP_LEFT_RIGHT)
         else:
             flipped_image = image
@@ -165,7 +160,7 @@ class EditorOptions(Frame):
         image = Image.fromarray(image)
 
         # Check if the image is already vertically flipped
-        if ImageProperties.is_flipped_vert:
+        if self.master.master.image_properties.is_flipped_vert:
             flipped_image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
         else:
             flipped_image = image
@@ -174,31 +169,17 @@ class EditorOptions(Frame):
         numpy_image = np.array(flipped_image)
         return numpy_image
 
-    def _apply_rotation_to_image(self, img=None):
-        # Get the processed image from the master
-        image = img
-        # Convert the numpy array of pixels to a Pillow image
-        image = Image.fromarray(image)
-
-        # Rotate the image 90 degrees clockwise
-        rotated_image = image.rotate(
-            ImageProperties.rotation, resample=Image.NEAREST, expand=True)
-        # Convert the rotated image back to a numpy array
-        numpy_image = np.array(rotated_image)
-        return numpy_image
-
     def _apply_grayscale_to_image(self, img=None):
         image = img
-        if ImageProperties.is_grayscaled:
+        if self.master.master.image_properties.is_grayscaled:
             grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
             grayscale_image = image
-
         return grayscale_image
 
     def _apply_sepia_to_image(self, img=None):
         image = img
-        if ImageProperties.is_sepia:
+        if self.master.master.image_properties.is_sepia:
             # Applying Sepia to the uploaded image.
             # Converting the image to a numpy array representing pixels.
             array_image = np.array(image, dtype=np.float64)
@@ -214,28 +195,56 @@ class EditorOptions(Frame):
             sepia_image = image
         return sepia_image
 
+    def _apply_rotation_to_image(self, img=None):
+        image = img
+        angle = self.master.master.image_properties.rotation
+        # Convert the numpy array of pixels to a Pillow image
+        image = Image.fromarray(image)
+
+        # Rotate the image to degrees specified by the angle variable
+        rotated_image = image.rotate(
+            angle=angle, resample=Image.NEAREST, expand=True)
+        # Convert the rotated image back to a numpy array
+        numpy_image = np.array(rotated_image)
+
+        resize_height = self.master.master.image_properties.resize_image_height
+        resize_width = self.master.master.image_properties.resize_image_width
+
+        if angle == 90 or angle == 270:
+            self.master.master.image_properties.altered_image_height = resize_width
+            self.master.master.image_properties.altered_image_width = resize_height
+        elif angle == 180 or angle == 360 or angle == 0:
+            self.master.master.image_properties.altered_image_height = resize_height
+            self.master.master.image_properties.altered_image_width = resize_width
+
+        return numpy_image
+
     def _apply_resize_to_image(self, img=None):
         image = img
-        resized_image = cv2.resize(image, (ImageProperties.altered_image_width, ImageProperties.altered_image_height))
+        # print(f"In Resize Function Altered Height: {self.master.master.image_properties.altered_image_height}")
+        # print(f"In Resize Function Altered Width: {self.master.master.image_properties.altered_image_width}")
+        resized_image = cv2.resize(image, (self.master.master.image_properties.altered_image_width,
+                                           self.master.master.image_properties.altered_image_height))
+
         return resized_image
 
     def _reset_basic_image_properties(self):
-        ImageProperties.is_flipped_horz = False
-        ImageProperties.is_flipped_vert = False
-        ImageProperties.is_grayscaled = False
-        ImageProperties.is_sepia = False
-        ImageProperties.rotation = 0
+        self.master.master.image_properties.is_flipped_horz = False
+        self.master.master.image_properties.is_flipped_vert = False
+        self.master.master.image_properties.is_grayscaled = False
+        self.master.master.image_properties.is_sepia = False
+        self.master.master.image_properties.rotation = 0
+        self.master.master.image_properties.altered_image_height = self.master.master.image_properties.original_image_height
+        self.master.master.image_properties.altered_image_width = self.master.master.image_properties.original_image_width
+        self.master.master.image_properties.resize_image_height = self.master.master.image_properties.original_image_height
+        self.master.master.image_properties.resize_image_width = self.master.master.image_properties.original_image_width
 
     def _reset_advanced_image_properties(self):
-        ImageProperties.brightness = 50
-        ImageProperties.contrast = 50
-        ImageProperties.saturation = 0
-        ImageProperties.blur_size = 0
-        ImageProperties.hue = 50
-
-    def _clear_basic_edits_to_image(self):
-        self._reset_basic_image_properties()
-        self.update_displayed_image()
+        self.master.master.image_properties.brightness = 50
+        self.master.master.image_properties.contrast = 50
+        self.master.master.image_properties.saturation = 0
+        self.master.master.image_properties.blur_size = 0
+        self.master.master.image_properties.hue = 0
 
     def _clear_all_edits_to_image(self):
         self._reset_basic_image_properties()
@@ -247,9 +256,11 @@ class EditorOptions(Frame):
     def _open_resize_window(self):
 
         def _change_resize_values():
-            ImageProperties.altered_image_width = int(width.get())
-            ImageProperties.altered_image_height = int(height.get())
-            title = f"Resize: {ImageProperties.altered_image_width}x{ImageProperties.altered_image_height}"
+            self.master.master.image_properties.resize_image_width = int(
+                width.get())
+            self.master.master.image_properties.resize_image_height = int(
+                height.get())
+            title = f"Resize: {self.master.master.image_properties.altered_image_width}x{self.master.master.image_properties.altered_image_height}"
 
             self._insert_into_history(
                 title=title)
@@ -262,13 +273,16 @@ class EditorOptions(Frame):
 
         Label(resize_window, text="Width").pack()
         width = Entry(resize_window)
-        width.insert(0, str(ImageProperties.altered_image_width))
+        width.insert(
+            0, str(self.master.master.image_properties.altered_image_width))
         width.pack()
         Label(resize_window, text="Height").pack()
         height = Entry(resize_window)
-        height.insert(0, str(ImageProperties.altered_image_height))
+        height.insert(
+            0, str(self.master.master.image_properties.altered_image_height))
         height.pack()
-        Button(resize_window, text="Apply Resize", command=_change_resize_values).pack()
+        Button(resize_window, text="Apply Resize",
+               command=_change_resize_values).pack()
 
     def update_displayed_image(self):
         self.master.master.image_viewer._apply_all_edits()
@@ -282,13 +296,12 @@ class EditorOptions(Frame):
 
     def _apply_all_basic_edits(self, img=None):
         image = img
+        image = self._apply_rotation_to_image(image)
+        image = self._apply_resize_to_image(image)
         image = self._apply_grayscale_to_image(image)
         image = self._apply_horizontal_flip_image(image)
         image = self._apply_vertical_flip_image(image)
         image = self._apply_sepia_to_image(image)
-        if ImageProperties.altered_image_height != ImageProperties.original_image_height or ImageProperties.altered_image_width != ImageProperties.original_image_width:
-            image = self._apply_resize_to_image(image)
-        image = self._apply_rotation_to_image(image)
 
         return image
 
@@ -302,45 +315,48 @@ class EditorOptions(Frame):
 
         Args:
             title (str): Title for the edit instance.
-            property_name (str): Name of the property to be updated in ImageProperties.
+            property_name (str): Name of the property to be updated in self.master.master.image_properties.
             new_value (any): New value to be set for the specified property.
 
         Returns:
             None
         """
         edit_instance = self._make_edit_instance(title)
+        # print(f"Edit Instance Altered Height: {edit_instance.altered_image_height}")
+        # print(f"Edit Instance Altered Width: {edit_instance.altered_image_width}")
         self._check_undo_performed()
-        self.history_arr = self.master.master.history
-        self.history_arr.append(edit_instance)
+        self.master.master.history.append(edit_instance)
         self.master.master.history_of_edits.update_history_list()
         self.master.master.history_of_edits._set_indices()
 
     def _make_edit_instance(self, title):
         """
-        Creates an edit instance with the current ImageProperties values.
+        Creates an edit instance with the current self.master.master.image_properties values.
         """
         edit_instance = ImageProperties(
             title=title,
             time=str(time.strftime('%H:%M:%S')),
-            is_flipped_horz=ImageProperties.is_flipped_horz,
-            is_flipped_vert=ImageProperties.is_flipped_vert,
-            is_grayscaled=ImageProperties.is_grayscaled,
-            is_sepia=ImageProperties.is_sepia,
-            is_cropped=ImageProperties.is_cropped,
-            original_image_height=ImageProperties.original_image_height,
-            original_image_width=ImageProperties.original_image_width,
-            altered_image_height=ImageProperties.altered_image_height,
-            altered_image_width=ImageProperties.altered_image_width,
-            rotation=ImageProperties.rotation,
-            brightness=ImageProperties.brightness,
-            contrast=ImageProperties.contrast,
-            saturation=ImageProperties.saturation,
-            blur=ImageProperties.blur,
-            hue=ImageProperties.hue,
-            crop_start_x=ImageProperties.crop_start_x,
-            crop_start_y=ImageProperties.crop_start_y,
-            crop_end_x=ImageProperties.crop_end_x,
-            crop_end_y=ImageProperties.crop_end_y,
-            crop_ratio=ImageProperties.crop_ratio
+            is_flipped_horz=self.master.master.image_properties.is_flipped_horz,
+            is_flipped_vert=self.master.master.image_properties.is_flipped_vert,
+            is_grayscaled=self.master.master.image_properties.is_grayscaled,
+            is_sepia=self.master.master.image_properties.is_sepia,
+            is_cropped=self.master.master.image_properties.is_cropped,
+            original_image_height=self.master.master.image_properties.original_image_height,
+            original_image_width=self.master.master.image_properties.original_image_width,
+            altered_image_height=self.master.master.image_properties.altered_image_height,
+            altered_image_width=self.master.master.image_properties.altered_image_width,
+            resize_image_height=self.master.master.image_properties.resize_image_height,
+            resize_image_width=self.master.master.image_properties.resize_image_width,
+            rotation=self.master.master.image_properties.rotation,
+            brightness=self.master.master.image_properties.brightness,
+            contrast=self.master.master.image_properties.contrast,
+            saturation=self.master.master.image_properties.saturation,
+            blur=self.master.master.image_properties.blur,
+            hue=self.master.master.image_properties.hue,
+            crop_start_x=self.master.master.image_properties.crop_start_x,
+            crop_start_y=self.master.master.image_properties.crop_start_y,
+            crop_end_x=self.master.master.image_properties.crop_end_x,
+            crop_end_y=self.master.master.image_properties.crop_end_y,
+            crop_ratio=self.master.master.image_properties.crop_ratio
         )
         return edit_instance

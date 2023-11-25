@@ -58,14 +58,20 @@ class AppOptions(Frame):
             image = cv2.imread(fm.file)
             self.master.master.original_image = image.copy()
             self.master.master.processed_image = image.copy()
-            height, width, channels = image.shape
-            ImageProperties.original_image_height = height
-            ImageProperties.original_image_height = width
-            ImageProperties.altered_image_height = height
-            ImageProperties.altered_image_width = width
-            self._insert_into_histroy()
-            self.master.master.editor_options.original_image = image.copy()
+            self.master.master.image_properties = ImageProperties()
+            self._set_dimensions_of_image(image)
+            self._insert_into_history(image)
             self.master.master.image_viewer.display_image(image)
+
+    def _set_dimensions_of_image(self, img=None):
+        image = img
+        height, width = image.shape[:2]
+        self.master.master.image_properties.original_image_height = height
+        self.master.master.image_properties.original_image_width = width
+        self.master.master.image_properties.altered_image_height = height
+        self.master.master.image_properties.altered_image_width = width
+        self.master.master.image_properties.resize_image_height = height
+        self.master.master.image_properties.resize_image_width = width
 
     def save_button_click(self, event=None):
         fm = FileManager()
@@ -113,7 +119,7 @@ class AppOptions(Frame):
 
     # Allows the user to set the current filters on the image as the default fitlers applied to all images.
     def _set_current_filters_as_default(self):
-        # call a function that applys all the current ImageProperties values to a config file
+        # call a function that applys all the current self.master.master.image_properties values to a config file
         print("Default values updates")
 
     def _show_zoom_slider(self):
@@ -153,13 +159,47 @@ class AppOptions(Frame):
         configFileDefaultZoom = zoom_scale.get()
         zoom_slider_window.destroy()  # Destroying the window
 
-    def _insert_into_histroy(self):
-        # Inserts the current ImageProperties into the history array
+    def _insert_into_history(self, img=None):
+        image = img
+        height, width = image.shape[:2]
+        # Inserts the current self.master.master.image_properties into the history array
         title = "File Imported"
         import_instance = ImageProperties(
             title=title,
-            time=str(time.strftime('%H:%M:%S'))
+            time=str(time.strftime('%H:%M:%S')),
+            is_flipped_horz=self.master.master.image_properties.is_flipped_horz,
+            is_flipped_vert=self.master.master.image_properties.is_flipped_vert,
+            is_grayscaled=self.master.master.image_properties.is_grayscaled,
+            is_sepia=self.master.master.image_properties.is_sepia,
+            is_cropped=self.master.master.image_properties.is_cropped,
+            original_image_height=height,
+            original_image_width=width,
+            altered_image_height=height,
+            altered_image_width=width,
+            resize_image_height=height,
+            resize_image_width=width,
+            rotation=self.master.master.image_properties.rotation,
+            brightness=self.master.master.image_properties.brightness,
+            contrast=self.master.master.image_properties.contrast,
+            saturation=self.master.master.image_properties.saturation,
+            blur=self.master.master.image_properties.blur,
+            hue=self.master.master.image_properties.hue,
+            crop_start_x=self.master.master.image_properties.crop_start_x,
+            crop_start_y=self.master.master.image_properties.crop_start_y,
+            crop_end_x=self.master.master.image_properties.crop_end_x,
+            crop_end_y=self.master.master.image_properties.crop_end_y,
+            crop_ratio=self.master.master.image_properties.crop_ratio
         )
         self.master.master.history.append(import_instance)
         self.master.master.history_of_edits._set_indices()
         self.master.master.history_of_edits.update_history_list()
+
+    def _reset_all_edits(self):
+        # Resets all edits to the original image
+        self.master.master.processed_image = self.master.master.original_image
+        self.master.master.image_viewer.display_image(
+            self.master.master.processed_image)
+        self.master.master.editor_options.reset_all_edits()
+        self.master.master.editor_options.display_image(
+            self.master.master.processed_image)
+        self.master.master.image_properties = self.master.master.image_properties()
