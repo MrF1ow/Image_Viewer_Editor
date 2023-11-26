@@ -17,12 +17,19 @@ class ImageManager(Frame):
         self.rectangle_id = 0
         self.ratio = 0
 
+        self.scale_factor = 1.0
+
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
         self.canvas = Canvas(self, bg="black",  width=720, height=405)
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
 
-    def display_image(self, img=None):
+        # Zoom functionality
+        self.scale_factor = 1.0
+        self.canvas.bind("<MouseWheel>", self._zoom)
+        self.canvas.bind("<KeyRelease-KP_Add>", self._zoom)
+
+    def display_image(self, img=None, zoom=False):
         self.clear_canvas()
         if img is None:
             # this uses the processed image if none is given
@@ -51,7 +58,13 @@ class ImageManager(Frame):
                 new_height = self.winfo_height()
                 new_width = int(math.floor(new_height * (width / height)))
 
-        self.current_image = cv2.resize(image, (new_width, new_height))
+        # For zoom functionality
+        if zoom:
+            size = int(new_width * self.scale_factor), int(new_height * self.scale_factor)
+            self.current_image = cv2.resize(image, size)
+        else:
+            self.current_image = cv2.resize(image, (new_width, new_height))
+
         self.current_image = ImageTk.PhotoImage(
             Image.fromarray(self.current_image))
 
@@ -164,5 +177,12 @@ class ImageManager(Frame):
 
     def clear_canvas(self):
         self.canvas.delete("all")
+
+    def _zoom(self, event):
+        if event.keysym == 'KP_Add' or event.delta == 120 :
+            self.scale_factor *= 1.2
+        elif event.keysym == 'minus' or event.delta == -120:
+            self.scale_factor *= 0.8
+        self.display_image(self.master.master.processed_image, zoom=True)
 
 
