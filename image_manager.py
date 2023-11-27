@@ -2,6 +2,7 @@ from tkinter import Frame, Canvas, CENTER
 from PIL import Image, ImageTk
 import cv2
 import math
+from tkinter import Frame, Button, Toplevel, Label, Button, Entry
 
 
 class ImageManager(Frame):
@@ -21,6 +22,30 @@ class ImageManager(Frame):
         self.canvas = Canvas(self, bg="black",  width=720, height=405)
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
+        
+        #Starting coordinates for panning
+        self.start_x = 0
+        self.start_y = 0
+        self.coord_x = 0
+        self.coord_y = 0
+
+        #Binding for panning
+        self.canvas.bind("<ButtonPress-1>", self._activate_pan)
+        self.canvas.bind("<B1-Motion>", self._pan_image)
+        #self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+        #Arroow key bindings for panning
+        self.master.master.bind("<Left>", self._pan_left)
+        self.master.master.bind("<Right>", self._pan_right)
+        self.master.master.bind("<Up>", self._pan_up)
+        self.master.master.bind("<Down>", self._pan_down)
+        
+        #Canvas reset button for zoom and pan
+        button_width = 2
+        button_height = 2
+        self.pan_reset_button = Button(self, text="Reset", width=button_width, height=button_height, command=self._reset)
+        self.pan_reset_button.pack(anchor="sw", side="left", padx=5, pady=5)
+
 
     def display_image(self, img=None):
         self.clear_canvas()
@@ -61,7 +86,111 @@ class ImageManager(Frame):
         self.canvas.create_image(
             new_width / 2, new_height / 2, anchor="center", image=self.current_image)
 
+        #Moves the image back to pan location when edits are applied
+        center_x, center_y = self.canvas.coords("all")
+        
+        if self.coord_x + center_x > new_width:
+            self.coord_x = center_x
+        if self.coord_y + center_y > new_height:
+            self.coord_y = center_y
+        if self.coord_x < 0:
+            self.coord_x = -center_x
+        if self.coord_y < 0:
+            self.coord_y = -center_y     
+                         
+        self.canvas.move("all", self.coord_x, self.coord_y)
+        
+        #Finds the click location
+    def _activate_pan(self, event):
+        if self.master.master.in_crop_mode:
+            return
+        if self.master.master.original_image is None:
+            return
+        if self.master.master.processed_image is None:
+            return  
+
+        self.start_x = event.x
+        self.start_y = event.y
+
+    #Shows the image drag and set destination coordinates
+    def _pan_image(self, event):
+        if self.master.master.in_crop_mode:
+            return
+        if self.master.master.original_image is None:
+            return
+        if self.master.master.processed_image is None:
+            return               
+        dest_x = event.x - self.start_x
+        dest_y = event.y - self.start_y
+
+        current_x, current_y = self.canvas.coords("all")
+
+        if 0 <= current_x + dest_x <= self.canvas.winfo_width():
+            self.canvas.move("all", dest_x, 0)
+            self.coord_x += dest_x
+        if 0 <= current_y + dest_y <= self.canvas.winfo_height():
+            self.canvas.move("all", 0, dest_y)
+            self.coord_y += dest_y
+
+        self.start_x = event.x
+        self.start_y = event.y  
+    
+    #Functions for panning macros
+    def _pan_left(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_x-(self.canvas.winfo_width()*.1) >= 0:
+            self.canvas.move("all", -(self.canvas.winfo_width()*.1), 0)
+            self.start_x -= (self.canvas.winfo_width()*.1)
+            self.coord_x -= (self.canvas.winfo_width()*.1)
+        if current_x-(self.canvas.winfo_width()*.1) < 0:
+            self.canvas.move("all", -current_x, 0)
+            self.start_x -= current_x
+            self.coord_x -= current_x
+
+    def _pan_right(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_x+(self.canvas.winfo_width()*.1) <= self.canvas.winfo_width():
+            self.canvas.move("all", (self.canvas.winfo_width()*.1), 0)
+            self.start_x += (self.canvas.winfo_width()*.1)
+            self.coord_x += (self.canvas.winfo_width()*.1)
+        if current_x+(self.canvas.winfo_width()*.1) > self.canvas.winfo_width():
+            self.canvas.move("all", self.canvas.winfo_width()-current_x, 0)
+            self.start_x += self.canvas.winfo_width()-current_x
+            self.coord_x += self.canvas.winfo_width()-current_x
+
+    def _pan_down(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_y+(self.canvas.winfo_height()*.1) <= self.canvas.winfo_height():
+            self.canvas.move("all", 0, +(self.canvas.winfo_height()*.1))
+            self.start_y += (self.canvas.winfo_height()*.1)
+            self.coord_y += (self.canvas.winfo_height()*.1)
+        if current_y+(self.canvas.winfo_height()*.1) > self.canvas.winfo_height():
+            self.canvas.move("all", 0, self.canvas.winfo_height()-current_y)
+            self.start_y += self.canvas.winfo_height()-current_y
+            self.coord_y += self.canvas.winfo_height()-current_y
+
+    def _pan_up(self, event):
+        current_x, current_y = self.canvas.coords("all")
+        if current_y-(self.canvas.winfo_height()*.1) >= 0:
+            self.canvas.move("all", 0, -(self.canvas.winfo_height()*.1))
+            self.start_y -= (self.canvas.winfo_height()*.1)
+            self.coord_y -= (self.canvas.winfo_height()*.1)
+        if current_y-(self.canvas.winfo_height()*.1) < 0:
+            self.canvas.move("all", 0, -current_y)
+            self.start_y -= current_y
+            self.coord_y -= current_y
+            
+    #Resets the pan coordinates      
+    def _reset(self):
+        self.canvas.move("all", -self.coord_x, -self.coord_y)
+        self.coord_x = 0
+        self.coord_y = 0
+        self.start_x = 0
+        self.start_y = 0
+
     def _active_crop_mode(self, event):
+        self.canvas.unbind("<ButtonPress-1>")
+        self.canvas.unbind("<B1-Motion>")
         self.canvas.bind("<ButtonPress>", self._start_crop)
         self.canvas.bind("<B1-Motion>", self._update_crop)
         self.canvas.bind("<ButtonRelease>", self._end_crop)
@@ -72,6 +201,8 @@ class ImageManager(Frame):
         self.canvas.unbind("<B1-Motion>")
         self.canvas.unbind("<ButtonRelease>")
         self.master.master.in_crop_mode = False
+        self.canvas.bind("<ButtonPress-1>", self._activate_pan)
+        self.canvas.bind("<B1-Motion>", self._pan_image)
 
     def _start_crop(self, event):
         self.crop_start_x = event.x
@@ -164,5 +295,3 @@ class ImageManager(Frame):
 
     def clear_canvas(self):
         self.canvas.delete("all")
-
-
