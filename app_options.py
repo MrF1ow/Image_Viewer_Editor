@@ -61,6 +61,7 @@ class AppOptions(Frame):
             self.master.master.image_properties = ImageProperties()
             self._set_dimensions_of_image(image)
             self._insert_into_history(image)
+            self.master.master.image_viewer._reset()
             self.master.master.image_viewer.display_image(image)
 
     def _set_dimensions_of_image(self, img=None):
