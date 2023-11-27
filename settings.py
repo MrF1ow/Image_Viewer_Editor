@@ -3,8 +3,10 @@ from tkinter import ttk
 from tkinter import Toplevel, filedialog, LEFT
 from system_default import SystemDefaults
 
-class Settings(Toplevel):
+class Settings(Toplevel): 
+    """A class representing the settings window."""
     def __init__(self, master=None):
+        """Initialize the Settings window."""
         Toplevel.__init__(self, master=master)
         self.title("Settings")
         
@@ -43,43 +45,52 @@ class Settings(Toplevel):
             ("History Size", "Int/Dropdown", self.history_size_dropdown_options, SystemDefaults.history_size),
             ("Reset Settings", "Button", None, None)
         ]
-        # Need to either declare system default or, if system defaults are already declared, need to get that variable.
-        # Dictionary to hold references to widget variables
+
         self.settings_vars = {} # Key: settings name; Value: widget
         self.create_widgets()
         
 
     def create_widgets(self):
-        # Looping through settings_title_and_widgets array and accessing the information: name, type, option.
+        """Create and layout widgets for the Settings window."""
+        
+        # Looping through settings_title_widget_type_widget_option_and_system_default array and accessing the information: name, type, option, default value to add.
         for settings_name, widget_type, widget_options, system_default_value in self.settings_title_widget_type_widget_option_and_system_default:
             widget_var = tk.StringVar()
             checkbox_var = tk.BooleanVar()
             
-            self._create_label(settings_name=settings_name)
-
+            # Checking the widget type to see how the widget will be created.
             if widget_type == "ComboboxType":
+                self._create_label(settings_name=settings_name)
                 self._create_combobox(widget_options=widget_options, system_default_value=system_default_value, widget_var=widget_var)
                 self._add_widget_to_settings_vars(settings_name, widget_var)
                 
             elif widget_type == "FileLocation": 
+                self._create_label(settings_name=settings_name)
                 self._create_file_location(system_default_value=system_default_value, widget_var=widget_var)
                 self._add_widget_to_settings_vars(settings_name, widget_var)
             
             elif widget_type == "CheckbuttonType":
+                self._create_label(settings_name=settings_name)
                 self._create_checkbutton(checkbox_var=checkbox_var, system_default_value=system_default_value)
                 self._add_widget_to_settings_vars(settings_name, checkbox_var)
                 
             elif widget_type == "ButtonType":
+                self._create_label(settings_name=settings_name)
                 self._create_button(settings_name=settings_name, system_default_value=system_default_value)
                 self._add_widget_to_settings_vars(settings_name, widget_var)
             
             elif widget_type == "Int/Dropdown":
+                self._create_label(settings_name=settings_name)
                 self._create_input_combobox(widget_options=widget_options, system_default_value=system_default_value, widget_var=widget_var)
                 self._add_widget_to_settings_vars(settings_name, widget_var)       
         
         self._add_blank_label_for_spacing()   
         self._create_apply_button()
         self._create_clear_button()
+    
+    
+    def _add_widget_to_settings_vars(self, index, value) -> None:
+        self.settings_vars[index] = value
     
     
     def _create_enter_value_functionality(self, widget):
@@ -97,10 +108,6 @@ class Settings(Toplevel):
         self._insert_widget_using_grid(widget=clear_settings_button, row=len(self.settings_vars), column=0, padx=0, pady=10, sticky=tk.E)
         self._add_widget_to_settings_vars("Clear", clear_settings_button)
 
-
-    def _add_widget_to_settings_vars(self, index, value) -> None:
-        self.settings_vars[index] = value
-    
     
     def _add_blank_label_for_spacing(self) -> None:
         space_label = self._create_space_label()
@@ -112,19 +119,11 @@ class Settings(Toplevel):
         return tk.Label(self, text="")
     
     
-    def _insert_space_widget_using_grid(self, widget) -> None:
-        widget.grid(row=len(self.settings_vars) + 1, column=0, pady=10, columnspan=2)
-    
-    
     def _create_label(self, settings_name) -> None:
         widget = self._initialize_label(settings_name=settings_name)
         self._insert_widget_using_grid(widget=widget, row=len(self.settings_vars), column=0, padx=10, pady=5, sticky=tk.W)
     
-    
-    def _initialize_label(self, settings_name) -> tk.Label:
-        return tk.Label(self, text=settings_name)
-    
-    
+       
     def _create_input_combobox(self, widget_options, system_default_value, widget_var) -> None:
         widget = self._initialize_combobox(widget_var=widget_var, widget_option=widget_options)
         self._insert_widget_using_grid(widget=widget, row=len(self.settings_vars), column=1, padx=10, pady=5, sticky=tk.W)
@@ -136,11 +135,7 @@ class Settings(Toplevel):
         widget = self._initialize_combobox(widget_var=widget_var, widget_option=widget_options)
         self._insert_widget_using_grid(widget=widget, row=len(self.settings_vars), column=1, padx=10, pady=5, sticky=tk.W)
         self._set_value_for_widget(widget=widget, value=system_default_value)
-    
-    
-    def _initialize_combobox(self, widget_var, widget_option) -> ttk.Combobox:
-        return ttk.Combobox(self, textvariable=widget_var, values=widget_option, state="readonly")
-    
+
     
     def _create_file_location(self, system_default_value, widget_var) -> None:
         widget = self._initialize_entry(widget_var)
@@ -163,6 +158,14 @@ class Settings(Toplevel):
         widget.set(system_default_value)
 
 
+    def _initialize_combobox(self, widget_var, widget_option) -> ttk.Combobox:
+        return ttk.Combobox(self, textvariable=widget_var, values=widget_option, state="readonly")
+    
+
+    def _initialize_label(self, settings_name) -> tk.Label:
+        return tk.Label(self, text=settings_name)
+    
+
     def _initialize_entry(self, widget_var) -> tk.Entry:
         return tk.Entry(self, textvariable=widget_var, state="readonly")
   
@@ -182,15 +185,11 @@ class Settings(Toplevel):
     def _insert_widget_using_grid(self, widget, row, column, padx, pady, sticky) -> None:
         widget.grid(row=row, column=column, padx=padx, pady=pady, sticky=sticky) 
   
-           
-    def _insert_widget(self, widget) -> None:
-        widget.grid(row=len(self.settings_vars), column=1, padx=10, pady=5, sticky=tk.W)
    
-    
-    def _set_value_for_widget(self, widget, value) -> None:
-        widget.set(value)
-   
-    
+    def _insert_space_widget_using_grid(self, widget) -> None:
+        widget.grid(row=len(self.settings_vars) + 1, column=0, pady=10, columnspan=2)
+      
+
     def _apply_current_settings(self):
         # This is the apply button that will tak everything in settings and apply it (edit the config file and apply the changes).
         pass
@@ -208,5 +207,11 @@ class Settings(Toplevel):
             self.settings_vars["Default File Location"].set(file_path)        
         
     
+    def _set_value_for_widget(self, widget, value) -> None:
+        widget.set(value)
+   
+     
     def _set_widget_config(self, widget, state) -> None:
-        widget.config(state=state)                        
+        valid_states = ["normal", "active", "disabled", "readonly"]
+        if state in valid_states:
+            widget.config(state=state)
