@@ -64,6 +64,10 @@ class Main(tk.Tk):
         self.bind("<Control-z>", self.history_of_edits.undo_action)
         self.bind('<Control-y>', self.history_of_edits.redo_action)
 
+        # self.bind("<MouseWheel>", self.image_viewer.on_mousewheel)
+        # self.bind('<Control-plus>', self.image_viewer.zoom_in)
+        # self.bind('<Control-minus>', self.image_viewer.zoom_out)
+
         # this is how to have something happen when the user closes the application
         # use this for saving before close
         # self.bind("<Destroy>", self._on_destroy)

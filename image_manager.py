@@ -18,34 +18,40 @@ class ImageManager(Frame):
         self.rectangle_id = 0
         self.ratio = 0
 
+        self.canvas_width = 1440
+        self.canvas_height = 810
+
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
-        self.canvas = Canvas(self, bg="black",  width=720, height=405)
+        self.canvas = Canvas(self, bg="black",  width=self.canvas_width,
+                             height=self.canvas_height, highlightthickness=0)
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
-        
-        #Starting coordinates for panning
+        self.canvas.config(scrollregion=(
+            0, 0, self.canvas_width, self.canvas_height))
+
+        # Starting coordinates for panning
         self.start_x = 0
         self.start_y = 0
         self.coord_x = 0
         self.coord_y = 0
 
-        #Binding for panning
+        # Binding for panning
         self.canvas.bind("<ButtonPress-1>", self._activate_pan)
         self.canvas.bind("<B1-Motion>", self._pan_image)
-        #self.canvas.config(scrollregion=self.canvas.bbox("all"))
+        # self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-        #Arroow key bindings for panning
+        # Arroow key bindings for panning
         self.master.master.bind("<Left>", self._pan_left)
         self.master.master.bind("<Right>", self._pan_right)
         self.master.master.bind("<Up>", self._pan_up)
         self.master.master.bind("<Down>", self._pan_down)
-        
-        #Canvas reset button for zoom and pan
+
+        # Canvas reset button for zoom and pan
         button_width = 2
         button_height = 2
-        self.pan_reset_button = Button(self, text="Reset", width=button_width, height=button_height, command=self._reset)
+        self.pan_reset_button = Button(
+            self, text="Reset", width=button_width, height=button_height, command=self._reset)
         self.pan_reset_button.pack(anchor="sw", side="left", padx=5, pady=5)
-
 
     def display_image(self, img=None):
         self.clear_canvas()
@@ -82,13 +88,19 @@ class ImageManager(Frame):
 
         self.ratio = height / new_height
 
-        self.canvas.config(width=new_width, height=new_height)
-        self.canvas.create_image(
-            new_width / 2, new_height / 2, anchor="center", image=self.current_image)
+        # self.canvas.config(width=new_width, height=new_height)
+        canvas_center_x = self.canvas_width / 2
+        canvas_center_y = self.canvas_height / 2
 
-        #Moves the image back to pan location when edits are applied
+        image_center_x = canvas_center_x - new_width / 2
+        image_center_y = canvas_center_y - new_height / 2
+
+        self.canvas.create_image(
+            image_center_x, image_center_y, anchor="nw", image=self.current_image)
+
+        # Moves the image back to pan location when edits are applied
         center_x, center_y = self.canvas.coords("all")
-        
+
         if self.coord_x + center_x > new_width:
             self.coord_x = center_x
         if self.coord_y + center_y > new_height:
@@ -96,46 +108,59 @@ class ImageManager(Frame):
         if self.coord_x < 0:
             self.coord_x = -center_x
         if self.coord_y < 0:
-            self.coord_y = -center_y     
-                         
+            self.coord_y = -center_y
+
         self.canvas.move("all", self.coord_x, self.coord_y)
-        
-        #Finds the click location
+
+        # Finds the click location
     def _activate_pan(self, event):
         if self.master.master.in_crop_mode:
             return
         if self.master.master.original_image is None:
             return
         if self.master.master.processed_image is None:
-            return  
+            return
 
         self.start_x = event.x
         self.start_y = event.y
 
-    #Shows the image drag and set destination coordinates
+    # Shows the image drag and set destination coordinates
     def _pan_image(self, event):
-        if self.master.master.in_crop_mode:
+        if self.master.master.in_crop_mode or self.master.master.original_image is None or self.master.master.processed_image is None:
             return
-        if self.master.master.original_image is None:
-            return
-        if self.master.master.processed_image is None:
-            return               
+
         dest_x = event.x - self.start_x
         dest_y = event.y - self.start_y
 
-        current_x, current_y = self.canvas.coords("all")
+        bbox = self.canvas.bbox("all")  # Get the bounding box of all elements on the canvas
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
 
-        if 0 <= current_x + dest_x <= self.canvas.winfo_width():
-            self.canvas.move("all", dest_x, 0)
-            self.coord_x += dest_x
-        if 0 <= current_y + dest_y <= self.canvas.winfo_height():
-            self.canvas.move("all", 0, dest_y)
-            self.coord_y += dest_y
+        # Calculate the current position
+        current_x, current_y = bbox[0], bbox[1]
+
+        if dest_x > 0:
+            if bbox[2] + dest_x <= canvas_width:
+                self.canvas.move("all", dest_x, 0)
+                self.coord_x += dest_x
+        else:
+            if bbox[0] + dest_x >= 0:
+                self.canvas.move("all", dest_x, 0)
+                self.coord_x += dest_x
+
+        if dest_y > 0:
+            if bbox[3] + dest_y <= canvas_height:
+                self.canvas.move("all", 0, dest_y)
+                self.coord_y += dest_y
+        else:
+            if bbox[1] + dest_y >= 0:
+                self.canvas.move("all", 0, dest_y)
+                self.coord_y += dest_y
 
         self.start_x = event.x
-        self.start_y = event.y  
-    
-    #Functions for panning macros
+        self.start_y = event.y
+
+    # Functions for panning macros
     def _pan_left(self, event):
         current_x, current_y = self.canvas.coords("all")
         if current_x-(self.canvas.winfo_width()*.1) >= 0:
@@ -179,8 +204,8 @@ class ImageManager(Frame):
             self.canvas.move("all", 0, -current_y)
             self.start_y -= current_y
             self.coord_y -= current_y
-            
-    #Resets the pan coordinates      
+
+    # Resets the pan coordinates
     def _reset(self):
         self.canvas.move("all", -self.coord_x, -self.coord_y)
         self.coord_x = 0
@@ -227,27 +252,44 @@ class ImageManager(Frame):
         self.master.master.image_properties.crop_ratio = self.ratio
 
     def _end_crop(self, event):
-        self._set_crop_coordinates(self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y)
+        self._set_crop_coordinates(
+            self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y)
         if self.master.master.image_properties.crop_start_x <= self.master.master.image_properties.crop_end_x and self.master.master.image_properties.crop_start_y <= self.master.master.image_properties.crop_end_y:
-            start_x = int(self.master.master.image_properties.crop_start_x * self.master.master.image_properties.crop_ratio)
-            start_y = int(self.master.master.image_properties.crop_start_y * self.master.master.image_properties.crop_ratio)
-            end_x = int(self.master.master.image_properties.crop_end_x * self.master.master.image_properties.crop_ratio)
-            end_y = int(self.master.master.image_properties.crop_end_y * self.master.master.image_properties.crop_ratio)
+            start_x = int(self.master.master.image_properties.crop_start_x *
+                          self.master.master.image_properties.crop_ratio)
+            start_y = int(self.master.master.image_properties.crop_start_y *
+                          self.master.master.image_properties.crop_ratio)
+            end_x = int(self.master.master.image_properties.crop_end_x *
+                        self.master.master.image_properties.crop_ratio)
+            end_y = int(self.master.master.image_properties.crop_end_y *
+                        self.master.master.image_properties.crop_ratio)
         elif self.master.master.image_properties.crop_start_x > self.master.master.image_properties.crop_end_x and self.master.master.image_properties.crop_start_y <= self.master.master.image_properties.crop_end_y:
-            start_x = int(self.master.master.image_properties.crop_end_x * self.master.master.image_properties.crop_ratio)
-            start_y = int(self.master.master.image_properties.crop_start_y * self.master.master.image_properties.crop_ratio)
-            end_x = int(self.master.master.image_properties.crop_start_x * self.master.master.image_properties.crop_ratio)
-            end_y = int(self.master.master.image_properties.crop_end_y * self.master.master.image_properties.crop_ratio)
+            start_x = int(self.master.master.image_properties.crop_end_x *
+                          self.master.master.image_properties.crop_ratio)
+            start_y = int(self.master.master.image_properties.crop_start_y *
+                          self.master.master.image_properties.crop_ratio)
+            end_x = int(self.master.master.image_properties.crop_start_x *
+                        self.master.master.image_properties.crop_ratio)
+            end_y = int(self.master.master.image_properties.crop_end_y *
+                        self.master.master.image_properties.crop_ratio)
         elif self.master.master.image_properties.crop_start_x <= self.master.master.image_properties.crop_end_x and self.master.master.image_properties.crop_start_y > self.master.master.image_properties.crop_end_y:
-            start_x = int(self.master.master.image_properties.crop_start_x * self.master.master.image_properties.crop_ratio)
-            start_y = int(self.master.master.image_properties.crop_end_y * self.master.master.image_properties.crop_ratio)
-            end_x = int(self.master.master.image_properties.crop_end_x * self.master.master.image_properties.crop_ratio)
-            end_y = int(self.master.master.image_properties.crop_start_y * self.master.master.image_properties.crop_ratio)
+            start_x = int(self.master.master.image_properties.crop_start_x *
+                          self.master.master.image_properties.crop_ratio)
+            start_y = int(self.master.master.image_properties.crop_end_y *
+                          self.master.master.image_properties.crop_ratio)
+            end_x = int(self.master.master.image_properties.crop_end_x *
+                        self.master.master.image_properties.crop_ratio)
+            end_y = int(self.master.master.image_properties.crop_start_y *
+                        self.master.master.image_properties.crop_ratio)
         else:
-            start_x = int(self.master.master.image_properties.crop_end_x * self.master.master.image_properties.crop_ratio)
-            start_y = int(self.master.master.image_properties.crop_end_y * self.master.master.image_properties.crop_ratio)
-            end_x = int(self.master.master.image_properties.crop_start_x * self.master.master.image_properties.crop_ratio)
-            end_y = int(self.master.master.image_properties.crop_start_y * self.master.master.image_properties.crop_ratio)
+            start_x = int(self.master.master.image_properties.crop_end_x *
+                          self.master.master.image_properties.crop_ratio)
+            start_y = int(self.master.master.image_properties.crop_end_y *
+                          self.master.master.image_properties.crop_ratio)
+            end_x = int(self.master.master.image_properties.crop_start_x *
+                        self.master.master.image_properties.crop_ratio)
+            end_y = int(self.master.master.image_properties.crop_start_y *
+                        self.master.master.image_properties.crop_ratio)
 
         # x = slice(start_x, end_x, 1)
         # y = slice(start_y, end_y, 1)
@@ -263,13 +305,17 @@ class ImageManager(Frame):
         y = slice(start_y, end_y, 1)
         return image[y, x]
 
-
     # gotta figure this one
+
     def _revert_crop_coordinates(self):
-        original_start_x = int(self.master.master.image_properties.crop_start_x / self.master.master.image_properties.crop_ratio)
-        original_start_y = int(self.master.master.image_properties.crop_start_y / self.master.master.image_properties.crop_ratio)
-        original_end_x = int(self.master.master.image_properties.crop_end_x / self.master.master.image_properties.crop_ratio)
-        original_end_y = int(self.master.master.image_properties.crop_end_y / self.master.master.image_properties.crop_ratio)
+        original_start_x = int(self.master.master.image_properties.crop_start_x /
+                               self.master.master.image_properties.crop_ratio)
+        original_start_y = int(self.master.master.image_properties.crop_start_y /
+                               self.master.master.image_properties.crop_ratio)
+        original_end_x = int(self.master.master.image_properties.crop_end_x /
+                             self.master.master.image_properties.crop_ratio)
+        original_end_y = int(self.master.master.image_properties.crop_end_y /
+                             self.master.master.image_properties.crop_ratio)
 
         x = slice(original_start_x, original_end_x, 1)
         y = slice(original_start_y, original_end_y, 1)
@@ -287,7 +333,8 @@ class ImageManager(Frame):
     def _apply_all_edits(self):
         image = self.master.master.original_image
         if self.master.master.advanced_tools is not None:
-            image = self.master.master.advanced_tools._apply_all_advanced_edits(image)
+            image = self.master.master.advanced_tools._apply_all_advanced_edits(
+                image)
         # self._end_crop()
         image = self.master.master.editor_options._apply_all_basic_edits(image)
         self.master.master.processed_image = image
