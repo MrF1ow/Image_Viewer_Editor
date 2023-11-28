@@ -1,6 +1,7 @@
 from tkinter import Frame, Button, LEFT, Menu, Label, Scale, Toplevel
 from file_manager import FileManager
 from image_properties import ImageProperties
+from settings import Settings
 import cv2
 import time
 
@@ -9,6 +10,7 @@ class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
 
+    
         self.file_options_button = Button(
             self, text="File", command=self._show_file_menu)
         self.file_options_button.pack(side=LEFT)
@@ -28,14 +30,10 @@ class AppOptions(Frame):
         self.edit_menu.add_command(label="Batch Processing", command=self.batch_processing_button_click)
 
         # SETTINGS
+        self.settings = Settings(master=master) # Creating the instance of Settings. 
         self.settings_menu_button = Button(
             self, text="Settings", command=self._show_settings_menu)
         self.settings_menu_button.pack(side="left")
-        self.settings_menu = Menu(self, tearoff=0)
-        self.settings_menu.add_command(
-            label="Set Current Filters As Default", command=self._set_current_filters_as_default)
-        self.settings_menu.add_command(
-            label="Change Zoom Percentage", command=self._show_zoom_slider)
 
     def _show_file_menu(self, event=None):
         self.file_menu.post(self.file_options_button.winfo_rootx(
@@ -46,9 +44,9 @@ class AppOptions(Frame):
         ), self.edit_options_button.winfo_rooty() + self.edit_options_button.winfo_height())
 
     def _show_settings_menu(self, event=None):
-        self.settings_menu.post(self.settings_menu_button.winfo_rootx(
-        ), self.settings_menu_button.winfo_rooty() + self.settings_menu_button.winfo_height())
-
+        self.settings.toggle_visibility()
+        
+        
     def new_button_click(self, event=None):
         fm = FileManager()
         fm.get_file()
