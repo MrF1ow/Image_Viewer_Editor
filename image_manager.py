@@ -22,12 +22,11 @@ class ImageManager(Frame):
         self.canvas_height = 810
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
-        self.canvas = Canvas(self, bg="black",  width=self.canvas_width,
-                             height=self.canvas_height, highlightthickness=0)
+        self.canvas = Canvas(self, bg="black",  width=self.canvas_width, height=self.canvas_height, highlightthickness=0)
+        
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
-        self.canvas.config(scrollregion=(
-            0, 0, self.canvas_width, self.canvas_height))
+        self.canvas.config(scrollregion=(0, 0, self.canvas_width, self.canvas_height))
 
         # Starting coordinates for panning
         self.start_x = 0
@@ -35,10 +34,9 @@ class ImageManager(Frame):
         self.coord_x = 0
         self.coord_y = 0
 
-        # Binding for panning
+        #Binding for panning
         self.canvas.bind("<ButtonPress-1>", self._activate_pan)
         self.canvas.bind("<B1-Motion>", self._pan_image)
-        # self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
         # Arroow key bindings for panning
         self.master.master.bind("<Left>", self._pan_left)
@@ -52,6 +50,9 @@ class ImageManager(Frame):
         self.pan_reset_button = Button(
             self, text="Reset", width=button_width, height=button_height, command=self._reset)
         self.pan_reset_button.pack(anchor="sw", side="left", padx=5, pady=5)
+        
+    def _resize_canvas(self, event):
+        self.canvas.config(width=event.width, height=event.height)
 
     def display_image(self, img=None):
         self.clear_canvas()
@@ -95,22 +96,12 @@ class ImageManager(Frame):
         image_center_x = canvas_center_x - new_width / 2
         image_center_y = canvas_center_y - new_height / 2
 
-        self.canvas.create_image(
-            image_center_x, image_center_y, anchor="nw", image=self.current_image)
+        self.canvas.create_image(image_center_x, image_center_y, anchor="nw", image=self.current_image)
 
         # Moves the image back to pan location when edits are applied
         center_x, center_y = self.canvas.coords("all")
 
-        if self.coord_x + center_x > new_width:
-            self.coord_x = center_x
-        if self.coord_y + center_y > new_height:
-            self.coord_y = center_y
-        if self.coord_x < 0:
-            self.coord_x = -center_x
-        if self.coord_y < 0:
-            self.coord_y = -center_y
-
-        self.canvas.move("all", self.coord_x, self.coord_y)
+        self.canvas.move("all", self.master.master.image_properties.pan_coord_x, self.master.master.image_properties.pan_coord_y)
 
         # Finds the click location
     def _activate_pan(self, event):
@@ -124,7 +115,6 @@ class ImageManager(Frame):
         self.start_x = event.x
         self.start_y = event.y
 
-    # Shows the image drag and set destination coordinates
     def _pan_image(self, event):
         if self.master.master.in_crop_mode or self.master.master.original_image is None or self.master.master.processed_image is None:
             return
@@ -137,25 +127,25 @@ class ImageManager(Frame):
         canvas_height = self.canvas.winfo_height()
 
         # Calculate the current position
-        current_x, current_y = bbox[0], bbox[1]
+        current_x, current_y = self.canvas.coords("all")
 
         if dest_x > 0:
             if bbox[2] + dest_x <= canvas_width:
                 self.canvas.move("all", dest_x, 0)
-                self.coord_x += dest_x
+                self.master.master.image_properties.pan_coord_x += dest_x
         else:
             if bbox[0] + dest_x >= 0:
                 self.canvas.move("all", dest_x, 0)
-                self.coord_x += dest_x
+                self.master.master.image_properties.pan_coord_x += dest_x
 
         if dest_y > 0:
             if bbox[3] + dest_y <= canvas_height:
                 self.canvas.move("all", 0, dest_y)
-                self.coord_y += dest_y
+                self.master.master.image_properties.pan_coord_y += dest_y
         else:
             if bbox[1] + dest_y >= 0:
                 self.canvas.move("all", 0, dest_y)
-                self.coord_y += dest_y
+                self.master.master.image_properties.pan_coord_y += dest_y
 
         self.start_x = event.x
         self.start_y = event.y
@@ -166,50 +156,50 @@ class ImageManager(Frame):
         if current_x-(self.canvas.winfo_width()*.1) >= 0:
             self.canvas.move("all", -(self.canvas.winfo_width()*.1), 0)
             self.start_x -= (self.canvas.winfo_width()*.1)
-            self.coord_x -= (self.canvas.winfo_width()*.1)
+            self.master.master.image_properties.pan_coord_x -= (self.canvas.winfo_width()*.1)
         if current_x-(self.canvas.winfo_width()*.1) < 0:
             self.canvas.move("all", -current_x, 0)
             self.start_x -= current_x
-            self.coord_x -= current_x
+            self.master.master.image_properties.pan_coord_x -= current_x
 
     def _pan_right(self, event):
-        current_x, current_y = self.canvas.coords("all")
-        if current_x+(self.canvas.winfo_width()*.1) <= self.canvas.winfo_width():
-            self.canvas.move("all", (self.canvas.winfo_width()*.1), 0)
+        bbox = self.canvas.bbox("all")  # Get the bounding box of all elements on the canvas
+        if bbox[2]+(self.canvas.winfo_width()*.1) <= self.canvas.winfo_width():
+            self.canvas.move("all", +(self.canvas.winfo_width()*.1), 0)
             self.start_x += (self.canvas.winfo_width()*.1)
-            self.coord_x += (self.canvas.winfo_width()*.1)
-        if current_x+(self.canvas.winfo_width()*.1) > self.canvas.winfo_width():
-            self.canvas.move("all", self.canvas.winfo_width()-current_x, 0)
-            self.start_x += self.canvas.winfo_width()-current_x
-            self.coord_x += self.canvas.winfo_width()-current_x
+            self.master.master.image_properties.pan_coord_x += (self.canvas.winfo_width()*.1)
+        if bbox[2]+(self.canvas.winfo_width()*.1) > self.canvas.winfo_width():
+            self.canvas.move("all", self.canvas.winfo_width()-bbox[2], 0)
+            self.start_x += self.canvas.winfo_width()-bbox[2]
+            self.master.master.image_properties.pan_coord_x += self.canvas.winfo_width()-bbox[2]
 
     def _pan_down(self, event):
-        current_x, current_y = self.canvas.coords("all")
-        if current_y+(self.canvas.winfo_height()*.1) <= self.canvas.winfo_height():
+        bbox = self.canvas.bbox("all")  # Get the bounding box of all elements on the canvas
+        if bbox[3]+(self.canvas.winfo_height()*.1) <= self.canvas.winfo_height():
             self.canvas.move("all", 0, +(self.canvas.winfo_height()*.1))
             self.start_y += (self.canvas.winfo_height()*.1)
-            self.coord_y += (self.canvas.winfo_height()*.1)
-        if current_y+(self.canvas.winfo_height()*.1) > self.canvas.winfo_height():
-            self.canvas.move("all", 0, self.canvas.winfo_height()-current_y)
-            self.start_y += self.canvas.winfo_height()-current_y
-            self.coord_y += self.canvas.winfo_height()-current_y
+            self.master.master.image_properties.pan_coord_y += (self.canvas.winfo_height()*.1)
+        if bbox[3]+(self.canvas.winfo_height()*.1) > self.canvas.winfo_height():
+            self.canvas.move("all", 0, self.canvas.winfo_height()-bbox[3])
+            self.start_y += self.canvas.winfo_height()-bbox[3]
+            self.master.master.image_properties.pan_coord_y += self.canvas.winfo_height()-bbox[3]
 
     def _pan_up(self, event):
         current_x, current_y = self.canvas.coords("all")
         if current_y-(self.canvas.winfo_height()*.1) >= 0:
             self.canvas.move("all", 0, -(self.canvas.winfo_height()*.1))
             self.start_y -= (self.canvas.winfo_height()*.1)
-            self.coord_y -= (self.canvas.winfo_height()*.1)
+            self.master.master.image_properties.pan_coord_y -= (self.canvas.winfo_height()*.1)
         if current_y-(self.canvas.winfo_height()*.1) < 0:
             self.canvas.move("all", 0, -current_y)
             self.start_y -= current_y
-            self.coord_y -= current_y
+            self.master.master.image_properties.pan_coord_y -= current_y
 
-    # Resets the pan coordinates
+    #Resets the pan coordinates
     def _reset(self):
-        self.canvas.move("all", -self.coord_x, -self.coord_y)
-        self.coord_x = 0
-        self.coord_y = 0
+        self.canvas.move("all", -self.master.master.image_properties.pan_coord_x, -self.master.master.image_properties.pan_coord_y)
+        self.master.master.image_properties.pan_coord_x = 0
+        self.master.master.image_properties.pan_coord_y = 0
         self.start_x = 0
         self.start_y = 0
 
@@ -330,6 +320,25 @@ class ImageManager(Frame):
             self.master.master.processed_image = self.master.master.original_image[y, x]
             self.display_image(self.master.master.processed_image)
 
+    def zoom_in(self, event):
+        if self.master.master.image_properties.zoom_percentage < 300:
+            self.master.master.image_properties.zoom_percentage += 10
+            self._apply_all_edits()
+
+    def zoom_out(self, event):
+        if self.master.master.image_properties.zoom_percentage > 10:
+            self.master.master.image_properties.zoom_percentage -= 10
+            self._apply_all_edits()
+
+    def _apply_zoom_to_image(self, img=None):
+        image = img
+        zoom_percentage = self.master.master.image_properties.zoom_percentage
+        if zoom_percentage != 100:
+            width = int(image.shape[1] * (zoom_percentage / 100))
+            height = int(image.shape[0] * (zoom_percentage / 100))
+            image = cv2.resize(image, (width, height))
+        return image
+
     def _apply_all_edits(self):
         image = self.master.master.original_image
         if self.master.master.advanced_tools is not None:
@@ -337,6 +346,7 @@ class ImageManager(Frame):
                 image)
         # self._end_crop()
         image = self.master.master.editor_options._apply_all_basic_edits(image)
+        image = self._apply_zoom_to_image(image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 
