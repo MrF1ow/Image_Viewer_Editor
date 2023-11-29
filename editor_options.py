@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from tkinter import Frame, Button, Toplevel, Label, Button, Entry
+from tkinter import Frame, Button, Toplevel, Label, Button, Entry, NW
 from PIL import Image, ImageTk
 from image_properties import ImageProperties
 from advanced_editor_tools import AdvancedEditorTools
@@ -360,3 +360,4 @@ class EditorOptions(Frame):
             crop_ratio=self.master.master.image_properties.crop_ratio
         )
         return edit_instance
+
