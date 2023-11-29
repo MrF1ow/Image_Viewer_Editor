@@ -179,9 +179,13 @@ class ImageManager(Frame):
         self.canvas.delete("all")
 
     def _zoom(self, event):
-        if event.keysym == 'KP_Add' or event.delta == 120 :
+        if event.keysym == 'KP_Add' or event.delta == 120:
+            if self.scale_factor > 2.2:
+                return
             self.scale_factor *= 1.2
         elif event.keysym == 'minus' or event.delta == -120:
+            if self.scale_factor < 0.2:
+                return
             self.scale_factor *= 0.8
         self.display_image(self.master.master.processed_image, zoom=True)
 
