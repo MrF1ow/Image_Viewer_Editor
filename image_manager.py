@@ -50,9 +50,6 @@ class ImageManager(Frame):
         self.pan_reset_button = Button(
             self, text="Reset", width=button_width, height=button_height, command=self._reset)
         self.pan_reset_button.pack(anchor="sw", side="left", padx=5, pady=5)
-        
-    def _resize_canvas(self, event):
-        self.canvas.config(width=event.width, height=event.height)
 
     def display_image(self, img=None):
         self.clear_canvas()
@@ -320,25 +317,6 @@ class ImageManager(Frame):
             self.master.master.processed_image = self.master.master.original_image[y, x]
             self.display_image(self.master.master.processed_image)
 
-    def zoom_in(self, event):
-        if self.master.master.image_properties.zoom_percentage < 300:
-            self.master.master.image_properties.zoom_percentage += 10
-            self._apply_all_edits()
-
-    def zoom_out(self, event):
-        if self.master.master.image_properties.zoom_percentage > 10:
-            self.master.master.image_properties.zoom_percentage -= 10
-            self._apply_all_edits()
-
-    def _apply_zoom_to_image(self, img=None):
-        image = img
-        zoom_percentage = self.master.master.image_properties.zoom_percentage
-        if zoom_percentage != 100:
-            width = int(image.shape[1] * (zoom_percentage / 100))
-            height = int(image.shape[0] * (zoom_percentage / 100))
-            image = cv2.resize(image, (width, height))
-        return image
-
     def _apply_all_edits(self):
         image = self.master.master.original_image
         if self.master.master.advanced_tools is not None:
@@ -346,7 +324,6 @@ class ImageManager(Frame):
                 image)
         # self._end_crop()
         image = self.master.master.editor_options._apply_all_basic_edits(image)
-        image = self._apply_zoom_to_image(image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 
