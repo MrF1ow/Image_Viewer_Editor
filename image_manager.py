@@ -24,7 +24,7 @@ class ImageManager(Frame):
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
         self.canvas = Canvas(self, bg="black",  width=self.canvas_width, height=self.canvas_height, highlightthickness=0)
-        
+
         # center the image
         self.canvas.place(relx=0.5, rely=0.5, anchor="center")
         self.canvas.config(scrollregion=(0, 0, self.canvas_width, self.canvas_height))
@@ -54,8 +54,6 @@ class ImageManager(Frame):
 
         # Zoom functionality
         self.scale_factor = 1.0
-        self.canvas.bind("<MouseWheel>", self._zoom)
-        self.canvas.bind("<KeyRelease-KP_Add>", self._zoom)
 
     def display_image(self, img=None, zoom=False):
         self.clear_canvas()
@@ -351,4 +349,16 @@ class ImageManager(Frame):
             if self.scale_factor < 0.2:
                 return
             self.scale_factor *= 0.8
-        self.display_image(self.master.master.processed_image, zoom=True)
+        self.display_image(zoom=True)
+
+    def _zoom_in(self, event):
+        if self.scale_factor > 2.2:
+            return
+        self.scale_factor *= 1.2
+        self.display_image(zoom=True)
+
+    def _zoom_out(self, event):
+        if self.scale_factor < 0.2:
+            return
+        self.scale_factor *= 0.8
+        self.display_image(zoom=True)
