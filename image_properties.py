@@ -35,3 +35,7 @@ class ImageProperties:
     crop_end_y: float = 0
     crop_ratio: float = 0.0
 
+    pan_start_x = 0
+    pan_start_y = 0
+    pan_coord_x = 0
+    pan_coord_y = 0
