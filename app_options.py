@@ -100,10 +100,10 @@ class AppOptions(Frame):
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()
                 height, width, channels = image.shape
-                ImageProperties.original_image_height = height
-                ImageProperties.original_image_height = width
-                ImageProperties.altered_image_height = height
-                ImageProperties.altered_image_width = width
+                self.master.master.image_properties.original_image_height = height
+                self.master.master.image_properties.original_image_height = width
+                self.master.master.image_properties.altered_image_height = height
+                self.master.master.image_properties.altered_image_width = width
                 self.master.master.editor_options.original_image = image.copy()
 
                 self.master.master.image_viewer._apply_all_edits()
