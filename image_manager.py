@@ -359,18 +359,19 @@ class ImageManager(Frame):
         if self.scale_factor > 2.2:
             return
         self.scale_factor *= 1.2
-        self._zoom_canvas_adj(self, 1.2)
+        self._zoom_canvas_adj(self)
         self.display_image(zoom=True)
 
     def _zoom_out(self, event):
         if self.scale_factor < 0.2:
             return
         self.scale_factor *= 0.8
-        self._zoom_canvas_adj(self, 0.8)
+        self._zoom_canvas_adj(self)
         self.display_image(zoom=True)
         
-    def _zoom_canvas_adj(self, scale_factor):
+    def _zoom_canvas_adj(self):
         if self.scale_factor <= 1.0:
             return
-        self.canvas_width *= scale_factor
-        self.canvas_height *= scale_factor
+        self.canvas_width *= self.scale_factor
+        self.canvas_height *= self.scale_factor
+        self.canvas.place(relx=0.5, rely=0.5, anchor="center")
