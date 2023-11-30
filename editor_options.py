@@ -221,8 +221,6 @@ class EditorOptions(Frame):
 
     def _apply_resize_to_image(self, img=None):
         image = img
-        # print(f"In Resize Function Altered Height: {self.master.master.image_properties.altered_image_height}")
-        # print(f"In Resize Function Altered Width: {self.master.master.image_properties.altered_image_width}")
         resized_image = cv2.resize(image, (self.master.master.image_properties.altered_image_width,
                                            self.master.master.image_properties.altered_image_height))
 
@@ -249,8 +247,8 @@ class EditorOptions(Frame):
     def _clear_all_edits_to_image(self):
         self._reset_basic_image_properties()
         self._reset_advanced_image_properties()
-        self.history_arr.clear()
-        self.master.master.history_of_edits.update_history_list()
+        title = "Cleared All Edits"
+        self._insert_into_history(title)
         self.update_displayed_image()
 
     def _open_resize_window(self):
@@ -260,10 +258,9 @@ class EditorOptions(Frame):
                 width.get())
             self.master.master.image_properties.resize_image_height = int(
                 height.get())
-            title = f"Resize: {self.master.master.image_properties.altered_image_width}x{self.master.master.image_properties.altered_image_height}"
+            title = f"Resize: {self.master.master.image_properties.resize_image_width}x{self.master.master.image_properties.resize_image_height}"
 
-            self._insert_into_history(
-                title=title)
+            self._insert_into_history(title)
 
             self.update_displayed_image()
             resize_window.destroy()

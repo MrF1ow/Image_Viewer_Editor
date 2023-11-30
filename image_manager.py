@@ -46,7 +46,7 @@ class ImageManager(Frame):
         self.master.master.bind("<Down>", self._pan_down)
 
         # Canvas reset button for zoom and pan
-        button_width = 2
+        button_width = 5
         button_height = 2
         self.pan_reset_button = Button(
             self, text="Reset", width=button_width, height=button_height, command=self._reset)
@@ -288,13 +288,13 @@ class ImageManager(Frame):
             end_y = int(self.master.master.image_properties.crop_start_y *
                         self.master.master.image_properties.crop_ratio)
 
-        # x = slice(start_x, end_x, 1)
-        # y = slice(start_y, end_y, 1)
+        x = slice(start_x, end_x, 1)
+        y = slice(start_y, end_y, 1)
 
         # return image[y, x]
 
-        # self.master.master.processed_image = self.master.master.processed_image[y, x]
-        # self.display_image(self.master.master.processed_image)
+        self.master.master.processed_image = self.master.master.processed_image[y, x]
+        self.display_image(self.master.master.processed_image)
 
     def _finalize_crop(self, img=None, start_x=None, start_y=None, end_x=None, end_y=None):
         image = img

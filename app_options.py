@@ -10,7 +10,6 @@ class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
 
-    
         self.file_options_button = Button(
             self, text="File", command=self._show_file_menu)
         self.file_options_button.pack(side=LEFT)
@@ -27,10 +26,12 @@ class AppOptions(Frame):
         self.edit_options_button.pack(side=LEFT)
 
         self.edit_menu = Menu(self, tearoff=0)
-        self.edit_menu.add_command(label="Batch Processing", command=self.batch_processing_button_click)
+        self.edit_menu.add_command(
+            label="Batch Processing", command=self.batch_processing_button_click)
 
         # SETTINGS
-        self.settings = Settings(master=master) # Creating the instance of Settings. 
+        # Creating the instance of Settings.
+        self.settings = Settings(master=master)
         self.settings_menu_button = Button(
             self, text="Settings", command=self._show_settings_menu)
         self.settings_menu_button.pack(side="left")
@@ -45,8 +46,7 @@ class AppOptions(Frame):
 
     def _show_settings_menu(self, event=None):
         self.settings.toggle_visibility()
-        
-        
+
     def new_button_click(self, event=None):
         fm = FileManager()
         fm.get_file()
@@ -96,7 +96,7 @@ class AppOptions(Frame):
             for i in fm.batch_files:
                 self.master.file_location = i
                 image = cv2.imread(i)
-                
+
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()
                 height, width, channels = image.shape
@@ -114,9 +114,9 @@ class AppOptions(Frame):
 
                 if fm.file is not None:
                     fm.save_file(self.master.master.processed_image)
-            
 
     # Allows the user to set the current filters on the image as the default fitlers applied to all images.
+
     def _set_current_filters_as_default(self):
         # call a function that applys all the current self.master.master.image_properties values to a config file
         print("Default values updates")
