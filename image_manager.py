@@ -21,6 +21,8 @@ class ImageManager(Frame):
         self.scale_factor = 1.0
         self.canvas_width = 1440
         self.canvas_height = 810
+        self.original_image_width = 1440
+        self.original_image_height = 810
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
         self.canvas = Canvas(self, bg="black",  width=self.canvas_width, height=self.canvas_height, highlightthickness=0)
@@ -75,7 +77,7 @@ class ImageManager(Frame):
         new_width = width
 
         # need to check if the image size is bigger than the frame
-        if height > self.winfo_height() or width > self.winfo_width():
+        if height > self.original_image_width or width > self.original_image_height:
             if ratio < 1:
                 new_width = self.winfo_width()
                 new_ratio = new_width / width
@@ -209,6 +211,8 @@ class ImageManager(Frame):
         self.master.master.image_properties.pan_coord_y = 0
         self.start_x = 0
         self.start_y = 0
+        self.scale_factor = 1.0
+        self.display_image(zoom=True)
 
     def _active_crop_mode(self, event):
         self.canvas.unbind("<ButtonPress-1>")
@@ -355,10 +359,18 @@ class ImageManager(Frame):
         if self.scale_factor > 2.2:
             return
         self.scale_factor *= 1.2
+        self._zoom_canvas_adj(self, 1.2)
         self.display_image(zoom=True)
 
     def _zoom_out(self, event):
         if self.scale_factor < 0.2:
             return
         self.scale_factor *= 0.8
+        self._zoom_canvas_adj(self, 0.8)
         self.display_image(zoom=True)
+        
+    def _zoom_canvas_adj(self, scale_factor):
+        if self.scale_factor <= 1.0:
+            return
+        self.canvas_width *= scale_factor
+        self.canvas_height *= scale_factor
