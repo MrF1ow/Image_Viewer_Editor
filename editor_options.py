@@ -252,7 +252,7 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _open_resize_window(self):
-        MAXIMUM_SIZE = 8000
+        MAXIMUM_SIZE = 7680
         MINIMUM_SIZE = 1
         
         def _in_range(value):
