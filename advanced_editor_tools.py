@@ -240,17 +240,35 @@ class AdvancedEditorTools(Toplevel):
 
     def _preview_edits_on_image(self, event):
         if self.displaying_processed_image:
+            self._reset_advanced_image_properties()
+            self.update_displayed_image()
+            self.displaying_processed_image = False
+            print("\n\nTurning off\n\n")
+            return
+
+            print("\n\ntoggle on\n\n")
             self.master.master.image_properties = self.pre_image_properties
-            print(f"Pocessed Image Properties: {self.pre_image_properties}")
+            print(f"Processed Image Properties: {self.pre_image_properties}")
             print(f"Image Properties Main: {self.master.master.image_properties}")
             self.update_displayed_image()
-            print(f"Pocessed Image Properties: {self.pre_image_properties}")
+            print(f"Processed Image Properties: {self.pre_image_properties}")
             print(f"Image Properties Main: {self.master.master.image_properties}")
             self.displaying_processed_image = False
         else:
-            self.master.master.image_properties = self.current_image_properties
+            self._change_blur_value(1)
+            self._change_brightness_value(1)
+            self._change_contrast_value(1)
+            self._change_hue_value(1)
+            self._change_saturation_value(1)
+            self.master.master.image_properties.brightness = self.current_image_properties.brightness
+            self.master.master.image_properties.contrast = self.current_image_properties.contrast
+            self.master.master.image_properties.saturation = self.current_image_properties.saturation
+            self.master.master.image_properties.blur = self.current_image_properties.blur
+            self.master.master.image_properties.hue = self.current_image_properties.hue
+            self._apply_all_advanced_edits()
             self.update_displayed_image()
             self.displaying_processed_image = True
+            print("\n\nTurning on\n\n")
 
     def _cancel_edits_to_image(self, event):
         self._reset_advanced_image_properties()
@@ -291,7 +309,10 @@ class AdvancedEditorTools(Toplevel):
         return image
 
     def update_displayed_image(self):
-        self.master.master.image_properties = self.current_image_properties
+        if self.displaying_processed_image:
+            self.master.master.image_properties = self.current_image_properties
+        else:
+            self.master.master.image_properties = self.pre_image_properties
         self.master.master.image_viewer._apply_all_edits()
 
     def _check_undo_performed(self):
