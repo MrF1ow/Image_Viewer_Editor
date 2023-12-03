@@ -252,18 +252,30 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _open_resize_window(self):
-
+        MAXIMUM_SIZE = 8000
+        MINIMUM_SIZE = 1
+        
+        def _in_range(value):
+            if MINIMUM_SIZE <= value <= MAXIMUM_SIZE:
+                return True
+            return False
+        
         def _change_resize_values():
-            self.master.master.image_properties.resize_image_width = int(
-                width.get())
-            self.master.master.image_properties.resize_image_height = int(
-                height.get())
-            title = f"Resize: {self.master.master.image_properties.resize_image_width}x{self.master.master.image_properties.resize_image_height}"
+            image_was_resized = False
+            if _in_range(int(width.get())):  
+                self.master.master.image_properties.resize_image_width = int(width.get())
+                image_was_resized = True
+            if _in_range(int(height.get())): 
+                self.master.master.image_properties.resize_image_height = int(height.get())
+                image_was_resized = True
+                
+            if image_was_resized:
+                title = f"Resize: {self.master.master.image_properties.resize_image_width}x{self.master.master.image_properties.resize_image_height}"
 
-            self._insert_into_history(title)
+                self._insert_into_history(title)
 
-            self.update_displayed_image()
-            resize_window.destroy()
+                self.update_displayed_image()
+                resize_window.destroy()
 
         resize_window = Toplevel(self)
         resize_window.title("Resize Image")
@@ -278,6 +290,7 @@ class EditorOptions(Frame):
         height.insert(
             0, str(self.master.master.image_properties.altered_image_height))
         height.pack()
+        
         Button(resize_window, text="Apply Resize",
                command=_change_resize_values).pack()
 
