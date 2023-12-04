@@ -17,6 +17,8 @@ class EditorOptions(Frame):
 
         self.history_arr = self.master.master.history
 
+        self.resize = False
+
         # Create buttons with image icons
         self.advanced_edits_button = Button(
             self, text="Advanced", width=button_width, height=button_height, command=self._open_advanced_edits)
@@ -261,6 +263,12 @@ class EditorOptions(Frame):
             return False
         
         def _change_resize_values():
+            self.resize = True
+            self.master.master.image_properties.resize_image_width = int(
+                width.get())
+            self.master.master.image_properties.resize_image_height = int(
+                height.get())
+            title = f"Resize: {self.master.master.image_properties.resize_image_width}x{self.master.master.image_properties.resize_image_height}"
             image_was_resized = False
             if _in_range(int(width.get())):  
                 self.master.master.image_properties.resize_image_width = int(width.get())
@@ -307,7 +315,8 @@ class EditorOptions(Frame):
     def _apply_all_basic_edits(self, img=None):
         image = img
         image = self._apply_rotation_to_image(image)
-        image = self._apply_resize_to_image(image)
+        if self.resize is True:
+            image = self._apply_resize_to_image(image)
         image = self._apply_grayscale_to_image(image)
         image = self._apply_horizontal_flip_image(image)
         image = self._apply_vertical_flip_image(image)
