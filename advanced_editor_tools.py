@@ -173,8 +173,10 @@ class AdvancedEditorTools(Toplevel):
         image = img
         if self.master.master.advanced_tools == None:
             blur_value = self.master.master.image_properties.blur
-        else:
+        elif (self.displaying_processed_image):
             blur_value = self.current_image_properties.blur
+        else:
+            blur_value = self.pre_image_properties.blur
         # this is how distorted each pixel will become
         kernel_size = (blur_value, blur_value)
         # the kernel size had to be a positive, ODD number
@@ -188,8 +190,10 @@ class AdvancedEditorTools(Toplevel):
         image = img
         if self.master.master.advanced_tools == None:
             hue_value = self.master.master.image_properties.hue
-        else:
+        elif (self.displaying_processed_image):
             hue_value = self.current_image_properties.hue
+        else:
+            hue_value = self.pre_image_properties.hue
         # Convert image to HSV
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         # Change the hue channel
@@ -204,8 +208,10 @@ class AdvancedEditorTools(Toplevel):
         image = img
         if self.master.master.advanced_tools == None:
             saturation_value = self.master.master.image_properties.saturation
-        else:
+        elif (self.displaying_processed_image):
             saturation_value = self.current_image_properties.saturation
+        else:
+            saturation_value = self.pre_image_properties.saturation
         saturation_factor = 1 + saturation_value
         # Convert image to HSV
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -222,9 +228,12 @@ class AdvancedEditorTools(Toplevel):
         if self.master.master.advanced_tools == None:
             brightness_value = self.master.master.image_properties.brightness
             contrast_value = self.master.master.image_properties.contrast
-        else:
+        elif (self.displaying_processed_image):
             brightness_value = self.current_image_properties.brightness
             contrast_value = self.current_image_properties.contrast
+        else:
+            brightness_value = self.pre_image_properties.brightness
+            contrast_value = self.pre_image_properties.contrast
 
         brightness_factor = self._convert_brightness(brightness_value)
         contrast_factor = self._convert_contrast(contrast_value)
@@ -239,36 +248,15 @@ class AdvancedEditorTools(Toplevel):
         self.destroy()  # closes the AdvancedEditorTools (destructor pretty much)
 
     def _preview_edits_on_image(self, event):
+        #print("\n\n\nHI\n\n\n")
+        #print(self.displaying_processed_image)
         if self.displaying_processed_image:
-            self._reset_advanced_image_properties()
-            self.update_displayed_image()
             self.displaying_processed_image = False
-            print("\n\nTurning off\n\n")
-            return
-
-            print("\n\ntoggle on\n\n")
-            self.master.master.image_properties = self.pre_image_properties
-            print(f"Processed Image Properties: {self.pre_image_properties}")
-            print(f"Image Properties Main: {self.master.master.image_properties}")
             self.update_displayed_image()
-            print(f"Processed Image Properties: {self.pre_image_properties}")
-            print(f"Image Properties Main: {self.master.master.image_properties}")
-            self.displaying_processed_image = False
         else:
-            self._change_blur_value(1)
-            self._change_brightness_value(1)
-            self._change_contrast_value(1)
-            self._change_hue_value(1)
-            self._change_saturation_value(1)
-            self.master.master.image_properties.brightness = self.current_image_properties.brightness
-            self.master.master.image_properties.contrast = self.current_image_properties.contrast
-            self.master.master.image_properties.saturation = self.current_image_properties.saturation
-            self.master.master.image_properties.blur = self.current_image_properties.blur
-            self.master.master.image_properties.hue = self.current_image_properties.hue
-            self._apply_all_advanced_edits()
-            self.update_displayed_image()
             self.displaying_processed_image = True
-            print("\n\nTurning on\n\n")
+            self.update_displayed_image()
+        #print(self.displaying_processed_image)
 
     def _cancel_edits_to_image(self, event):
         self._reset_advanced_image_properties()
@@ -309,6 +297,10 @@ class AdvancedEditorTools(Toplevel):
         return image
 
     def update_displayed_image(self):
+        if self.displaying_processed_image:
+            self.master.master.image_properties = self.current_image_properties
+        else:
+            self.master.master.image_properties = self.pre_image_properties
         if self.displaying_processed_image:
             self.master.master.image_properties = self.current_image_properties
         else:
