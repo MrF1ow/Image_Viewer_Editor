@@ -114,6 +114,10 @@ class AppOptions(Frame):
 
                 if fm.file is not None:
                     fm.save_file(self.master.master.processed_image)
+        
+        # Reset image properties so same edits cant be reapplied if user decides to batch process again
+        self.master.master.editor_options._reset_basic_image_properties()
+        self.master.master.editor_options._reset_advanced_image_properties()
 
     # Allows the user to set the current filters on the image as the default fitlers applied to all images.
 
