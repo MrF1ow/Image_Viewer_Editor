@@ -214,6 +214,10 @@ class ImageManager(Frame):
         self.scale_factor = 1.0
         self.display_image(zoom=True)
 
+        self.canvas_width = self.original_image_width
+        self.canvas_height = self.original_image_height
+        self.canvas.config(width=self.canvas_width, height=self.canvas_height)
+
     def _active_crop_mode(self, event):
         self.canvas.unbind("<ButtonPress-1>")
         self.canvas.unbind("<B1-Motion>")
@@ -353,25 +357,26 @@ class ImageManager(Frame):
             if self.scale_factor < 0.2:
                 return
             self.scale_factor *= 0.8
+        self._zoom_canvas_adj()
         self.display_image(zoom=True)
 
     def _zoom_in(self, event):
         if self.scale_factor > 2.2:
             return
         self.scale_factor *= 1.2
-        self._zoom_canvas_adj(self)
+        self._zoom_canvas_adj()
         self.display_image(zoom=True)
 
     def _zoom_out(self, event):
         if self.scale_factor < 0.2:
             return
         self.scale_factor *= 0.8
-        self._zoom_canvas_adj(self)
+        self._zoom_canvas_adj()
         self.display_image(zoom=True)
-        
+
     def _zoom_canvas_adj(self):
         if self.scale_factor <= 1.0:
             return
-        self.canvas_width *= self.scale_factor
-        self.canvas_height *= self.scale_factor
-        self.canvas.place(relx=0.5, rely=0.5, anchor="center")
+        self.canvas_width = self.original_image_width * self.scale_factor
+        self.canvas_height = self.original_image_height * self.scale_factor
+        self.canvas.config(width=self.canvas_width, height=self.canvas_height)
