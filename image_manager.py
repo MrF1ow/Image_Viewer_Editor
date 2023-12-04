@@ -209,17 +209,22 @@ class ImageManager(Frame):
 
     #Resets the pan coordinates
     def _reset(self):
-        self.canvas.move("all", -self.master.master.image_properties.pan_coord_x, -self.master.master.image_properties.pan_coord_y)
-        self.master.master.image_properties.pan_coord_x = 0
-        self.master.master.image_properties.pan_coord_y = 0
-        self.start_x = 0
-        self.start_y = 0
-        self.scale_factor = 1.0
-        self.display_image()
+        i = 0
+        while i < 2:
+            self.start_x = 0
+            self.start_y = 0
+            self.scale_factor = 1.0
+            self.display_image()
 
-        self.canvas_width = self.original_image_width
-        self.canvas_height = self.original_image_height
-        self.canvas.config(width=self.canvas_width, height=self.canvas_height)
+            self.canvas_width = self.original_image_width
+            self.canvas_height = self.original_image_height
+            self.canvas.config(width=self.canvas_width, height=self.canvas_height)
+            
+            self.canvas.move("all", -self.master.master.image_properties.pan_coord_x, -self.master.master.image_properties.pan_coord_y)
+            self.master.master.image_properties.pan_coord_x = 0
+            self.master.master.image_properties.pan_coord_y = 0
+            i += 1
+        
 
     def _active_crop_mode(self, event):
         self.canvas.unbind("<ButtonPress-1>")
@@ -375,6 +380,7 @@ class ImageManager(Frame):
         if self.scale_factor > 2.2:
             return
         self.scale_factor *= 1.2
+        self._set_zoom_bool()
         self._zoom_canvas_adj()
         self.display_image()
 
@@ -382,6 +388,7 @@ class ImageManager(Frame):
         if self.scale_factor < 0.2:
             return
         self.scale_factor *= 0.8
+        self._set_zoom_bool()
         self._zoom_canvas_adj()
         self.display_image()
 
