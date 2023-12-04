@@ -57,13 +57,15 @@ class ImageManager(Frame):
         # Zoom functionality
         self.scale_factor = 1.0
 
-    def display_image(self, img=None, zoom=False):
+    def display_image(self, img=None):
         self.clear_canvas()
         if img is None:
             # this uses the processed image if none is given
             image = self.master.master.processed_image.copy()
         else:
             image = img
+
+        zoom = self.master.master.image_properties.is_zoomed
 
         # use openCV to convert the image from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -86,6 +88,7 @@ class ImageManager(Frame):
                 new_height = self.winfo_height()
                 new_width = int(math.floor(new_height * (width / height)))
 
+        print(f"scale factor: {self.scale_factor}")
         # For zoom functionality
         if zoom:
             size = int(new_width * self.scale_factor), int(new_height * self.scale_factor)
@@ -212,7 +215,7 @@ class ImageManager(Frame):
         self.start_x = 0
         self.start_y = 0
         self.scale_factor = 1.0
-        self.display_image(zoom=True)
+        self.display_image()
 
         self.canvas_width = self.original_image_width
         self.canvas_height = self.original_image_height
@@ -348,31 +351,39 @@ class ImageManager(Frame):
     def clear_canvas(self):
         self.canvas.delete("all")
 
+    def _set_zoom_bool(self):
+        if self.scale_factor == 1.0:
+            self.master.master.image_properties.is_zoomed = False
+        else:
+            self.master.master.image_properties.is_zoomed = True
+
     def _zoom(self, event):
         if event.keysym == 'KP_Add' or event.delta == 120:
             if self.scale_factor > 2.2:
                 return
             self.scale_factor *= 1.2
+            self._set_zoom_bool()
         elif event.keysym == 'minus' or event.delta == -120:
             if self.scale_factor < 0.2:
                 return
             self.scale_factor *= 0.8
+            self._set_zoom_bool()
         self._zoom_canvas_adj()
-        self.display_image(zoom=True)
+        self.display_image()
 
     def _zoom_in(self, event):
         if self.scale_factor > 2.2:
             return
         self.scale_factor *= 1.2
         self._zoom_canvas_adj()
-        self.display_image(zoom=True)
+        self.display_image()
 
     def _zoom_out(self, event):
         if self.scale_factor < 0.2:
             return
         self.scale_factor *= 0.8
         self._zoom_canvas_adj()
-        self.display_image(zoom=True)
+        self.display_image()
 
     def _zoom_canvas_adj(self):
         if self.scale_factor <= 1.0:
