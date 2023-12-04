@@ -1,4 +1,4 @@
-from tkinter import Frame, Button, LEFT, Menu, Label, Scale, Toplevel
+from tkinter import Frame, Button, LEFT, DISABLED, Menu, Label, Scale, Toplevel
 from file_manager import FileManager
 from image_properties import ImageProperties
 from settings import Settings
@@ -35,6 +35,176 @@ class AppOptions(Frame):
         self.settings_menu_button = Button(
             self, text="Settings", command=self._show_settings_menu)
         self.settings_menu_button.pack(side="left")
+        
+        # HELP MENU
+        self.HELP_MENU_SEPERATOR_STRING = "-seperate-"
+        self.help_menu_items = [
+            "Import Image",
+            "Export Image",
+            "Undo Edit",
+            "Redo Edit",
+            "Batch Processing",
+            "Zoom",
+            "Pan", 
+            "Save File",
+            "History Selection",
+            "Access Meta Data",
+            self.HELP_MENU_SEPERATOR_STRING,
+            "Advanced Edits",
+            "Brightness",
+            "Contrast", 
+            "Blur", 
+            "Hue", 
+            "Saturation",
+            self.HELP_MENU_SEPERATOR_STRING,
+            "Basic Edits",
+            "Horizontal Flip",
+            "Vertical Flip", 
+            "Rotate", 
+            "Resize", 
+            "Grayscale", 
+            "Sepia",
+            "Crop",
+            self.HELP_MENU_SEPERATOR_STRING,
+            "Clear All"
+        ]
+        
+        self.dictionary_of_help_menu_items_and_help_information = {
+            "Import Image" : 
+                """To import an image, navigate to the homepage and click
+                on "File" -> "New." Select your desired image file.
+                Supported formats include .png, .jpeg (.jpg), .gif, .bmp,
+                and .tiff.""",
+            
+            "Export Image" : 
+                """To export an image, go to the homepage, click on
+                "File" -> "Save As," enter the filename, choose the
+                destination, and select the file type. Supported formats
+                include .png, .jpeg (.jpg), .gif, .bmp, and .tiff.""",
+
+            "Undo Edit" : 
+                """Undo edits by clicking the undo button on the homepage
+                or using the keyboard shortcut Ctrl+Z.""",
+            
+            "Redo Edit" : 
+                """Redo edits by clicking the redo button on the homepage
+                or using the keyboard shortcut Shift+Ctrl+Z.""",
+            
+            "Batch Processing" : 
+                """Initiate batch processing by selecting "Edit" -> "Batch Processing"
+                and choosing the files you want to apply the edits to.""",
+            
+            "Zoom" : 
+                """Effortlessly zoom in and out using your trackpad or by
+                holding down the 'Ctrl' key and pressing '+' or '-'""",
+            
+            "Pan" : 
+                """Navigate across your image seamlessly by clicking and
+                dragging your mouse. To move around the image, click, hold,
+                and drag to explore different areas. Release the mouse button
+                when you've reached the desired view.""",
+            
+            "Crop" : 
+                """To crop an image, select the 'Crop' option, click, and
+                drag across the desired area. Release the mouse button to
+                confirm the crop.""",
+            
+            "Brightness" : 
+                """Adjust brightness by selecting "Advanced" on the homepage
+                and using the brightness slider (range: [0, 100]). Click
+                apply when finished.""",
+            
+            "Contrast" : 
+                """Adjust contrast by selecting "Advanced" on the homepage
+                and using the contrast slider (range: [0, 100]). Click apply
+                when finished.""", 
+            
+            "Blur" : 
+                """Adjust blur by selecting "Advanced" on the homepage and
+                using the blur slider (range: [0, 100]). Click apply when
+                finished.""", 
+            
+            "Hue" : 
+                """Adjust hue by selecting "Advanced" on the homepage and
+                using the hue slider (range: [-100, 100]). Click apply when
+                finished.""", 
+            
+            "Saturation" : 
+                """Adjust saturation by selecting "Advanced" on the homepage
+                and using the saturation slider (range: [-100, 100]). Click
+                apply when finished.""",
+            
+            "Horizontal Flip" : 
+                """Apply a horizontal flip by selecting "Horz Flip" on the
+                homepage, resulting in a mirrored version along the vertical
+                axis.""",
+            
+            "Vertical Flip" : 
+                """Apply a vertical flip by selecting "Vert Flip" on the
+                homepage, resulting in a mirrored version along the
+                horizontal axis.""", 
+
+            "Rotate" : 
+                """Rotate the image 90° counterclockwise by selecting
+                "Rotate" on the homepage.""", 
+            
+            "Resize" : 
+                """Resize an image by selecting "Resize" on the homepage
+                and entering width and height values within the valid
+                range [1, 7680].""", 
+            
+            "Grayscale" :  
+                """Apply grayscale by selecting "Grayscale" on the
+                homepage, converting the image to shades of gray.""", 
+            
+            "Sepia" : 
+                """Apply sepia by selecting "Sepia" on the homepage,
+                imparting a warm, brownish tone for a vintage look.""", 
+            
+            "Clear All" : 
+                """Clear all applied edits by selecting "Clear All"
+                on the homepage. The history log remains for future
+                reference.""",
+                            
+            "Save File" : 
+                """Save the image by clicking "File" -> "Save" on the
+                homepage, saving it to your operating system's file
+                manager.""",
+            
+            "History Selection" : 
+                """Access the history log on the homepage's right panel.
+                Click on a history item to return to a specific point
+                in your image's editing history. Items are labeled with
+                the edit and time.""",
+            
+            "Access Meta Data" : """"""
+        }
+        self.help_menu = Menu(self,tearoff=0) 
+        self._add_help_menu_items()
+        self.help_button = Button(self, text="Help", command=self._show_help_menu)
+        self.help_button.pack(side="left")
+
+
+    def _add_help_menu_items(self):
+        self.help_menu.add_cascade(label="User Guide", font=("Helvetica", 20, "bold"), state=DISABLED) # Creating meny title
+        self.help_menu.add_separator()
+        
+        for element in self.help_menu_items: # Creating menu items and submenus 
+            if element == self.HELP_MENU_SEPERATOR_STRING: # This creates a divider line.
+                self.help_menu.add_separator()
+            elif element not in self.dictionary_of_help_menu_items_and_help_information: # This means there is no sub menu. It is just text. Meaning, this is a header
+                self.help_menu.add_cascade(label=element, font=("Helvectica", 16), state=DISABLED)
+            else: # Create submenu and add it to menu item
+                submenu = Menu(self, tearoff=0)
+                submenu.add_command(label=self.dictionary_of_help_menu_items_and_help_information.get(element))
+                self.help_menu.add_cascade(label=element, menu=submenu)
+               
+                
+    def _show_help_menu(self, event=None):
+        x = self.help_button.winfo_rootx() + 10
+        y_top = self.help_button.winfo_rooty()
+        y_bot = y_top + self.help_button.winfo_height() + 5
+        self.help_menu.post(x=x, y=y_bot)
 
     def _show_file_menu(self, event=None):
         self.file_menu.post(self.file_options_button.winfo_rootx(
