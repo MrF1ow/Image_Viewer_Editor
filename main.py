@@ -79,11 +79,8 @@ class Main(tk.Tk):
 
     # def _on_closing(self):
     #     if not self.is_saved:
-    #         save_prompt = tk.Toplevel(self)
+    #         save_prompt = Toplevel(self)
     #         save_prompt.title("Save Image")
-    #         save_prompt.geometry("300x100")
-    #         save_prompt.resizable(False, False)
-    #         save_prompt.configure(bg="#6b6b6b")
 
     #         save_button = tk.Button(save_prompt, text="Save", command=self._save_image)
     #         save_button.pack()

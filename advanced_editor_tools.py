@@ -10,9 +10,6 @@ class AdvancedEditorTools(Toplevel):
     def __init__(self, master=None):
         Toplevel.__init__(self, master=master)
 
-        self.original_image = self.master.master.original_image
-        self.processing_image = self.master.master.processed_image
-
         self.pre_image_properties = None
         self.current_image_properties = None
 
@@ -89,6 +86,7 @@ class AdvancedEditorTools(Toplevel):
             is_grayscaled=self.master.master.image_properties.is_grayscaled,
             is_sepia=self.master.master.image_properties.is_sepia,
             is_cropped=self.master.master.image_properties.is_cropped,
+            is_zoomed=self.master.master.image_properties.is_zoomed,
             original_image_height=self.master.master.image_properties.original_image_height,
             original_image_width=self.master.master.image_properties.original_image_width,
             altered_image_height=self.master.master.image_properties.altered_image_height,
@@ -105,7 +103,11 @@ class AdvancedEditorTools(Toplevel):
             crop_start_y=self.master.master.image_properties.crop_start_y,
             crop_end_x=self.master.master.image_properties.crop_end_x,
             crop_end_y=self.master.master.image_properties.crop_end_y,
-            crop_ratio=self.master.master.image_properties.crop_ratio
+            crop_ratio=self.master.master.image_properties.crop_ratio,
+            pan_start_x=self.master.master.image_properties.pan_start_x,
+            pan_start_y=self.master.master.image_properties.pan_start_y,
+            pan_coord_x=self.master.master.image_properties.pan_coord_x,
+            pan_coord_y=self.master.master.image_properties.pan_coord_y
         )
 
     def _set_current_image_properties(self):
@@ -117,6 +119,7 @@ class AdvancedEditorTools(Toplevel):
             is_grayscaled=self.master.master.image_properties.is_grayscaled,
             is_sepia=self.master.master.image_properties.is_sepia,
             is_cropped=self.master.master.image_properties.is_cropped,
+            is_zoomed=self.master.master.image_properties.is_zoomed,
             original_image_height=self.master.master.image_properties.original_image_height,
             original_image_width=self.master.master.image_properties.original_image_width,
             altered_image_height=self.master.master.image_properties.altered_image_height,
@@ -133,7 +136,11 @@ class AdvancedEditorTools(Toplevel):
             crop_start_y=self.master.master.image_properties.crop_start_y,
             crop_end_x=self.master.master.image_properties.crop_end_x,
             crop_end_y=self.master.master.image_properties.crop_end_y,
-            crop_ratio=self.master.master.image_properties.crop_ratio
+            crop_ratio=self.master.master.image_properties.crop_ratio,
+            pan_start_x=self.master.master.image_properties.pan_start_x,
+            pan_start_y=self.master.master.image_properties.pan_start_y,
+            pan_coord_x=self.master.master.image_properties.pan_coord_x,
+            pan_coord_y=self.master.master.image_properties.pan_coord_y
         )
 
     def _change_blur_value(self, event):
