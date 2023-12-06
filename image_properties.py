@@ -11,6 +11,7 @@ class ImageProperties:
     is_sepia: bool=False
     is_cropped: bool=False
     is_rotated: bool=False
+    is_zoomed: bool=False
 
     original_image_width: int=0
     original_image_height: int=0

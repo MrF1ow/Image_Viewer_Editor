@@ -22,6 +22,8 @@ class ImageManager(Frame):
         self.scale_factor = 1.0
         self.canvas_width = 1440
         self.canvas_height = 810
+        self.original_image_width = 1440
+        self.original_image_height = 810
 
         # inside of the frame, make a canvas for image using the 'Canvas' widget (look it up)
         self.canvas = Canvas(self, bg="black",  width=self.canvas_width, height=self.canvas_height, highlightthickness=0)
@@ -56,13 +58,15 @@ class ImageManager(Frame):
         # Zoom functionality
         self.scale_factor = 1.0
 
-    def display_image(self, img=None, zoom=False):
+    def display_image(self, img=None):
         self.clear_canvas()
         if img is None:
             # this uses the processed image if none is given
             image = self.master.master.processed_image.copy()
         else:
             image = img
+
+        zoom = self.master.master.image_properties.is_zoomed
 
         # use openCV to convert the image from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -76,7 +80,7 @@ class ImageManager(Frame):
         new_width = width
 
         # need to check if the image size is bigger than the frame
-        if height > self.winfo_height() or width > self.winfo_width():
+        if height > self.original_image_width or width > self.original_image_height:
             if ratio < 1:
                 new_width = self.winfo_width()
                 new_ratio = new_width / width
@@ -85,6 +89,7 @@ class ImageManager(Frame):
                 new_height = self.winfo_height()
                 new_width = int(math.floor(new_height * (width / height)))
 
+        print(f"scale factor: {self.scale_factor}")
         # For zoom functionality
         if zoom:
             size = int(new_width * self.scale_factor), int(new_height * self.scale_factor)
@@ -205,11 +210,22 @@ class ImageManager(Frame):
 
     #Resets the pan coordinates
     def _reset(self):
-        self.canvas.move("all", -self.master.master.image_properties.pan_coord_x, -self.master.master.image_properties.pan_coord_y)
-        self.master.master.image_properties.pan_coord_x = 0
-        self.master.master.image_properties.pan_coord_y = 0
-        self.start_x = 0
-        self.start_y = 0
+        i = 0
+        while i < 2:
+            self.start_x = 0
+            self.start_y = 0
+            self.scale_factor = 1.0
+            self.display_image()
+
+            self.canvas_width = self.original_image_width
+            self.canvas_height = self.original_image_height
+            self.canvas.config(width=self.canvas_width, height=self.canvas_height)
+            
+            self.canvas.move("all", -self.master.master.image_properties.pan_coord_x, -self.master.master.image_properties.pan_coord_y)
+            self.master.master.image_properties.pan_coord_x = 0
+            self.master.master.image_properties.pan_coord_y = 0
+            i += 1
+        
 
     def _active_crop_mode(self, event):
         self.canvas.unbind("<ButtonPress-1>")
@@ -338,25 +354,45 @@ class ImageManager(Frame):
     def clear_canvas(self):
         self.canvas.delete("all")
 
+    def _set_zoom_bool(self):
+        if self.scale_factor == 1.0:
+            self.master.master.image_properties.is_zoomed = False
+        else:
+            self.master.master.image_properties.is_zoomed = True
+
     def _zoom(self, event):
         if event.keysym == 'KP_Add' or event.delta == 120:
             if self.scale_factor > 2.2:
                 return
             self.scale_factor *= 1.2
+            self._set_zoom_bool()
         elif event.keysym == 'minus' or event.delta == -120:
             if self.scale_factor < 0.2:
                 return
             self.scale_factor *= 0.8
-        self.display_image(zoom=True)
+            self._set_zoom_bool()
+        self._zoom_canvas_adj()
+        self.display_image()
 
     def _zoom_in(self, event):
         if self.scale_factor > 2.2:
             return
         self.scale_factor *= 1.2
-        self.display_image(zoom=True)
+        self._set_zoom_bool()
+        self._zoom_canvas_adj()
+        self.display_image()
 
     def _zoom_out(self, event):
         if self.scale_factor < 0.2:
             return
         self.scale_factor *= 0.8
-        self.display_image(zoom=True)
+        self._set_zoom_bool()
+        self._zoom_canvas_adj()
+        self.display_image()
+
+    def _zoom_canvas_adj(self):
+        if self.scale_factor <= 1.0:
+            return
+        self.canvas_width = self.original_image_width * self.scale_factor
+        self.canvas_height = self.original_image_height * self.scale_factor
+        self.canvas.config(width=self.canvas_width, height=self.canvas_height)
