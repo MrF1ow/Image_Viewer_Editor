@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import cv2
 import math
 from tkinter import Frame, Button, Toplevel, Label, Button, Entry
+from edit_functions import AllEditFunctions
 
 
 class ImageManager(Frame):
@@ -329,11 +330,8 @@ class ImageManager(Frame):
 
     def _apply_all_edits(self):
         image = self.master.master.original_image
-        if self.master.master.advanced_tools is not None:
-            image = self.master.master.advanced_tools._apply_all_advanced_edits(
-                image)
-        # self._end_crop()
-        image = self.master.master.editor_options._apply_all_basic_edits(image)
+        image = AllEditFunctions._apply_all_basic_edits(self.master.master.image_properties, image)
+        image = AllEditFunctions._apply_all_advanced_edits(self.master.master.image_properties, image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
 

@@ -1,4 +1,4 @@
-from tkinter import Frame, Button, END, Y, LEFT, RIGHT, BOTH, YES, BOTTOM, X, TOP, CENTER
+from tkinter import Frame, Button, END, LEFT, BOTH, YES, BOTTOM, X, TOP, CENTER, font as tkFont
 from tkinter import ttk
 
 class History(Frame):
@@ -125,3 +125,9 @@ class History(Frame):
 
     def update_displayed_image(self):
         self.master.master.image_viewer._apply_all_edits()
+
+    def _clear_history(self):
+        self.history_arr.clear()
+        self.master.master.history = self.history_arr
+        self._set_indices()
+        self.update_history_list()

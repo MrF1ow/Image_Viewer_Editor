@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Toplevel, Frame, Button
 from app_options import AppOptions  # tried to make a button
 from image_manager import ImageManager
 from editor_options import EditorOptions
@@ -22,10 +22,14 @@ class Main(tk.Tk):
         self.history = []
         self.item_clicked = False
 
+        self.is_saved = False
+
         self.configure(bg="#6b6b6b")
 
         # this just sets the title of the application
         self.title("Image Editor")
+        self.geometry("1440x810")
+        self.resizable(True, True)
 
         # this is used just as the frame to contain everything else
         main_frame = tk.Frame(self, bg="#6b6b6b")
@@ -68,6 +72,24 @@ class Main(tk.Tk):
         self.bind("<Control-plus>", self.image_viewer._zoom_in)
         self.bind("<Control-minus>", self.image_viewer._zoom_out)
 
-        # this is how to have something happen when the user closes the application
-        # use this for saving before close
-        # self.bind("<Destroy>", self._on_destroy)
+        # self.bind("WM_DELETE_WINDOW", self._on_closing)
+
+    def _switch_crop_to_off(self):
+        self.in_crop_mode = False
+
+    # def _on_closing(self):
+    #     if not self.is_saved:
+    #         save_prompt = tk.Toplevel(self)
+    #         save_prompt.title("Save Image")
+    #         save_prompt.geometry("300x100")
+    #         save_prompt.resizable(False, False)
+    #         save_prompt.configure(bg="#6b6b6b")
+
+    #         save_button = tk.Button(save_prompt, text="Save", command=self._save_image)
+    #         save_button.pack()
+
+    #         # Intercept window closing event
+    #         self.protocol("WM_DELETE_WINDOW", lambda: self._close_window(save_prompt))
+    # def _close_window(self, window):
+    #     window.destroy()
+    #     self.destroy()
