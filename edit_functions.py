@@ -111,7 +111,6 @@ class AllEditFunctions:
         return num * 0.02
 
     @staticmethod
-    # need to fix conversion
     def _convert_saturation(num):
         return int(num * 0.01)
 

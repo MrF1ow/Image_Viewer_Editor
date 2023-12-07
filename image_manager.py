@@ -4,6 +4,7 @@ import cv2
 import math
 from tkinter import Frame, Button, Toplevel, Label, Button, Entry
 from edit_functions import AllEditFunctions
+import numpy as np
 
 
 class ImageManager(Frame):
@@ -22,6 +23,8 @@ class ImageManager(Frame):
         self.scale_factor = 1.0
         self.canvas_width = 1440
         self.canvas_height = 810
+        self.canvas_ratio_x = 0
+        self.canvas_ratio_y = 0
         self.original_image_width = 1440
         self.original_image_height = 810
 
@@ -115,6 +118,9 @@ class ImageManager(Frame):
 
         self.canvas.move("all", self.master.master.image_properties.pan_coord_x,
                          self.master.master.image_properties.pan_coord_y)
+
+        self.canvas_ratio_y = self.canvas_height / new_height
+        self.canvas_ratio_x = self.canvas_width / new_width
 
         # Finds the click location
     def _activate_pan(self, event):
@@ -242,7 +248,6 @@ class ImageManager(Frame):
         self.canvas.bind("<B1-Motion>", self._update_crop)
         self.canvas.bind("<ButtonRelease>", self._end_crop)
         height, width = self.master.master.processed_image.shape[:2]
-        print(f"BEFORE CROP: height: {height}, width: {width}")
         self.master.master.in_crop_mode = True
 
     def _deactive_crop_mode(self, event):
@@ -256,6 +261,7 @@ class ImageManager(Frame):
     def _start_crop(self, event):
         self.crop_start_x = event.x
         self.crop_start_y = event.y
+        print(f"start_x: {self.crop_start_x}, start_y: {self.crop_start_y}")
 
     def _update_crop(self, event):
         if self.rectangle_id:
@@ -276,57 +282,183 @@ class ImageManager(Frame):
         self.master.master.image_properties.crop_ratio = self.ratio
 
     def _check_crop_coordinates(self):
-        columns, rows = self.master.master.processed_image.shape[:2]
-        if self.crop_start_x > columns:
-            self.crop_start_x = columns
-        elif self.crop_start_x < 0:
-            self.crop_start_x = 1
-        if self.crop_start_y > rows:
-            self.crop_start_y = rows
-        elif self.crop_start_y < 0:
-            self.crop_start_y = 1
-        if self.crop_end_x > columns:
-            self.crop_end_x = columns
-        elif self.crop_end_x < 0:
-            self.crop_end_x = 1
-        if self.crop_end_y > rows:
-            self.crop_end_y = rows
-        elif self.crop_end_y < 0:
-            self.crop_end_y = 1
+
+
+        # Get the bounding box of all elements on the canvas
+        bbox = self.canvas.bbox("all")
+
+        # Find the current panning offset
+        pan_offset_x = self.master.master.image_properties.pan_coord_x
+        pan_offset_y = self.master.master.image_properties.pan_coord_y
+
+        top_left_x = bbox[0] - pan_offset_x
+        top_left_y = bbox[1] - pan_offset_y
+
+        bottom_left_x = bbox[0] - pan_offset_x
+        bottom_left_y = bbox[3] - pan_offset_y
+
+        bottom_right_x = bbox[2] - pan_offset_x
+        bottom_right_y = bbox[3] - pan_offset_y
+
+        top_right_x = bbox[2] - pan_offset_x
+        top_right_y = bbox[1] - pan_offset_y
+
+        print("Top-left coordinates of the displayed image:", top_left_x, top_left_y)
+        print("Bottom-left coordinates of the displayed image:", bottom_left_x, bottom_left_y)
+        print("Bottom-right coordinates of the displayed image:", bottom_right_x, bottom_right_y)
+        print("Top-right coordinates of the displayed image:", top_right_x, top_right_y)
+
+        if self.crop_start_x > top_left_x:
+            self.crop_start_x = top_left_x
+        if self.crop_start_y > top_left_y:
+            self.crop_start_y = top_left_y
+        if self.crop_end_x > bottom_right_x:
+            self.crop_end_x = bottom_right_x
+        if self.crop_end_y > bottom_right_y:
+            self.crop_end_y = bottom_right_y
+
 
     def _end_crop(self, event):
+        # self._check_crop_coordinates()
+
+        # Get the bounding box of all elements on the canvas
+        # bbox = self.canvas.bbox("all")
+
+        # # Find the current panning offset
+        # pan_offset_x = self.master.master.image_properties.pan_coord_x
+        # pan_offset_y = self.master.master.image_properties.pan_coord_y
+
+        # top_left_x = bbox[0] - pan_offset_x
+        # top_left_y = bbox[1] - pan_offset_y
+
+        # bottom_left_x = bbox[0] - pan_offset_x
+        # bottom_left_y = bbox[3] - pan_offset_y
+
+        # bottom_right_x = bbox[2] - pan_offset_x
+        # bottom_right_y = bbox[3] - pan_offset_y
+
+        # top_right_x = bbox[2] - pan_offset_x
+        # top_right_y = bbox[1] - pan_offset_y
+
+        print(f"canvas height: {self.canvas_height}, canvas width: {self.canvas_width}")
+        columns, rows = self.master.master.processed_image.shape[:2]
+        print(f"Image Width: {rows}, Image Height: {columns}")
+
+
+        # columns, rows = self.master.master.processed_image.shape[:2]
+        # print(f"Image Width: {rows}, Image Height: {columns}")
+        width = abs(self.crop_end_x - self.crop_start_x)
+        height = abs(self.crop_end_y - self.crop_start_y)
+        # print(f"PRE Rectangle Width: {width}, Rectangle Height: {height}")
+        # print(f"PRE: start_x: {self.crop_start_x}, start_y: {self.crop_start_y}, end_x: {self.crop_end_x}, end_y: {self.crop_end_y}")
         self._check_crop_coordinates()
+        width2 = abs(self.crop_end_x - self.crop_start_x)
+        height2 = abs(self.crop_end_y - self.crop_start_y)
+        # print(f"POST Rectangle Width: {width2}, Rectangle Height: {height2}")
+        # print(f"POST: start_x: {self.crop_start_x}, start_y: {self.crop_start_y}, end_x: {self.crop_end_x}, end_y: {self.crop_end_y}")
+
+
+        # print(f"PRE: start_x: {self.crop_start_x}, start_y: {self.crop_start_y}, end_x: {self.crop_end_x}, end_y: {self.crop_end_y}")
         if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
-            start_x = int(self.crop_start_x * self.ratio)
-            start_y = int(self.crop_start_y * self.ratio)
-            end_x = int(self.crop_end_x * self.ratio)
-            end_y = int(self.crop_end_y * self.ratio)
+            start_x = int(self.crop_start_x * self.canvas_ratio_x)
+            start_y = int(self.crop_start_y * self.canvas_ratio_y)
+            end_x = int(self.crop_end_x * self.canvas_ratio_x)
+            end_y = int(self.crop_end_y * self.canvas_ratio_y)
         elif self.crop_start_x > self.crop_end_x and self.crop_start_y <= self.crop_end_y:
-            start_x = int(self.crop_end_x * self.ratio)
-            start_y = int(self.crop_start_y * self.ratio)
-            end_x = int(self.crop_start_x * self.ratio)
-            end_y = int(self.crop_end_y * self.ratio)
+            start_x = int(self.crop_end_x * self.canvas_ratio_x)
+            start_y = int(self.crop_start_y * self.canvas_ratio_y)
+            end_x = int(self.crop_start_x * self.canvas_ratio_x)
+            end_y = int(self.crop_end_y * self.canvas_ratio_y)
         elif self.crop_start_x <= self.crop_end_x and self.crop_start_y > self.crop_end_y:
-            start_x = int(self.crop_start_x * self.ratio)
-            start_y = int(self.crop_end_y * self.ratio)
-            end_x = int(self.crop_end_x * self.ratio)
-            end_y = int(self.crop_start_y * self.ratio)
+            start_x = int(self.crop_start_x * self.canvas_ratio_x)
+            start_y = int(self.crop_end_y * self.canvas_ratio_y)
+            end_x = int(self.crop_end_x * self.canvas_ratio_x)
+            end_y = int(self.crop_start_y * self.canvas_ratio_y)
         else:
-            start_x = int(self.crop_end_x * self.ratio)
-            start_y = int(self.crop_end_y * self.ratio)
-            end_x = int(self.crop_start_x * self.ratio)
-            end_y = int(self.crop_start_y * self.ratio)
+            start_x = int(self.crop_end_x * self.canvas_ratio_x)
+            start_y = int(self.crop_end_y * self.canvas_ratio_y)
+            end_x = int(self.crop_start_x * self.canvas_ratio_x)
+            end_y = int(self.crop_start_y * self.canvas_ratio_y)
+
+        self._set_crop_coordinates(start_x, start_y, end_x, end_y)
+
+        # print (f"POST: start_x: {start_x}, start_y: {start_y}, end_x: {end_x}, end_y: {end_y}")
+
+        # columns, rows = self.master.master.processed_image.shape[:2]
+        # print(f"Image Width: {rows}, Image Height: {columns}")
+        # print(f"Ratio: {self.ratio}")
+        # wdith3 = abs(end_x - start_x)
+        # height3 = abs(end_y - start_y)
+        # print(f"POST2 Rectangle Width: {wdith3}, Rectangle Height: {height3}")
 
         x = slice(start_x, end_x, 1)
         y = slice(start_y, end_y, 1)
 
 
         self.master.master.processed_image = self.master.master.processed_image[y, x]
-        height, width = self.master.master.processed_image.shape[:2]
-        print(f"AFTER CROP: height: {height}, width: {width}")
+        # height, width = self.master.master.processed_image.shape[:2]
         # self._set_crop_coordinates(
         #     self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y)
         self.display_image(self.master.master.processed_image)
+
+    # def _end_crop(self, event):
+    #     # self._check_crop_coordinates()
+
+    #     # columns, rows = self.master.master.processed_image.shape[:2]
+    #     # print(f"Image Width: {rows}, Image Height: {columns}")
+    #     width = abs(self.crop_end_x - self.crop_start_x)
+    #     height = abs(self.crop_end_y - self.crop_start_y)
+    #     print(f"PRE Rectangle Width: {width}, Rectangle Height: {height}")
+    #     print(f"PRE: start_x: {self.crop_start_x}, start_y: {self.crop_start_y}, end_x: {self.crop_end_x}, end_y: {self.crop_end_y}")
+    #     self._check_crop_coordinates()
+    #     width2 = abs(self.crop_end_x - self.crop_start_x)
+    #     height2 = abs(self.crop_end_y - self.crop_start_y)
+    #     print(f"POST Rectangle Width: {width2}, Rectangle Height: {height2}")
+    #     print(f"POST: start_x: {self.crop_start_x}, start_y: {self.crop_start_y}, end_x: {self.crop_end_x}, end_y: {self.crop_end_y}")
+
+
+    #     # print(f"PRE: start_x: {self.crop_start_x}, start_y: {self.crop_start_y}, end_x: {self.crop_end_x}, end_y: {self.crop_end_y}")
+    #     if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
+    #         start_x = int(self.crop_start_x * self.ratio)
+    #         start_y = int(self.crop_start_y * self.ratio)
+    #         end_x = int(self.crop_end_x * self.ratio)
+    #         end_y = int(self.crop_end_y * self.ratio)
+    #     elif self.crop_start_x > self.crop_end_x and self.crop_start_y <= self.crop_end_y:
+    #         start_x = int(self.crop_end_x * self.ratio)
+    #         start_y = int(self.crop_start_y * self.ratio)
+    #         end_x = int(self.crop_start_x * self.ratio)
+    #         end_y = int(self.crop_end_y * self.ratio)
+    #     elif self.crop_start_x <= self.crop_end_x and self.crop_start_y > self.crop_end_y:
+    #         start_x = int(self.crop_start_x * self.ratio)
+    #         start_y = int(self.crop_end_y * self.ratio)
+    #         end_x = int(self.crop_end_x * self.ratio)
+    #         end_y = int(self.crop_start_y * self.ratio)
+    #     else:
+    #         start_x = int(self.crop_end_x * self.ratio)
+    #         start_y = int(self.crop_end_y * self.ratio)
+    #         end_x = int(self.crop_start_x * self.ratio)
+    #         end_y = int(self.crop_start_y * self.ratio)
+
+    #     self._set_crop_coordinates(start_x, start_y, end_x, end_y)
+
+    #     # print (f"POST: start_x: {start_x}, start_y: {start_y}, end_x: {end_x}, end_y: {end_y}")
+
+    #     columns, rows = self.master.master.processed_image.shape[:2]
+    #     print(f"Image Width: {rows}, Image Height: {columns}")
+    #     print(f"Ratio: {self.ratio}")
+    #     wdith3 = abs(end_x - start_x)
+    #     height3 = abs(end_y - start_y)
+    #     print(f"POST2 Rectangle Width: {wdith3}, Rectangle Height: {height3}")
+
+    #     x = slice(start_x, end_x, 1)
+    #     y = slice(start_y, end_y, 1)
+
+
+    #     self.master.master.processed_image = self.master.master.processed_image[y, x]
+    #     # height, width = self.master.master.processed_image.shape[:2]
+    #     # self._set_crop_coordinates(
+    #     #     self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y)
+    #     self.display_image(self.master.master.processed_image)
 
     def _finalize_crop(self, img=None, start_x=None, start_y=None, end_x=None, end_y=None):
         image = img
