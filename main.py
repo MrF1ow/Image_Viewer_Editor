@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, Toplevel, Frame, Button
+from tkinter import ttk, Toplevel, Frame, Button, messagebox
 from app_options import AppOptions  # tried to make a button
 from image_manager import ImageManager
 from editor_options import EditorOptions
@@ -72,21 +72,38 @@ class Main(tk.Tk):
         self.bind("<Control-plus>", self.image_viewer._zoom_in)
         self.bind("<Control-minus>", self.image_viewer._zoom_out)
 
-        # self.bind("WM_DELETE_WINDOW", self._on_closing)
+        self.protocol("WM_DELETE_WINDOW", self._on_closing)
 
     def _switch_crop_to_off(self):
         self.in_crop_mode = False
 
-    # def _on_closing(self):
-    #     if not self.is_saved:
-    #         save_prompt = Toplevel(self)
-    #         save_prompt.title("Save Image")
+    def _on_closing(self, event=None):
+        if not self.is_saved:
+            save_prompt = tk.Toplevel(self)
+            save_prompt.title("Save Image")
+            save_prompt.geometry("300x100")
+            save_prompt.resizable(False, False)
+            save_prompt.configure(bg="#6b6b6b")
 
-    #         save_button = tk.Button(save_prompt, text="Save", command=self._save_image)
-    #         save_button.pack()
+            save_question = tk.Label(save_prompt, text="Would you like to save your image?", bg="#6b6b6b", fg="white")
+            save_question.pack(anchor="center")
+            
+            save_button = tk.Button(save_prompt, text="Save", width=4, height=2, command= self._combine_save)
+            save_button.pack(anchor="center", padx=25, pady=10, side=tk.LEFT)
+            
+            no_button = tk.Button(save_prompt, text="No", width=4, height=2, command=self.destroy)
+            no_button.pack(anchor="center", padx=25, pady=10, side=tk.RIGHT)
 
-    #         # Intercept window closing event
-    #         self.protocol("WM_DELETE_WINDOW", lambda: self._close_window(save_prompt))
-    # def _close_window(self, window):
-    #     window.destroy()
-    #     self.destroy()
+
+            # Intercept window closing event
+            self.protocol("WM_DELETE_WINDOW", lambda: self._close_window(save_prompt))
+            
+        else:
+            self.destroy()
+    def _close_window(self, window):
+        window.destroy()
+        self.destroy()
+        
+    def _combine_save(self):
+        self.app_options.save_button_click()
+        self.destroy()
