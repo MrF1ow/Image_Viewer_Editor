@@ -254,6 +254,9 @@ class AppOptions(Frame):
             for i in fm.batch_files:
                 self.master.file_location = i
                 image = cv2.imread(i)
+                if image is None: # image failed to be read
+                    print(f"Corrupt image at {i}\n")
+                    continue  
 
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()

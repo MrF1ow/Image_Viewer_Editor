@@ -102,62 +102,70 @@ class FileManager:
                 print(f"Error: {OSError}")
 
     def get_files(self):
-            answer = simpledialog.messagebox.askyesno("Preparing to Select Folder", 
+            answer = simpledialog.messagebox.askyesnocancel("Preparing to Select Folder", 
                                                       "Would you rather select files manually? \n\nNote: A PNG will be created for the first frame of each GIF file.")
+            
+            if answer is None:
+                return
 
-            warning = simpledialog.messagebox.askokcancel("Warning",  
-                                                         "Batch processing is irreversible. Are you sure you want to proceed?")
+            gifFile = False
 
-            if warning is True: 
-                gifFile = False
+            valid_file_types = [
+                ("Image Files", "*.png *.jpeg *.jpg *.gif *.bmp *.tiff"),
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpeg"),
+                ("JPEG files", "*.jpg"),
+                ("GIF files", "*.gif"),
+                ("BMP files", "*.bmp"),
+                ("TIFF files", "*.tiff")
+            ]
 
-                valid_file_types = [
-                    ("Image Files", "*.png *.jpeg *.jpg *.gif *.bmp *.tiff"),
-                    ("PNG files", "*.png"),
-                    ("JPEG files", "*.jpeg"),
-                    ("JPEG files", "*.jpg"),
-                    ("GIF files", "*.gif"),
-                    ("BMP files", "*.bmp"),
-                    ("TIFF files", "*.tiff")
-                ]
+            if answer is False:
+                folder_path = filedialog.askdirectory()
+                if not folder_path: return # User cancelled folder selection
 
-                if answer is False:
-                    folder_path = filedialog.askdirectory()
-                    if not folder_path:
-                        return # User cancelled folder selection
-                    
-                    file_set = []
-                    for file_type in valid_file_types:
-                        _, file_extension = file_type
-                        file_pattern = os.path.join(folder_path, file_extension)
-                        matching_files = glob.glob(file_pattern) # Use glob to find files matching the pattern
-                        file_set.extend(matching_files) # Add matching files to the file_set
-                else:
-                    file_set = filedialog.askopenfilenames(
-                        filetypes=valid_file_types)  # Prompt user to select images
-                    file_set = list(file_set)
+                warning = simpledialog.messagebox.askokcancel("Warning",  
+                                    "Batch processing is irreversible. Are you sure you want to proceed?")
+                if warning is False: return # User decided to cancel the process
+
+                file_set = []
+                for file_type in valid_file_types:
+                    _, file_extension = file_type
+                    file_pattern = os.path.join(folder_path, file_extension)
+                    matching_files = glob.glob(file_pattern) # Use glob to find files matching the pattern
+                    file_set.extend(matching_files) # Add matching files to the file_set
+            elif answer is True:
+                file_set = filedialog.askopenfilenames(
+                    filetypes=valid_file_types)  # Prompt user to select images
+                if not file_set: return
+
+                warning = simpledialog.messagebox.askokcancel("Warning",  
+                                    "Batch processing is irreversible. Are you sure you want to proceed?")
+                if warning is False: return # User decided to cancel the process
                 
-                for i, file_path in enumerate(file_set):
-                    if file_path.endswith(".gif"):
+                file_set = list(file_set)
+            
+            for i, file_path in enumerate(file_set):
+                if file_path.endswith(".gif"):
 
-                        # Gets the first frame from the gif
-                        cap = cv.VideoCapture(file_path)
-                        ret, first_frame = cap.read()
-                        cap.release()
+                    # Gets the first frame from the gif
+                    cap = cv.VideoCapture(file_path)
+                    ret, first_frame = cap.read()
+                    cap.release()
 
-                        if ret:
-                            gifFile = True
-                            directory, file_name = os.path.split(file_path)
-                            name, ext = os.path.splitext(file_name)
-                            new_file_path = os.path.join(
-                                directory, f'{name}_first_frame.png')
-                            
-                            cv.imwrite(new_file_path, first_frame)
-                            file_set[i] = new_file_path
-                        else:
-                            print("Error: Could not read first frame from GIF")
+                    if ret:
+                        gifFile = True
+                        directory, file_name = os.path.split(file_path)
+                        name, ext = os.path.splitext(file_name)
+                        new_file_path = os.path.join(
+                            directory, f'{name}_first_frame.png')
+                        
+                        cv.imwrite(new_file_path, first_frame)
+                        file_set[i] = new_file_path
+                    else:
+                        print("Error: Could not read first frame from GIF")
 
-                if gifFile is True:
-                    simpledialog.messagebox.showinfo("GIF(s) Detected", "For each GIF file that was processed, another image was created of its first frame.")
+            if gifFile is True:
+                simpledialog.messagebox.showinfo("GIF(s) Detected", "For each GIF file that was processed, another image was created of its first frame.")
 
-                self.batch_files = file_set
+            self.batch_files = file_set
