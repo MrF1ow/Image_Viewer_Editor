@@ -102,8 +102,12 @@ class FileManager:
                 print(f"Error: {OSError}")
 
     def get_files(self):
-            answer = simpledialog.messagebox.askyesno("Preparing to Select Folder", 
-                                                      "Would you rather select files manually?\n\nNote: A PNG will be created for the first frame of each GIF file.")
+            answer = simpledialog.messagebox.askyesnocancel("Preparing to Select Folder", 
+                                                      "Would you rather select files manually? \n\nNote: A PNG will be created for the first frame of each GIF file.")
+            
+            if answer is None:
+                return
+
             gifFile = False
 
             valid_file_types = [
@@ -118,18 +122,27 @@ class FileManager:
 
             if answer is False:
                 folder_path = filedialog.askdirectory()
-                if not folder_path:
-                    return # User cancelled folder selection
-                
+                if not folder_path: return # User cancelled folder selection
+
+                warning = simpledialog.messagebox.askokcancel("Warning",  
+                                    "Batch processing is irreversible. Are you sure you want to proceed?")
+                if warning is False: return # User decided to cancel the process
+
                 file_set = []
                 for file_type in valid_file_types:
                     _, file_extension = file_type
                     file_pattern = os.path.join(folder_path, file_extension)
                     matching_files = glob.glob(file_pattern) # Use glob to find files matching the pattern
                     file_set.extend(matching_files) # Add matching files to the file_set
-            else:
+            elif answer is True:
                 file_set = filedialog.askopenfilenames(
                     filetypes=valid_file_types)  # Prompt user to select images
+                if not file_set: return
+
+                warning = simpledialog.messagebox.askokcancel("Warning",  
+                                    "Batch processing is irreversible. Are you sure you want to proceed?")
+                if warning is False: return # User decided to cancel the process
+                
                 file_set = list(file_set)
             
             for i, file_path in enumerate(file_set):

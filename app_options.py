@@ -254,6 +254,9 @@ class AppOptions(Frame):
             for i in fm.batch_files:
                 self.master.file_location = i
                 image = cv2.imread(i)
+                if image is None: # image failed to be read
+                    print(f"Corrupt image at {i}\n")
+                    continue  
 
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()
@@ -267,8 +270,6 @@ class AppOptions(Frame):
 
                 if fm.file is not None:
                     fm.save_file(self.master.master.processed_image)
-
-    # Allows the user to set the current filters on the image as the default fitlers applied to all images.
 
     def _set_current_filters_as_default(self):
         # call a function that applys all the current self.master.master.image_properties values to a config file

@@ -87,11 +87,13 @@ class AllEditFunctions:
     @staticmethod
     def _apply_all_basic_edits(img_properties=None, img=None):
         image_properties = img_properties
+        resize = image_properties.is_resize
         image = img
         image = AllEditFunctions._apply_rotation_to_image(
             image_properties, image)
-        image = AllEditFunctions._apply_resize_to_image(
-            image_properties, image)
+        if resize is True:
+            image = AllEditFunctions._apply_resize_to_image(
+                image_properties, image)
         image = AllEditFunctions._apply_grayscale_to_image(
             image_properties, image)
         image = AllEditFunctions._apply_horizontal_flip_image(
