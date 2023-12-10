@@ -148,11 +148,19 @@ class EditorOptions(Frame):
         self.master.master.image_properties.is_flipped_vert = False
         self.master.master.image_properties.is_grayscaled = False
         self.master.master.image_properties.is_sepia = False
+        self.master.master.image_properties.is_cropped = False
         self.master.master.image_properties.rotation = 0
         self.master.master.image_properties.altered_image_height = self.master.master.image_properties.original_image_height
         self.master.master.image_properties.altered_image_width = self.master.master.image_properties.original_image_width
         self.master.master.image_properties.resize_image_height = self.master.master.image_properties.original_image_height
         self.master.master.image_properties.resize_image_width = self.master.master.image_properties.original_image_width
+        self.master.master.image_properties.crop_start_x = 0
+        self.master.master.image_properties.crop_start_y = 0
+        self.master.master.image_properties.crop_end_x = 0
+        self.master.master.image_properties.crop_end_y = 0
+        self.master.master.image_properties.crop_ratio = 0
+        self.master.master.image_properties.crop_rectangle_width = 0
+        self.master.master.image_properties.crop_rectangle_height = 0
 
     def _reset_advanced_image_properties(self):
         self.master.master.image_properties.brightness = 50
@@ -283,6 +291,8 @@ class EditorOptions(Frame):
             crop_start_y=self.master.master.image_properties.crop_start_y,
             crop_end_x=self.master.master.image_properties.crop_end_x,
             crop_end_y=self.master.master.image_properties.crop_end_y,
-            crop_ratio=self.master.master.image_properties.crop_ratio
+            crop_ratio=self.master.master.image_properties.crop_ratio,
+            crop_rectangle_width=self.master.master.image_properties.crop_rectangle_width,
+            crop_rectangle_height=self.master.master.image_properties.crop_rectangle_height,
         )
         return edit_instance

@@ -78,6 +78,8 @@ class History(Frame):
         self.master.master.image_properties.crop_end_x = property_instance.crop_end_x
         self.master.master.image_properties.crop_end_y = property_instance.crop_end_y
         self.master.master.image_properties.crop_ratio = property_instance.crop_ratio
+        self.master.master.image_properties.crop_rectangle_width = property_instance.crop_rectangle_width
+        self.master.master.image_properties.crop_rectangle_height = property_instance.crop_rectangle_height
 
     def undo_action(self, event=None):
         # Handles the undo action by decrementing the current index and retrieving the property instance
