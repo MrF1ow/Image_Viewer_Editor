@@ -67,6 +67,7 @@ class History(Frame):
         self.master.master.image_properties.altered_image_width = property_instance.altered_image_width
         self.master.master.image_properties.resize_image_height = property_instance.resize_image_height
         self.master.master.image_properties.resize_image_width = property_instance.resize_image_width
+        self.master.master.image_properties.zoom_scale_factor = property_instance.zoom_scale_factor
         self.master.master.image_properties.rotation = property_instance.rotation
         self.master.master.image_properties.brightness = property_instance.brightness
         self.master.master.image_properties.contrast = property_instance.contrast
@@ -80,6 +81,8 @@ class History(Frame):
         self.master.master.image_properties.crop_ratio = property_instance.crop_ratio
         self.master.master.image_properties.crop_rectangle_width = property_instance.crop_rectangle_width
         self.master.master.image_properties.crop_rectangle_height = property_instance.crop_rectangle_height
+        self.master.master.image_properties.at_time_canvas_width = property_instance.at_time_canvas_width
+        self.master.master.image_properties.at_time_canvas_height = property_instance.at_time_canvas_height
 
     def undo_action(self, event=None):
         # Handles the undo action by decrementing the current index and retrieving the property instance

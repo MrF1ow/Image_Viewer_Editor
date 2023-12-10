@@ -279,8 +279,9 @@ class ImageManager(Frame):
         self.master.master.image_properties.altered_image_height = end_y - start_y
         self.master.master.image_properties.resize_image_height = self.master.master.image_properties.altered_image_height
         self.master.master.image_properties.resize_image_width = self.master.master.image_properties.altered_image_width
-        # print(f"Altered Image Height: {self.master.master.image_properties.altered_image_height}, Altered Image Width: {self.master.master.image_properties.altered_image_width}")
-        # print(f"Resize Image Height: {self.master.master.image_properties.resize_image_height}, Resize Image Width: {self.master.master.image_properties.resize_image_width}")
+        self.master.master.image_properties.at_time_canvas_height = self.canvas.winfo_height()
+        self.master.master.image_properties.at_time_canvas_width = self.canvas.winfo_width()
+        self.master.master.image_properties.zoom_scale_factor = self.scale_factor
 
     def _check_crop_coordinates(self):
 
@@ -314,18 +315,6 @@ class ImageManager(Frame):
 
         top_right_x = top_left_x + image_width
         top_right_y = top_left_y
-
-        print(f"Top Left: ({top_left_x}, {top_left_y})")
-        print(f"Bottom Left: ({bottom_left_x}, {bottom_left_y})")
-        print(f"Bottom Right: ({bottom_right_x}, {bottom_right_y})")
-        print(f"Top Right: ({top_right_x}, {top_right_y})")
-
-        print(f"Start: ({self.crop_start_x}, {self.crop_start_y})")
-        print(f"End: ({self.crop_end_x}, {self.crop_end_y})")
-
-
-        print(f"Start: ({self.crop_start_x}, {self.crop_start_y})")
-        print(f"End: ({self.crop_end_x}, {self.crop_end_y})")
 
         if self.crop_start_x < top_left_x:
             self.crop_start_x = top_left_x
@@ -399,25 +388,18 @@ class ImageManager(Frame):
         image = img
         if self.master.master.image_properties.crop_start_x == 0 or self.master.master.image_properties.crop_start_y == 0 or self.master.master.image_properties.crop_end_x == 0 or self.master.master.image_properties.crop_end_y == 0:
             return image
-        original_start_x = int(self.master.master.image_properties.crop_start_x / self.master.master.image_properties.crop_ratio)
-        original_start_y = int(self.master.master.image_properties.crop_start_y / self.master.master.image_properties.crop_ratio)
-        original_end_x = int(self.master.master.image_properties.crop_end_x / self.master.master.image_properties.crop_ratio)
-        original_end_y = int(self.master.master.image_properties.crop_end_y / self.master.master.image_properties.crop_ratio)
+
+        original_crop_ratio = self.master.master.image_properties.crop_ratio
+        original_start_x = int(self.master.master.image_properties.crop_start_x / original_crop_ratio)
+        original_start_y = int(self.master.master.image_properties.crop_start_y / original_crop_ratio)
+        original_end_x = int(self.master.master.image_properties.crop_end_x / original_crop_ratio)
+        original_end_y = int(self.master.master.image_properties.crop_end_y / original_crop_ratio)
 
         x = slice(original_start_x, original_end_x, 1)
         y = slice(original_start_y, original_end_y, 1)
 
-        if self.master.master.original_image is not None:
-            image = self.master.master.original_image[y, x]
-            return image
-
-        crop_height = original_end_y - original_start_y
-        crop_width = original_end_x - original_start_x
-
-        self.master.master.image_properties.altered_image_height = crop_height
-        self.master.master.image_properties.altered_image_width = crop_width
-        self.master.master.image_properties.resize_image_height = crop_height
-        self.master.master.image_properties.resize_image_width = crop_width
+        image = image[y, x]
+        return image
 
     def _apply_all_edits(self):
         image = self.master.master.original_image
@@ -428,6 +410,8 @@ class ImageManager(Frame):
             self.master.master.image_properties, image)
         self.master.master.processed_image = image
         self.display_image(self.master.master.processed_image)
+        print(f"Original Crop Start: ({self.master.master.image_properties.crop_start_x}, {self.master.master.image_properties.crop_start_y})")
+        print(f"Original Crop End: ({self.master.master.image_properties.crop_end_x}, {self.master.master.image_properties.crop_end_y})")
 
     def clear_canvas(self):
         self.canvas.delete("all")
@@ -519,6 +503,7 @@ class ImageManager(Frame):
             altered_image_width=self.master.master.image_properties.altered_image_width,
             resize_image_height=self.master.master.image_properties.resize_image_height,
             resize_image_width=self.master.master.image_properties.resize_image_width,
+            zoom_scale_factor=self.master.master.image_properties.zoom_scale_factor,
             rotation=self.master.master.image_properties.rotation,
             brightness=self.master.master.image_properties.brightness,
             contrast=self.master.master.image_properties.contrast,
@@ -532,5 +517,7 @@ class ImageManager(Frame):
             crop_ratio=self.master.master.image_properties.crop_ratio,
             crop_rectangle_height=self.master.master.image_properties.crop_rectangle_height,
             crop_rectangle_width=self.master.master.image_properties.crop_rectangle_width,
+            at_time_canvas_height=self.master.master.image_properties.at_time_canvas_height,
+            at_time_canvas_width=self.master.master.image_properties.at_time_canvas_width
         )
         return edit_instance
