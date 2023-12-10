@@ -374,7 +374,7 @@ class ImageManager(Frame):
             self._deactive_crop_mode(None)
             return
 
-        self._set_crop_coordinates(start_x, start_y, end_x, end_y)
+        self._set_crop_coordinates(self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y)
 
         self.master.master.processed_image = self.master.master.processed_image[y, x]
 
@@ -385,39 +385,58 @@ class ImageManager(Frame):
 
     def _perform_crop_to_image(self, img=None):
         image = img
-        original_start_x = int(self.master.master.image_properties.crop_start_x /
-                               self.master.master.image_properties.crop_ratio)
-        original_start_y = int(self.master.master.image_properties.crop_start_y /
-                               self.master.master.image_properties.crop_ratio)
-        original_end_x = int(self.master.master.image_properties.crop_end_x /
-                             self.master.master.image_properties.crop_ratio)
-        original_end_y = int(self.master.master.image_properties.crop_end_y /
-                             self.master.master.image_properties.crop_ratio)
+        if self.master.master.image_properties.crop_start_x == 0 or self.master.master.image_properties.crop_start_y == 0 or self.master.master.image_properties.crop_end_x == 0 or self.master.master.image_properties.crop_end_y == 0:
+            return image
+        original_start_x = int(self.master.master.image_properties.crop_start_x)
+        original_start_y = int(self.master.master.image_properties.crop_start_y)
+        original_end_x = int(self.master.master.image_properties.crop_end_x)
+        original_end_y = int(self.master.master.image_properties.crop_end_y)
+        original_ratio = self.master.master.image_properties.crop_ratio
 
-        x = slice(original_start_x, original_end_x, 1)
-        y = slice(original_start_y, original_end_y, 1)
+        if original_start_x <= original_end_x and original_start_y <= original_end_y:
+            start_x = int(original_start_x * original_ratio)
+            start_y = int(original_start_y * original_ratio)
+            end_x = int(original_end_x * original_ratio)
+            end_y = int(original_end_y * original_ratio)
+        elif original_start_x > original_end_x and original_start_y <= original_end_y:
+            start_x = int(original_end_x * original_ratio)
+            start_y = int(original_start_y * original_ratio)
+            end_x = int(original_start_x * original_ratio)
+            end_y = int(original_end_y * original_ratio)
+        elif original_start_x <= original_end_x and original_start_y > original_end_y:
+            start_x = int(original_start_x * original_ratio)
+            start_y = int(original_end_y * original_ratio)
+            end_x = int(original_end_x * original_ratio)
+            end_y = int(original_start_y * original_ratio)
+        else:
+            start_x = int(original_end_x * original_ratio)
+            start_y = int(original_end_y * original_ratio)
+            end_x = int(original_start_x * original_ratio)
+            end_y = int(original_start_y * original_ratio)
 
-        crop_height = original_end_y - original_start_y
-        crop_width = original_end_x - original_start_x
-
-        if self.master.master.undo_performed:
-            self.master.master.image_properties.crop_start_x = original_start_x
-            self.master.master.image_properties.crop_start_y = original_start_y
-            self.master.master.image_properties.crop_end_x = original_end_x
-            self.master.master.image_properties.crop_end_y = original_end_y
-            self.master.master.image_properties.crop_ratio = 1
-            self.master.master.image_properties.altered_image_height = crop_height
-            self.master.master.image_properties.altered_image_width = crop_width
-            self.master.master.image_properties.resize_image_height = self.master.master.image_properties.altered_image_height
-            self.master.master.image_properties.resize_image_width = self.master.master.image_properties.altered_image_width
+        x = slice(start_x, end_x, 1)
+        y = slice(start_y, end_y, 1)
 
         if self.master.master.original_image is not None:
             image = self.master.master.original_image[y, x]
             return image
 
+        crop_height = original_end_y - original_start_y
+        crop_width = original_end_x - original_start_x
+
+        self.master.master.image_properties.crop_start_x = original_start_x
+        self.master.master.image_properties.crop_start_y = original_start_y
+        self.master.master.image_properties.crop_end_x = original_end_x
+        self.master.master.image_properties.crop_end_y = original_end_y
+        self.master.master.image_properties.crop_ratio = 1
+        self.master.master.image_properties.altered_image_height = crop_height
+        self.master.master.image_properties.altered_image_width = crop_width
+        self.master.master.image_properties.resize_image_height = crop_height
+        self.master.master.image_properties.resize_image_width = crop_width
+
     def _apply_all_edits(self):
         image = self.master.master.original_image
-        if self.master.master.image_properties.is_cropped:
+        if self.master.master.undo_performed:
             image = self._perform_crop_to_image(image)
         image = AllEditFunctions._apply_all_basic_edits(
             self.master.master.image_properties, image)
@@ -438,11 +457,13 @@ class ImageManager(Frame):
     def _zoom(self, event):
         if event.keysym == 'KP_Add' or event.delta == 120:
             if self.scale_factor > 2.2:
+                self.scale_factor = 2.2
                 return
             self.scale_factor *= 1.2
             self._set_zoom_bool()
         elif event.keysym == 'minus' or event.delta == -120:
             if self.scale_factor < 0.2:
+                self.scale_factor = 0.2
                 return
             self.scale_factor *= 0.8
             self._set_zoom_bool()
@@ -454,6 +475,7 @@ class ImageManager(Frame):
 
     def _zoom_in(self, event):
         if self.scale_factor > 2.2:
+            self.scale_factor = 2.2
             return
         self.scale_factor *= 1.2
         self._set_zoom_bool()
@@ -462,6 +484,7 @@ class ImageManager(Frame):
 
     def _zoom_out(self, event):
         if self.scale_factor < 0.2:
+            self.scale_factor = 0.2
             return
         self.scale_factor *= 0.8
         self._set_zoom_bool()
