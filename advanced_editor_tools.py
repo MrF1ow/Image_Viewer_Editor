@@ -104,6 +104,8 @@ class AdvancedEditorTools(Toplevel):
             crop_end_x=self.master.master.image_properties.crop_end_x,
             crop_end_y=self.master.master.image_properties.crop_end_y,
             crop_ratio=self.master.master.image_properties.crop_ratio,
+            crop_rectangle_height=self.master.master.image_properties.crop_rectangle_height,
+            crop_rectangle_width=self.master.master.image_properties.crop_rectangle_width,
             pan_start_x=self.master.master.image_properties.pan_start_x,
             pan_start_y=self.master.master.image_properties.pan_start_y,
             pan_coord_x=self.master.master.image_properties.pan_coord_x,
@@ -137,6 +139,8 @@ class AdvancedEditorTools(Toplevel):
             crop_end_x=self.master.master.image_properties.crop_end_x,
             crop_end_y=self.master.master.image_properties.crop_end_y,
             crop_ratio=self.master.master.image_properties.crop_ratio,
+            crop_rectangle_height=self.master.master.image_properties.crop_rectangle_height,
+            crop_rectangle_width=self.master.master.image_properties.crop_rectangle_width,
             pan_start_x=self.master.master.image_properties.pan_start_x,
             pan_start_y=self.master.master.image_properties.pan_start_y,
             pan_coord_x=self.master.master.image_properties.pan_coord_x,
@@ -268,6 +272,8 @@ class AdvancedEditorTools(Toplevel):
             crop_start_y=self.current_image_properties.crop_start_y,
             crop_end_x=self.current_image_properties.crop_end_x,
             crop_end_y=self.current_image_properties.crop_end_y,
-            crop_ratio=self.current_image_properties.crop_ratio
+            crop_ratio=self.current_image_properties.crop_ratio,
+            crop_rectangle_height=self.current_image_properties.crop_rectangle_height,
+            crop_rectangle_width=self.current_image_properties.crop_rectangle_width
         )
         return edit_instance

@@ -227,6 +227,8 @@ class AppOptions(Frame):
         self.master.master.image_properties.altered_image_width = width
         self.master.master.image_properties.resize_image_height = height
         self.master.master.image_properties.resize_image_width = width
+        self.master.master.image_properties.zoom_image_height = height
+        self.master.master.image_properties.zoom_image_width = width
 
     def save_button_click(self, event=None):
         fm = FileManager()
