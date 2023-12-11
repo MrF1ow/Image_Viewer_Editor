@@ -4,6 +4,9 @@ from image_properties import ImageProperties
 from settings import Settings
 import cv2
 import time
+import os
+from PIL import Image
+import numpy as np
 
 
 class AppOptions(Frame):
@@ -38,7 +41,6 @@ class AppOptions(Frame):
 
         # HELP MENU
         self.help_menu_items = [
-            "General", # h2
             "Import Image",
             "Export Image",
             "Undo Edit",
@@ -49,21 +51,21 @@ class AppOptions(Frame):
             "Save File",
             "History Selection",
             "Access Meta Data",
-            "Clear All",
-            "Advanced Edits", # h2
+            "Advanced Edits",
             "Brightness",
             "Contrast",
             "Blur",
             "Hue",
             "Saturation",
-            "Basic Edits", # h2
+            "Basic Edits",
             "Horizontal Flip",
             "Vertical Flip",
             "Rotate",
             "Resize",
             "Grayscale",
             "Sepia",
-            "Crop"
+            "Crop",
+            "Clear All"
         ]
 
         self.dictionary_of_help_menu_items_and_help_information = {
@@ -83,7 +85,7 @@ class AppOptions(Frame):
                 "Initiate batch processing by selecting \"Edit\" -> \"Batch Processing\" and choosing the files you want to apply the edits to.",
 
             "Zoom":
-                "Effortlessly zoom in and out using your trackpad or by holding down the 'Ctrl' key and pressing '+' or '-'.",
+                "Effortlessly zoom in and out using your trackpad or by holding down the 'Ctrl' key and pressing '+' or '-'",
 
             "Pan":
                 "Navigate across your image seamlessly by clicking and dragging your mouse. To move around the image, click, hold, and drag to explore different areas. Release the mouse button when you've reached the desired view.",
@@ -133,8 +135,7 @@ class AppOptions(Frame):
             "History Selection":
                 "Access the history log on the homepage's right panel.Click on a history item to return to a specific point in your image's editing history. Items are labeled with the edit and time.",
 
-            "Access Meta Data": 
-                """Meta data is displayed for the loaded image on the bottom left of the homepage. The following information can be found: size (in Bytes), file name, extension, Bytes per pixel, and zoomed-in resolution."""
+            "Access Meta Data": """Blah blah blah"""
         }
 
         self.help_button = Button(
@@ -155,15 +156,13 @@ class AppOptions(Frame):
         for element in self.help_menu_items:
             help_info = self.dictionary_of_help_menu_items_and_help_information.get(
                 element, "")
-            if element not in self.dictionary_of_help_menu_items_and_help_information: # h2 is being added
-                self.help_text.insert(END, "\n")
+            if element not in self.dictionary_of_help_menu_items_and_help_information:
                 current_position = self.help_text.index("insert")
                 end_index = self.convert_index_to_end(current_position)
                 self.help_text.insert(END, f"{element}\n")
                 self.help_text.tag_add("header1", current_position, end_index)
                 self.help_text.tag_configure(
-                    "header1", font=("Arial", 20, "bold", "underline"))
-                self.help_text.insert(END, "\n")
+                    "header1", font=("Arial", 20, "bold"))
             else:
                 current_position = self.help_text.index("insert")
                 end_index = self.convert_index_to_end(current_position)
@@ -209,8 +208,8 @@ class AppOptions(Frame):
     def new_button_click(self, event=None):
         fm = FileManager()
         fm.get_file()
-
         if fm.file is not None:
+            self.my_file = fm.file
             self.master.file_location = fm.file
             image = cv2.imread(fm.file)
             self.master.master.original_image = image.copy()
@@ -221,6 +220,52 @@ class AppOptions(Frame):
             self._insert_into_history(image)
             self.master.master.image_viewer._reset()
             self.master.master.image_viewer.display_image(image)
+            self._update_metadata()
+
+    def bytes_per_pixel(self, image):
+        try:
+            if isinstance(image, np.ndarray):
+                channels = image.shape[-1] if len(image.shape) > 2 else 1
+                bit_depth = image.dtype.itemsize * 8
+
+                bytes_per_pixel = (bit_depth * channels + 7) // 8
+            else:
+                channels = len(image.getbands())
+                bit_depth = getattr(image, 'bits', 8)
+                bytes_per_pixel = (bit_depth * channels + 7) // 8
+
+            return bytes_per_pixel
+        except Exception as e:
+            print(f"Error calculating bytes per pixel: {e}")
+            return None
+
+    def _update_metadata(self):
+        fm = FileManager()
+        path = self.master.file_location
+        fm.find_file(path)
+        if fm.file is not None:
+            try:
+                with Image.open(fm.file) as img:
+                    resolution = img.size
+                    file_size = os.path.getsize(fm.file)
+                    file_name = os.path.basename(fm.file)
+                    file_extension = os.path.splitext(file_name)[1]
+                    bytes_per_pixel = self.bytes_per_pixel(img)
+                    zoom_resolution = (
+                        int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                        int(resolution[1] * self.master.master.image_viewer.scale_factor))
+            except Exception as e:
+                print(f"Error reading image metadata: {e}")
+        if self.master.master.processed_image is not None:
+            resolution = (self.master.master.processed_image.shape[1], self.master.master.processed_image.shape[0])
+            file_size = os.path.getsize(fm.file)
+            file_name = os.path.basename(fm.file)
+            file_extension = os.path.splitext(file_name)[1]
+            bytes_per_pixel = self.bytes_per_pixel(self.master.master.processed_image)
+            zoom_resolution = (
+                int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                int(resolution[1] * self.master.master.image_viewer.scale_factor))
+        self.master.master.editor_options.update_metadata_labels(file_size, resolution, file_name, file_extension, bytes_per_pixel, zoom_resolution)
 
     def _set_dimensions_of_image(self, img=None):
         image = img
@@ -262,7 +307,7 @@ class AppOptions(Frame):
                 image = cv2.imread(i)
                 if image is None: # image failed to be read
                     print(f"Corrupt image at {i}\n")
-                    continue  
+                    continue
 
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()
