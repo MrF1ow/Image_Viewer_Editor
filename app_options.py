@@ -82,7 +82,7 @@ class AppOptions(Frame):
                 "Initiate batch processing by selecting \"Edit\" -> \"Batch Processing\" and choosing the files you want to apply the edits to.",
 
             "Zoom":
-                "Effortlessly zoom in and out using your trackpad or by holding down the 'Ctrl' key and pressing '+' or '-'",
+                "Effortlessly zoom in and out using your trackpad or by holding down the 'Ctrl' key and pressing '+' or '-'.",
 
             "Pan":
                 "Navigate across your image seamlessly by clicking and dragging your mouse. To move around the image, click, hold, and drag to explore different areas. Release the mouse button when you've reached the desired view.",
@@ -132,7 +132,8 @@ class AppOptions(Frame):
             "History Selection":
                 "Access the history log on the homepage's right panel.Click on a history item to return to a specific point in your image's editing history. Items are labeled with the edit and time.",
 
-            "Access Meta Data": """Blah blah blah"""
+            "Access Meta Data": 
+                """Meta data is displayed for the loaded image on the bottom left of the homepage. The following information can be found: size (in Bytes), file name, extension, Bytes per pixel, and zoomed-in resolution."""
         }
 
         self.help_button = Button(
