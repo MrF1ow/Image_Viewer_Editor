@@ -85,25 +85,29 @@ class Main(tk.Tk):
             save_prompt.resizable(False, False)
             save_prompt.configure(bg="#6b6b6b")
 
-            save_question = tk.Label(save_prompt, text="Would you like to save your image?", bg="#6b6b6b", fg="white")
+            save_question = tk.Label(
+                save_prompt, text="Would you like to save your image?", bg="#6b6b6b", fg="white")
             save_question.pack(anchor="center")
-            
-            save_button = tk.Button(save_prompt, text="Save", width=4, height=2, command= self._combine_save)
+
+            save_button = tk.Button(
+                save_prompt, text="Save", width=4, height=2, command=self._combine_save)
             save_button.pack(anchor="center", padx=25, pady=10, side=tk.LEFT)
-            
-            no_button = tk.Button(save_prompt, text="No", width=4, height=2, command=self.destroy)
+
+            no_button = tk.Button(save_prompt, text="No",
+                                  width=4, height=2, command=self.destroy)
             no_button.pack(anchor="center", padx=25, pady=10, side=tk.RIGHT)
 
-
             # Intercept window closing event
-            self.protocol("WM_DELETE_WINDOW", lambda: self._close_window(save_prompt))
-            
+            self.protocol("WM_DELETE_WINDOW",
+                          lambda: self._close_window(save_prompt))
+
         else:
             self.destroy()
+
     def _close_window(self, window):
         window.destroy()
         self.destroy()
-        
+
     def _combine_save(self):
         self.app_options.save_button_click()
         self.destroy()

@@ -62,8 +62,6 @@ class AllEditFunctions:
             angle=angle, resample=Image.NEAREST, expand=True)
         numpy_image = np.array(rotated_image)
 
-        # Adjust image properties based on rotation angle
-        # (the property settings could be optimized here based on your use case)
         resize_height = image_properties.resize_image_height
         resize_width = image_properties.resize_image_width
 
@@ -87,11 +85,13 @@ class AllEditFunctions:
     @staticmethod
     def _apply_all_basic_edits(img_properties=None, img=None):
         image_properties = img_properties
+        resize = image_properties.is_resized
         image = img
         image = AllEditFunctions._apply_rotation_to_image(
             image_properties, image)
-        image = AllEditFunctions._apply_resize_to_image(
-            image_properties, image)
+        if resize is True:
+            image = AllEditFunctions._apply_resize_to_image(
+                image_properties, image)
         image = AllEditFunctions._apply_grayscale_to_image(
             image_properties, image)
         image = AllEditFunctions._apply_horizontal_flip_image(
@@ -111,7 +111,6 @@ class AllEditFunctions:
         return num * 0.02
 
     @staticmethod
-    # need to fix conversion
     def _convert_saturation(num):
         return int(num * 0.01)
 
