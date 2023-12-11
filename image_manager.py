@@ -403,12 +403,13 @@ class ImageManager(Frame):
 
     def _apply_all_edits(self):
         image = self.master.master.original_image
-        image = self._perform_crop_to_image(image)
         image = AllEditFunctions._apply_all_basic_edits(
             self.master.master.image_properties, image)
         image = AllEditFunctions._apply_all_advanced_edits(
             self.master.master.image_properties, image)
+        image = self._perform_crop_to_image(image)
         self.master.master.processed_image = image
+        self.master.master.app_options._update_metadata()
         self.display_image(self.master.master.processed_image)
         print(f"Original Crop Start: ({self.master.master.image_properties.crop_start_x}, {self.master.master.image_properties.crop_start_y})")
         print(f"Original Crop End: ({self.master.master.image_properties.crop_end_x}, {self.master.master.image_properties.crop_end_y})")
@@ -435,6 +436,7 @@ class ImageManager(Frame):
                 return
             self.scale_factor *= 0.8
             self._set_zoom_bool()
+        self.master.master.app_options._update_metadata()
         self._zoom_canvas_adj()
         self.display_image()
 
@@ -497,6 +499,7 @@ class ImageManager(Frame):
             is_grayscaled=self.master.master.image_properties.is_grayscaled,
             is_sepia=self.master.master.image_properties.is_sepia,
             is_cropped=self.master.master.image_properties.is_cropped,
+            is_resized=self.master.master.image_properties.is_resized,
             original_image_height=self.master.master.image_properties.original_image_height,
             original_image_width=self.master.master.image_properties.original_image_width,
             altered_image_height=self.master.master.image_properties.altered_image_height,
