@@ -85,7 +85,7 @@ class AllEditFunctions:
     @staticmethod
     def _apply_all_basic_edits(img_properties=None, img=None):
         image_properties = img_properties
-        resize = image_properties.is_resize
+        resize = image_properties.is_resized
         image = img
         image = AllEditFunctions._apply_rotation_to_image(
             image_properties, image)
