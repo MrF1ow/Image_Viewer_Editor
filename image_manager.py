@@ -411,8 +411,8 @@ class ImageManager(Frame):
         self.master.master.processed_image = image
         self.master.master.app_options._update_metadata()
         self.display_image(self.master.master.processed_image)
-        print(f"Original Crop Start: ({self.master.master.image_properties.crop_start_x}, {self.master.master.image_properties.crop_start_y})")
-        print(f"Original Crop End: ({self.master.master.image_properties.crop_end_x}, {self.master.master.image_properties.crop_end_y})")
+        #print(f"Original Crop Start: ({self.master.master.image_properties.crop_start_x}, {self.master.master.image_properties.crop_start_y})")
+        #print(f"Original Crop End: ({self.master.master.image_properties.crop_end_x}, {self.master.master.image_properties.crop_end_y})")
 
     def clear_canvas(self):
         self.canvas.delete("all")
