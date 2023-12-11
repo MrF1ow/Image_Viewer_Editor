@@ -5,7 +5,6 @@ from settings import Settings
 import cv2
 import time
 
-
 class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
@@ -143,7 +142,7 @@ class AppOptions(Frame):
 
     def convert_index_to_end(self, index):
         line, column = index.split('.')
-        return f"{line}.end"
+        return f"{line}.end" 
 
     def _add_help_menu_items(self):
         current_position = self.help_text.index("insert")
