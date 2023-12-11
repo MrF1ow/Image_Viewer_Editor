@@ -208,6 +208,13 @@ class AppOptions(Frame):
     def _show_settings_menu(self, event=None):
         self.settings.toggle_visibility()
 
+    def _update_app_title(self):
+        if self.master.file_location is not None:
+            self.master.master.title(
+                f"Image Editor - {os.path.basename(self.master.file_location)}")
+        else:
+            self.master.master.title("Image Editor")
+
     def new_button_click(self, event=None):
         fm = FileManager()
         fm.get_file()
@@ -224,6 +231,7 @@ class AppOptions(Frame):
             self.master.master.image_viewer._reset()
             self.master.master.image_viewer.display_image(image)
             self._update_metadata()
+            self._update_app_title()
 
     def bytes_per_pixel(self, image):
         try:
