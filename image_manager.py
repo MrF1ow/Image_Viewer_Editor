@@ -115,8 +115,8 @@ class ImageManager(Frame):
 
         self.canvas.move("all", self.master.master.image_properties.pan_coord_x,
                          self.master.master.image_properties.pan_coord_y)
-        
-        self.master.master.editor_options.update_metadata_labels(self.master.file_location)
+
+        self.master.master.app_options._update_metadata()
 
         # Finds the click location
     def _activate_pan(self, event):
@@ -367,7 +367,7 @@ class ImageManager(Frame):
         image = AllEditFunctions._apply_all_advanced_edits(
             self.master.master.image_properties, image)
         self.master.master.processed_image = image
-        self.master.master.editor_options.update_metadata_labels(self.master.file_location)
+        self.master.master.app_options._update_metadata()
         self.display_image(self.master.master.processed_image)
 
     def clear_canvas(self):

@@ -1,9 +1,11 @@
 from tkinter import Frame, Button, END, LEFT, DISABLED, Menu, Label, Scale, Toplevel, Text, ttk
+from PIL import Image
 from file_manager import FileManager
 from image_properties import ImageProperties
 from settings import Settings
 import cv2
 import time
+import os
 
 
 class AppOptions(Frame):
@@ -219,7 +221,51 @@ class AppOptions(Frame):
             self._insert_into_history(image)
             self.master.master.image_viewer._reset()
             self.master.master.image_viewer.display_image(image)
-            self.master.master.editor_options.update_metadata_labels(fm.file)
+            self._update_metadata()
+
+    def bytes_per_pixel(self, image):
+        try:
+            # Get the number of channels and bit depth per channel
+            channels = len(image.getbands())
+
+            # Check if the 'bits' attribute is available
+            bit_depth = getattr(image, 'bits', 8)  # Default to 8 bits if 'bits' is not available
+
+            # Calculate bytes per pixel
+            bytes_per_pixel = (bit_depth * channels + 7) // 8
+
+            return bytes_per_pixel
+        except Exception as e:
+            print(f"Error calculating bytes per pixel: {e}")
+            return None
+
+    def _update_metadata(self):
+        fm = FileManager()
+        path = self.master.file_location
+        fm.find_file(path)
+        if fm.file is not None:
+            try:
+                with Image.open(fm.file) as img:
+                    resolution = img.size
+                    file_size = os.path.getsize(fm.file)
+                    file_name = os.path.basename(fm.file)
+                    file_extension = os.path.splitext(file_name)[1]
+                    bytes_per_pixel = self.bytes_per_pixel(img)
+                    zoom_resolution = (
+                        int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                        int(resolution[1] * self.master.master.image_viewer.scale_factor))
+            except Exception as e:
+                print(f"Error reading image metadata: {e}")
+        if self.master.master.processed_image is not None:
+            resolution = (self.master.master.processed_image.shape[1], self.master.master.processed_image.shape[0])
+            file_size = os.path.getsize(fm.file)
+            file_name = os.path.basename(fm.file)
+            file_extension = os.path.splitext(file_name)[1]
+            bytes_per_pixel = self.bytes_per_pixel(self.master.master.processed_image)
+            zoom_resolution = (
+                int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                int(resolution[1] * self.master.master.image_viewer.scale_factor))
+        self.master.master.editor_options.update_metadata_labels(file_size, resolution, file_name, file_extension, bytes_per_pixel, zoom_resolution)
 
     def _get_file_location(self):
         return self.my_file
