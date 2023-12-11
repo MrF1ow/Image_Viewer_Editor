@@ -12,6 +12,7 @@ class ImageProperties:
     is_cropped: bool=False
     is_rotated: bool=False
     is_zoomed: bool=False
+    is_resize: bool=False
 
     original_image_width: int=0
     original_image_height: int=0
