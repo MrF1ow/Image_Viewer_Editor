@@ -38,6 +38,7 @@ class AppOptions(Frame):
 
         # HELP MENU
         self.help_menu_items = [
+            "General", # h2
             "Import Image",
             "Export Image",
             "Undo Edit",
@@ -48,21 +49,21 @@ class AppOptions(Frame):
             "Save File",
             "History Selection",
             "Access Meta Data",
-            "Advanced Edits",
+            "Clear All",
+            "Advanced Edits", # h2
             "Brightness",
             "Contrast",
             "Blur",
             "Hue",
             "Saturation",
-            "Basic Edits",
+            "Basic Edits", # h2
             "Horizontal Flip",
             "Vertical Flip",
             "Rotate",
             "Resize",
             "Grayscale",
             "Sepia",
-            "Crop",
-            "Clear All"
+            "Crop"
         ]
 
         self.dictionary_of_help_menu_items_and_help_information = {
@@ -154,13 +155,15 @@ class AppOptions(Frame):
         for element in self.help_menu_items:
             help_info = self.dictionary_of_help_menu_items_and_help_information.get(
                 element, "")
-            if element not in self.dictionary_of_help_menu_items_and_help_information:
+            if element not in self.dictionary_of_help_menu_items_and_help_information: # h2 is being added
+                self.help_text.insert(END, "\n")
                 current_position = self.help_text.index("insert")
                 end_index = self.convert_index_to_end(current_position)
                 self.help_text.insert(END, f"{element}\n")
                 self.help_text.tag_add("header1", current_position, end_index)
                 self.help_text.tag_configure(
-                    "header1", font=("Arial", 20, "bold"))
+                    "header1", font=("Arial", 20, "bold", "underline"))
+                self.help_text.insert(END, "\n")
             else:
                 current_position = self.help_text.index("insert")
                 end_index = self.convert_index_to_end(current_position)
