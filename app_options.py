@@ -1,18 +1,17 @@
 from tkinter import Frame, Button, END, LEFT, DISABLED, Menu, Label, Scale, Toplevel, Text, ttk
-from PIL import Image
 from file_manager import FileManager
 from image_properties import ImageProperties
 from settings import Settings
 import cv2
 import time
 import os
+from PIL import Image
+import numpy as np
 
 
 class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
-
-        self.my_file = ""
 
         self.file_options_button = Button(
             self, text="File", command=self._show_file_menu)
@@ -225,14 +224,15 @@ class AppOptions(Frame):
 
     def bytes_per_pixel(self, image):
         try:
-            # Get the number of channels and bit depth per channel
-            channels = len(image.getbands())
+            if isinstance(image, np.ndarray):
+                channels = image.shape[-1] if len(image.shape) > 2 else 1
+                bit_depth = image.dtype.itemsize * 8
 
-            # Check if the 'bits' attribute is available
-            bit_depth = getattr(image, 'bits', 8)  # Default to 8 bits if 'bits' is not available
-
-            # Calculate bytes per pixel
-            bytes_per_pixel = (bit_depth * channels + 7) // 8
+                bytes_per_pixel = (bit_depth * channels + 7) // 8
+            else:
+                channels = len(image.getbands())
+                bit_depth = getattr(image, 'bits', 8)
+                bytes_per_pixel = (bit_depth * channels + 7) // 8
 
             return bytes_per_pixel
         except Exception as e:
@@ -267,10 +267,6 @@ class AppOptions(Frame):
                 int(resolution[1] * self.master.master.image_viewer.scale_factor))
         self.master.master.editor_options.update_metadata_labels(file_size, resolution, file_name, file_extension, bytes_per_pixel, zoom_resolution)
 
-    def _get_file_location(self):
-        return self.my_file
-
-
     def _set_dimensions_of_image(self, img=None):
         image = img
         height, width = image.shape[:2]
@@ -280,6 +276,8 @@ class AppOptions(Frame):
         self.master.master.image_properties.altered_image_width = width
         self.master.master.image_properties.resize_image_height = height
         self.master.master.image_properties.resize_image_width = width
+        self.master.master.image_properties.zoom_image_height = height
+        self.master.master.image_properties.zoom_image_width = width
 
     def save_button_click(self, event=None):
         fm = FileManager()
@@ -289,18 +287,15 @@ class AppOptions(Frame):
         if fm.file is not None:
             fm.save_file(self.master.master.processed_image)
             self.master.master.is_saved = True
-            self.master.master.editor_options.update_metadata_labels(self.master.file_location)
 
     def save_as_button_click(self, event=None):
         fm = FileManager()
         path = self.master.file_location
         fm.find_file(path)
 
-
         if fm.file is not None:
             fm.save_as_file(self.master.master.processed_image)
             self.master.master.is_saved = True
-            self.master.master.editor_options.update_metadata_labels(self.master.file_location)
 
     def batch_processing_button_click(self, event=None):
         fm = FileManager()
@@ -310,6 +305,9 @@ class AppOptions(Frame):
             for i in fm.batch_files:
                 self.master.file_location = i
                 image = cv2.imread(i)
+                if image is None: # image failed to be read
+                    print(f"Corrupt image at {i}\n")
+                    continue
 
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()
@@ -323,9 +321,6 @@ class AppOptions(Frame):
 
                 if fm.file is not None:
                     fm.save_file(self.master.master.processed_image)
-                    self.master.master.editor_options.update_metadata_labels(self.master.file_location)
-
-    # Allows the user to set the current filters on the image as the default fitlers applied to all images.
 
     def _set_current_filters_as_default(self):
         # call a function that applys all the current self.master.master.image_properties values to a config file
