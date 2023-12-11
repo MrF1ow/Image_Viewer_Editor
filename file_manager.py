@@ -8,6 +8,7 @@ class FileManager:
     def __init__(self):
         self.file = None
         self.batch_files = None #Alternate variable for a list of batch processed files
+        self.file_location = None  
 
     def get_file(self):
         valid_file_types = [
@@ -49,6 +50,7 @@ class FileManager:
                     print("Error: Could not read first frame from GIF")
 
             self.file = file_path  # Update file attribute with path of file selected
+            self.file_location = file_path
 
     def find_file(self, path):
         # Get a file that already exists
@@ -60,6 +62,7 @@ class FileManager:
         if self.file:
             # Overwrites existing file with new edits
             cv.imwrite(self.file, content)
+
 
     @staticmethod
     def save_as_file(content):
@@ -102,12 +105,8 @@ class FileManager:
                 print(f"Error: {OSError}")
 
     def get_files(self):
-            answer = simpledialog.messagebox.askyesnocancel("Preparing to Select Folder", 
-                                                      "Would you rather select files manually? \n\nNote: A PNG will be created for the first frame of each GIF file.")
-            
-            if answer is None:
-                return
-
+            answer = simpledialog.messagebox.askyesno("Preparing to Select Folder", 
+                                                      "Would you rather select files manually?\n\nNote: A PNG will be created for the first frame of each GIF file.")
             gifFile = False
 
             valid_file_types = [
@@ -122,27 +121,18 @@ class FileManager:
 
             if answer is False:
                 folder_path = filedialog.askdirectory()
-                if not folder_path: return # User cancelled folder selection
-
-                warning = simpledialog.messagebox.askokcancel("Warning",  
-                                    "Batch processing is irreversible. Are you sure you want to proceed?")
-                if warning is False: return # User decided to cancel the process
-
+                if not folder_path:
+                    return # User cancelled folder selection
+                
                 file_set = []
                 for file_type in valid_file_types:
                     _, file_extension = file_type
                     file_pattern = os.path.join(folder_path, file_extension)
                     matching_files = glob.glob(file_pattern) # Use glob to find files matching the pattern
                     file_set.extend(matching_files) # Add matching files to the file_set
-            elif answer is True:
+            else:
                 file_set = filedialog.askopenfilenames(
                     filetypes=valid_file_types)  # Prompt user to select images
-                if not file_set: return
-
-                warning = simpledialog.messagebox.askokcancel("Warning",  
-                                    "Batch processing is irreversible. Are you sure you want to proceed?")
-                if warning is False: return # User decided to cancel the process
-                
                 file_set = list(file_set)
             
             for i, file_path in enumerate(file_set):

@@ -5,6 +5,9 @@ from PIL import Image, ImageTk
 from image_properties import ImageProperties
 from advanced_editor_tools import AdvancedEditorTools
 import cv2
+from file_manager import FileManager
+import os
+from image_manager import ImageManager
 
 
 class EditorOptions(Frame):
@@ -17,50 +20,75 @@ class EditorOptions(Frame):
 
         self.history_arr = self.master.master.history
 
+        self.resize = False
+
         # Create buttons with image icons
         self.advanced_edits_button = Button(
             self, text="Advanced", width=button_width, height=button_height, command=self._open_advanced_edits)
         self.advanced_edits_button.grid(
-            row=0, column=0, padx=5, pady=5, sticky="w")
+            row=0, column=0, padx=5, pady=2, sticky="w")
 
         self.horz_flip_button = Button(self, text="Horz Flip", width=button_width,
                                        height=button_height, command=self._change_horizontal_flip_value)
-        self.horz_flip_button.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+        self.horz_flip_button.grid(row=0, column=1, padx=5, pady=2, sticky="e")
 
         self.vert_flip_button = Button(self, text="Vert Flip", width=button_width,
                                        height=button_height, command=self._change_vertical_flip_value)
         self.vert_flip_button.grid(
-            row=1, column=0, padx=5, pady=5, sticky="sw", columnspan=2)
+            row=1, column=0, padx=5, pady=2, sticky="sw", columnspan=2)
 
         self.rotate_button = Button(self, text="Rotate", width=button_width,
                                     height=button_height, command=self._change_rotation_value)
         self.rotate_button.grid(row=1, column=1, padx=5,
-                                pady=5, sticky="se", columnspan=2)
+                                pady=2, sticky="se", columnspan=2)
 
         self.resize_button = Button(
             self, text="Resize", width=button_width, height=button_height, command=self._open_resize_window)
-        self.resize_button.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        self.resize_button.grid(row=2, column=0, padx=5, pady=2, sticky="w")
 
         self.apply_grayscale = Button(self, text="GrayScale", width=button_width,
                                       height=button_height, command=self._change_grayscale_value)
         self.apply_grayscale.grid(
-            row=2, column=1, padx=5, pady=5, sticky="nw", columnspan=2)
+            row=2, column=1, padx=5, pady=2, sticky="nw", columnspan=2)
 
         self.apply_sepia = Button(self, text="Sepia", width=button_width,
                                   height=button_height, command=self._change_sepia_value)
         self.apply_sepia.grid(row=3, column=0, padx=5,
-                              pady=5, sticky="nw", columnspan=2)
+                              pady=2, sticky="nw", columnspan=2)
+
+        # New frame for metadata labels
+        self.metadata_frame = Frame(self, bg="#6b6b6b")
+        self.metadata_frame.grid(row=7, column=0, padx=1, pady=2, sticky="nsew")
+
+        # Labels for displaying image metadata
+        self.size_label = Label(self.metadata_frame, text="Size: ", bg="#6b6b6b", fg="white")
+        self.resolution_label = Label(self.metadata_frame, text="Resolution: ", bg="#6b6b6b", fg="white")
+        self.filename_label = Label(self.metadata_frame, text="File Name: ", bg="#6b6b6b", fg="white")
+        self.extension_label = Label(self.metadata_frame, text="Extension: ", bg="#6b6b6b", fg="white")
+        self.bytes_per_pixel_label = Label(self.metadata_frame, text="Bytes per Pixel: ", bg="#6b6b6b", fg="white")
+        self.zoom_resolution_label = Label(self.metadata_frame, text="Zoomed-in Resolution: ", bg="#6b6b6b", fg="white")
+
+        # Packing labels in the metadata frame
+        self.size_label.grid(row=0, column=0, padx=5, pady=1, sticky="w")
+        self.resolution_label.grid(row=1, column=0, padx=5, pady=1, sticky="w")
+        self.filename_label.grid(row=2, column=0, padx=5, pady=1, sticky="w")
+        self.extension_label.grid(row=3, column=0, padx=5, pady=1, sticky="w")
+        self.bytes_per_pixel_label.grid(row=4, column=0, padx=5, pady=1, sticky="w")
+        self.zoom_resolution_label.grid(row=5, column=0, padx=5, pady=1, sticky="w")
+
 
         self.crop_button = Button(
             self, text="Crop", width=button_width, height=button_height)
         self.crop_button.bind("<ButtonRelease>", self._initiate_crop_mode)
         self.crop_button.grid(row=3, column=1, padx=5,
-                              pady=5, sticky='e', columnspan=2)
+                              pady=2, sticky='e', columnspan=2)
 
         self.clear_all_button = Button(self, text="Clear All", width=button_width,
                                        height=button_height, command=self._clear_all_edits_to_image)
         self.clear_all_button.grid(
-            row=4, column=0, padx=5, pady=5, sticky="w", columnspan=2)
+            row=4, column=0, padx=5, pady=2, sticky="w", columnspan=2)
+        
+        self.image_properties = ImageProperties()
 
     def _open_advanced_edits(self):
         # initializes the AdvancedEditorTools
@@ -146,19 +174,11 @@ class EditorOptions(Frame):
         self.master.master.image_properties.is_flipped_vert = False
         self.master.master.image_properties.is_grayscaled = False
         self.master.master.image_properties.is_sepia = False
-        self.master.master.image_properties.is_cropped = False
         self.master.master.image_properties.rotation = 0
         self.master.master.image_properties.altered_image_height = self.master.master.image_properties.original_image_height
         self.master.master.image_properties.altered_image_width = self.master.master.image_properties.original_image_width
         self.master.master.image_properties.resize_image_height = self.master.master.image_properties.original_image_height
         self.master.master.image_properties.resize_image_width = self.master.master.image_properties.original_image_width
-        self.master.master.image_properties.crop_start_x = 0
-        self.master.master.image_properties.crop_start_y = 0
-        self.master.master.image_properties.crop_end_x = 0
-        self.master.master.image_properties.crop_end_y = 0
-        self.master.master.image_properties.crop_ratio = 0
-        self.master.master.image_properties.crop_rectangle_width = 0
-        self.master.master.image_properties.crop_rectangle_height = 0
 
     def _reset_advanced_image_properties(self):
         self.master.master.image_properties.brightness = 50
@@ -186,7 +206,7 @@ class EditorOptions(Frame):
             return False
 
         def _change_resize_values():
-            self.master.master.image_properties_is_resize = True
+            self.resize = True
             self.master.master.image_properties.resize_image_width = int(
                 width.get())
             self.master.master.image_properties.resize_image_height = int(
@@ -229,6 +249,7 @@ class EditorOptions(Frame):
 
     def update_displayed_image(self):
         self.master.master.image_viewer._apply_all_edits()
+        self.master.master.editor_options.update_metadata_labels(self.master.file_location)
 
     def _initiate_crop_mode(self, event):
         if self.winfo_containing(event.x_root, event.y_root) == self.crop_button:
@@ -289,8 +310,49 @@ class EditorOptions(Frame):
             crop_start_y=self.master.master.image_properties.crop_start_y,
             crop_end_x=self.master.master.image_properties.crop_end_x,
             crop_end_y=self.master.master.image_properties.crop_end_y,
-            crop_ratio=self.master.master.image_properties.crop_ratio,
-            crop_rectangle_width=self.master.master.image_properties.crop_rectangle_width,
-            crop_rectangle_height=self.master.master.image_properties.crop_rectangle_height,
+            crop_ratio=self.master.master.image_properties.crop_ratio
         )
         return edit_instance
+    
+    def bytes_per_pixel(self, image):
+        try:
+            # Get the number of channels and bit depth per channel
+            channels = len(image.getbands())
+        
+            # Check if the 'bits' attribute is available
+            bit_depth = getattr(image, 'bits', 8)  # Default to 8 bits if 'bits' is not available
+
+            # Calculate bytes per pixel
+            bytes_per_pixel = (bit_depth * channels + 7) // 8
+
+            return bytes_per_pixel
+        except Exception as e:
+            print(f"Error calculating bytes per pixel: {e}")
+            return None
+
+
+    def update_metadata_labels(self, path):
+        fm = FileManager()
+        fm.find_file(path)
+        if fm.file is not None:
+            try:
+                # Get image metadata
+                with Image.open(fm.file) as img:
+                    resolution = img.size
+                    file_size = os.path.getsize(fm.file)
+                    file_name = os.path.basename(fm.file)
+                    file_extension = os.path.splitext(file_name)[1]
+                    bytes_per_pixel = self.bytes_per_pixel(img)
+                    zoom_resolution = (
+                        int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                        int(resolution[1] * self.master.master.image_viewer.scale_factor))
+
+            # Update labels
+                self.size_label.config(text=f"Size: {file_size} Bytes ")
+                self.resolution_label.config(text=f"Resolution: {resolution[1]} x {resolution[0]}")
+                self.filename_label.config(text=f"File Name: {file_name} ")
+                self.extension_label.config(text=f"Extension: {file_extension} ")
+                self.bytes_per_pixel_label.config(text=f"Bytes per Pixel: {bytes_per_pixel} Bytes ")
+                self.zoom_resolution_label.config(text=f"Zoomed-in Resolution: {zoom_resolution[1]} x {zoom_resolution[0]} ")
+            except Exception as e:
+                print(f"Error reading image metadata: {e}")
