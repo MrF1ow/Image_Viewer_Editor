@@ -61,6 +61,7 @@ class History(Frame):
         self.master.master.image_properties.is_sepia = property_instance.is_sepia
         self.master.master.image_properties.is_cropped = property_instance.is_cropped
         self.master.master.image_properties.is_rotated = property_instance.is_rotated
+        self.master.master.image_properties.is_resized = property_instance.is_resized
         self.master.master.image_properties.original_image_height = property_instance.original_image_height
         self.master.master.image_properties.original_image_width = property_instance.original_image_width
         self.master.master.image_properties.altered_image_height = property_instance.altered_image_height
