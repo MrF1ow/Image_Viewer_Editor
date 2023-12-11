@@ -1,14 +1,18 @@
 from tkinter import Frame, Button, END, LEFT, DISABLED, Menu, Label, Scale, Toplevel, Text, ttk
+from PIL import Image
 from file_manager import FileManager
 from image_properties import ImageProperties
 from settings import Settings
 import cv2
 import time
+import os
 
 
 class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
+
+        self.my_file = ""
 
         self.file_options_button = Button(
             self, text="File", command=self._show_file_menu)
@@ -205,8 +209,8 @@ class AppOptions(Frame):
     def new_button_click(self, event=None):
         fm = FileManager()
         fm.get_file()
-
         if fm.file is not None:
+            self.my_file = fm.file
             self.master.file_location = fm.file
             image = cv2.imread(fm.file)
             self.master.master.original_image = image.copy()
@@ -217,6 +221,55 @@ class AppOptions(Frame):
             self._insert_into_history(image)
             self.master.master.image_viewer._reset()
             self.master.master.image_viewer.display_image(image)
+            self._update_metadata()
+
+    def bytes_per_pixel(self, image):
+        try:
+            # Get the number of channels and bit depth per channel
+            channels = len(image.getbands())
+
+            # Check if the 'bits' attribute is available
+            bit_depth = getattr(image, 'bits', 8)  # Default to 8 bits if 'bits' is not available
+
+            # Calculate bytes per pixel
+            bytes_per_pixel = (bit_depth * channels + 7) // 8
+
+            return bytes_per_pixel
+        except Exception as e:
+            print(f"Error calculating bytes per pixel: {e}")
+            return None
+
+    def _update_metadata(self):
+        fm = FileManager()
+        path = self.master.file_location
+        fm.find_file(path)
+        if fm.file is not None:
+            try:
+                with Image.open(fm.file) as img:
+                    resolution = img.size
+                    file_size = os.path.getsize(fm.file)
+                    file_name = os.path.basename(fm.file)
+                    file_extension = os.path.splitext(file_name)[1]
+                    bytes_per_pixel = self.bytes_per_pixel(img)
+                    zoom_resolution = (
+                        int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                        int(resolution[1] * self.master.master.image_viewer.scale_factor))
+            except Exception as e:
+                print(f"Error reading image metadata: {e}")
+        if self.master.master.processed_image is not None:
+            resolution = (self.master.master.processed_image.shape[1], self.master.master.processed_image.shape[0])
+            file_size = os.path.getsize(fm.file)
+            file_name = os.path.basename(fm.file)
+            file_extension = os.path.splitext(file_name)[1]
+            bytes_per_pixel = self.bytes_per_pixel(self.master.master.processed_image)
+            zoom_resolution = (
+                int(resolution[0] * self.master.master.image_viewer.scale_factor),
+                int(resolution[1] * self.master.master.image_viewer.scale_factor))
+        self.master.master.editor_options.update_metadata_labels(file_size, resolution, file_name, file_extension, bytes_per_pixel, zoom_resolution)
+
+    def _get_file_location(self):
+        return self.my_file
+
 
     def _set_dimensions_of_image(self, img=None):
         image = img
@@ -227,8 +280,6 @@ class AppOptions(Frame):
         self.master.master.image_properties.altered_image_width = width
         self.master.master.image_properties.resize_image_height = height
         self.master.master.image_properties.resize_image_width = width
-        self.master.master.image_properties.zoom_image_height = height
-        self.master.master.image_properties.zoom_image_width = width
 
     def save_button_click(self, event=None):
         fm = FileManager()
@@ -238,15 +289,18 @@ class AppOptions(Frame):
         if fm.file is not None:
             fm.save_file(self.master.master.processed_image)
             self.master.master.is_saved = True
+            self.master.master.editor_options.update_metadata_labels(self.master.file_location)
 
     def save_as_button_click(self, event=None):
         fm = FileManager()
         path = self.master.file_location
         fm.find_file(path)
 
+
         if fm.file is not None:
             fm.save_as_file(self.master.master.processed_image)
             self.master.master.is_saved = True
+            self.master.master.editor_options.update_metadata_labels(self.master.file_location)
 
     def batch_processing_button_click(self, event=None):
         fm = FileManager()
@@ -256,9 +310,6 @@ class AppOptions(Frame):
             for i in fm.batch_files:
                 self.master.file_location = i
                 image = cv2.imread(i)
-                if image is None: # image failed to be read
-                    print(f"Corrupt image at {i}\n")
-                    continue  
 
                 self.master.master.original_image = image.copy()
                 self.master.master.processed_image = image.copy()
@@ -272,6 +323,9 @@ class AppOptions(Frame):
 
                 if fm.file is not None:
                     fm.save_file(self.master.master.processed_image)
+                    self.master.master.editor_options.update_metadata_labels(self.master.file_location)
+
+    # Allows the user to set the current filters on the image as the default fitlers applied to all images.
 
     def _set_current_filters_as_default(self):
         # call a function that applys all the current self.master.master.image_properties values to a config file

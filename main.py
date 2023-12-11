@@ -72,7 +72,7 @@ class Main(tk.Tk):
         self.bind("<Control-plus>", self.image_viewer._zoom_in)
         self.bind("<Control-minus>", self.image_viewer._zoom_out)
 
-        self.protocol("<WM_DELETE_WINDOW>", self._on_closing)
+        self.protocol("WM_DELETE_WINDOW", self._on_closing)
 
     def _switch_crop_to_off(self):
         self.in_crop_mode = False
