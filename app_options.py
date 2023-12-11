@@ -8,7 +8,6 @@ import os
 from PIL import Image
 import numpy as np
 
-
 class AppOptions(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master=master, bg="#6b6b6b")
@@ -41,6 +40,7 @@ class AppOptions(Frame):
 
         # HELP MENU
         self.help_menu_items = [
+            "General", # h2
             "Import Image",
             "Export Image",
             "Undo Edit",
@@ -51,21 +51,21 @@ class AppOptions(Frame):
             "Save File",
             "History Selection",
             "Access Meta Data",
-            "Advanced Edits",
+            "Clear All",
+            "Advanced Edits", # h2
             "Brightness",
             "Contrast",
             "Blur",
             "Hue",
             "Saturation",
-            "Basic Edits",
+            "Basic Edits", # h2
             "Horizontal Flip",
             "Vertical Flip",
             "Rotate",
             "Resize",
             "Grayscale",
             "Sepia",
-            "Crop",
-            "Clear All"
+            "Crop"
         ]
 
         self.dictionary_of_help_menu_items_and_help_information = {
@@ -85,7 +85,7 @@ class AppOptions(Frame):
                 "Initiate batch processing by selecting \"Edit\" -> \"Batch Processing\" and choosing the files you want to apply the edits to.",
 
             "Zoom":
-                "Effortlessly zoom in and out using your trackpad or by holding down the 'Ctrl' key and pressing '+' or '-'",
+                "Effortlessly zoom in and out using your trackpad or by holding down the 'Ctrl' key and pressing '+' or '-'.",
 
             "Pan":
                 "Navigate across your image seamlessly by clicking and dragging your mouse. To move around the image, click, hold, and drag to explore different areas. Release the mouse button when you've reached the desired view.",
@@ -135,7 +135,8 @@ class AppOptions(Frame):
             "History Selection":
                 "Access the history log on the homepage's right panel.Click on a history item to return to a specific point in your image's editing history. Items are labeled with the edit and time.",
 
-            "Access Meta Data": """Blah blah blah"""
+            "Access Meta Data": 
+                """Meta data is displayed for the loaded image on the bottom left of the homepage. The following information can be found: size (in Bytes), file name, extension, Bytes per pixel, and zoomed-in resolution."""
         }
 
         self.help_button = Button(
@@ -144,7 +145,7 @@ class AppOptions(Frame):
 
     def convert_index_to_end(self, index):
         line, column = index.split('.')
-        return f"{line}.end"
+        return f"{line}.end" 
 
     def _add_help_menu_items(self):
         current_position = self.help_text.index("insert")
@@ -156,13 +157,15 @@ class AppOptions(Frame):
         for element in self.help_menu_items:
             help_info = self.dictionary_of_help_menu_items_and_help_information.get(
                 element, "")
-            if element not in self.dictionary_of_help_menu_items_and_help_information:
+            if element not in self.dictionary_of_help_menu_items_and_help_information: # h2 is being added
+                self.help_text.insert(END, "\n")
                 current_position = self.help_text.index("insert")
                 end_index = self.convert_index_to_end(current_position)
                 self.help_text.insert(END, f"{element}\n")
                 self.help_text.tag_add("header1", current_position, end_index)
                 self.help_text.tag_configure(
-                    "header1", font=("Arial", 20, "bold"))
+                    "header1", font=("Arial", 20, "bold", "underline"))
+                self.help_text.insert(END, "\n")
             else:
                 current_position = self.help_text.index("insert")
                 end_index = self.convert_index_to_end(current_position)
