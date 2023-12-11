@@ -69,7 +69,7 @@ class Main(tk.Tk):
         self.bind('<Control-y>', self.history_of_edits.redo_action)
 
         self.bind("<MouseWheel>", self.image_viewer._zoom)
-        self.bind("<Control-plus>", self.image_viewer._zoom_in)
+        self.bind("<Control-equal>", self.image_viewer._zoom_in)
         self.bind("<Control-minus>", self.image_viewer._zoom_out)
 
         self.protocol("<WM_DELETE_WINDOW>", self._on_closing)
