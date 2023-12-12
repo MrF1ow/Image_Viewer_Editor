@@ -257,6 +257,7 @@ class ImageManager(Frame):
     def _start_crop(self, event):
         self.crop_start_x = event.x
         self.crop_start_y = event.y
+        # print(f"Start: ({self.crop_start_x}, {self.crop_start_y})")
 
     def _update_crop(self, event):
         if self.rectangle_id:
@@ -270,10 +271,19 @@ class ImageManager(Frame):
 
     def _set_crop_coordinates(self, start_x, start_y, end_x, end_y):
         self.master.master.image_properties.is_cropped = True
-        self.master.master.image_properties.crop_start_x = start_x
-        self.master.master.image_properties.crop_start_y = start_y
-        self.master.master.image_properties.crop_end_x = end_x
-        self.master.master.image_properties.crop_end_y = end_y
+        current_location = len(self.master.master.history) - 1
+        add_x = self.master.master.history[current_location].crop_start_x
+        add_y = self.master.master.history[current_location].crop_start_y
+
+        new_crop_start_x = start_x + add_x
+        new_crop_start_y = start_y + add_y
+        new_crop_end_x = end_x + add_x
+        new_crop_end_y = end_y + add_y
+
+        self.master.master.image_properties.crop_start_x = new_crop_start_x
+        self.master.master.image_properties.crop_start_y = new_crop_start_y
+        self.master.master.image_properties.crop_end_x = new_crop_end_x
+        self.master.master.image_properties.crop_end_y = new_crop_end_y
         self.master.master.image_properties.crop_ratio = self.ratio
         self.master.master.image_properties.altered_image_width = end_x - start_x
         self.master.master.image_properties.altered_image_height = end_y - start_y
@@ -377,7 +387,7 @@ class ImageManager(Frame):
 
         self._set_crop_coordinates(start_x, start_y, end_x, end_y)
 
-        self.master.master.processed_image = self.master.master.processed_image[y, x]
+        self.master.master.processed_image = self.master.master.processed_image[y,x]
 
         title = "Cropped Image"
         self._insert_into_history(title)
@@ -398,21 +408,21 @@ class ImageManager(Frame):
         x = slice(original_start_x, original_end_x, 1)
         y = slice(original_start_y, original_end_y, 1)
 
+        print(f"X slice: {x}, Y slice: {y}")
+
         image = image[y, x]
         return image
 
     def _apply_all_edits(self):
         image = self.master.master.original_image
+        image = self._perform_crop_to_image(image)
         image = AllEditFunctions._apply_all_basic_edits(
             self.master.master.image_properties, image)
         image = AllEditFunctions._apply_all_advanced_edits(
             self.master.master.image_properties, image)
-        image = self._perform_crop_to_image(image)
         self.master.master.processed_image = image
         self.master.master.app_options._update_metadata()
         self.display_image(self.master.master.processed_image)
-        #print(f"Original Crop Start: ({self.master.master.image_properties.crop_start_x}, {self.master.master.image_properties.crop_start_y})")
-        #print(f"Original Crop End: ({self.master.master.image_properties.crop_end_x}, {self.master.master.image_properties.crop_end_y})")
 
     def clear_canvas(self):
         self.canvas.delete("all")

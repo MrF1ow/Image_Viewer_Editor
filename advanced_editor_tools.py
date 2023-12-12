@@ -17,6 +17,8 @@ class AdvancedEditorTools(Toplevel):
 
         self.history_arr = self.master.master.history
 
+        self.title("Advanced Editor Tools")
+
         self._set_pre_image_properties()
         self._set_current_image_properties()
 
@@ -162,7 +164,7 @@ class AdvancedEditorTools(Toplevel):
 
     def _change_hue_value(self, event):
         self.displaying_processed_image = True
-        self.current_image_properties.hue = self.hue_scale.get() * 1.79
+        self.current_image_properties.hue = self.hue_scale.get()
         self.update_displayed_image()
 
     def _change_saturation_value(self, event):
@@ -183,7 +185,7 @@ class AdvancedEditorTools(Toplevel):
     def _confirm_edits_to_image(self):
         self.master.master.image_properties = self.current_image_properties
         self._insert_into_history()
-        self.destroy()  # closes the AdvancedEditorTools (destructor pretty much)
+        self.destroy()
 
     def _preview_edits_on_image(self, event):
         if self.displaying_processed_image:
@@ -216,7 +218,7 @@ class AdvancedEditorTools(Toplevel):
         self.hue_scale.set(self.master.master.image_properties.hue)
         self.contrast_scale.set(self.master.master.image_properties.contrast)
         self.saturation_scale.set(
-            self.master.master.image_properties.saturation)
+            self.master.master.image_properties.saturation * 100)
 
     def update_displayed_image(self):
         if self.displaying_processed_image:
@@ -244,7 +246,7 @@ class AdvancedEditorTools(Toplevel):
         Returns:
             None
         """
-        title = f"Advanced Edits:\nBrightness: {self.master.master.image_properties.brightness},\nContrast: {self.master.master.image_properties.contrast},\nSaturation: {self.master.master.image_properties.saturation},\nBlur: {self.master.master.image_properties.blur},\nHue: {self.master.master.image_properties.hue}"
+        title = f"Advanced Edits Applied"
         edit_instance = self._make_edit_instance(title)
         self._check_undo_performed()
         self.history_arr = self.master.master.history

@@ -111,10 +111,6 @@ class AllEditFunctions:
         return num * 0.02
 
     @staticmethod
-    def _convert_saturation(num):
-        return int(num * 0.01)
-
-    @staticmethod
     def _convert_hue(num):
         return int(num * 1.79)
 
@@ -136,7 +132,7 @@ class AllEditFunctions:
     def _apply_hue_to_image(img_properties=None, img=None):
         image_properties = img_properties
         image = img
-        hue_value = image_properties.hue
+        hue_value = AllEditFunctions._convert_hue(image_properties.hue)
         # Convert image to HSV
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         # Change the hue channel
