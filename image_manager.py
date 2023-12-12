@@ -257,7 +257,6 @@ class ImageManager(Frame):
     def _start_crop(self, event):
         self.crop_start_x = event.x
         self.crop_start_y = event.y
-        # print(f"Start: ({self.crop_start_x}, {self.crop_start_y})")
 
     def _update_crop(self, event):
         if self.rectangle_id:
@@ -392,7 +391,7 @@ class ImageManager(Frame):
         title = "Cropped Image"
         self._insert_into_history(title)
 
-        self.display_image(self.master.master.processed_image)
+        self._apply_all_edits()
 
     def _perform_crop_to_image(self, img=None):
         image = img
@@ -400,15 +399,13 @@ class ImageManager(Frame):
             return image
 
         original_crop_ratio = self.master.master.image_properties.crop_ratio
-        original_start_x = int(self.master.master.image_properties.crop_start_x / original_crop_ratio)
-        original_start_y = int(self.master.master.image_properties.crop_start_y / original_crop_ratio)
-        original_end_x = int(self.master.master.image_properties.crop_end_x / original_crop_ratio)
-        original_end_y = int(self.master.master.image_properties.crop_end_y / original_crop_ratio)
+        original_start_x = int(self.master.master.image_properties.crop_start_x)
+        original_start_y = int(self.master.master.image_properties.crop_start_y)
+        original_end_x = int(self.master.master.image_properties.crop_end_x)
+        original_end_y = int(self.master.master.image_properties.crop_end_y)
 
         x = slice(original_start_x, original_end_x, 1)
         y = slice(original_start_y, original_end_y, 1)
-
-        print(f"X slice: {x}, Y slice: {y}")
 
         image = image[y, x]
         return image
