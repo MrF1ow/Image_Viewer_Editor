@@ -332,6 +332,7 @@ class AppOptions(Frame):
 
                 if fm.file is not None:
                     fm.save_file(self.master.master.processed_image)
+                    self.master.master.is_saved = True
 
     def _set_current_filters_as_default(self):
         # call a function that applys all the current self.master.master.image_properties values to a config file
