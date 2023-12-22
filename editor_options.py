@@ -1,10 +1,7 @@
-import numpy as np
 import time
-from tkinter import Frame, Button, Toplevel, Label, Button, Entry, NW
-from PIL import Image, ImageTk
+from tkinter import Frame, Button, Toplevel, Label, Button, Entry
 from image_properties import ImageProperties
 from advanced_editor_tools import AdvancedEditorTools
-import cv2
 
 
 class EditorOptions(Frame):
@@ -17,16 +14,19 @@ class EditorOptions(Frame):
 
         self.history_arr = self.master.master.history
 
-                # Create a frame for buttons
+        # Frame for displaying buttons
         self.button_frame = Frame(self, bg="#6b6b6b")
-        self.button_frame.grid(row=0, column=0, rowspan=4, padx=5, pady=2, sticky="nsew")
+        self.button_frame.grid(row=0, column=0, rowspan=4,
+                               padx=5, pady=2, sticky="nsew")
 
-        # Create buttons with image icons and place them in the button_frame
+        # Buttons for editing the image
         self.advanced_edits_button = Button(
             self.button_frame, text="Advanced", width=button_width, height=button_height, command=self._open_advanced_edits)
-        self.advanced_edits_button.grid(row=0, column=0, padx=5, pady=2, sticky="w")
+        self.advanced_edits_button.grid(
+            row=0, column=0, padx=5, pady=2, sticky="w")
 
-        self.crop_button = Button(self.button_frame, text="Crop", width=button_width, height=button_height)
+        self.crop_button = Button(
+            self.button_frame, text="Crop", width=button_width, height=button_height)
         self.crop_button.bind("<ButtonRelease>", self._initiate_crop_mode)
         self.crop_button.grid(row=0, column=1, padx=5, pady=2, sticky='e')
 
@@ -36,11 +36,13 @@ class EditorOptions(Frame):
 
         self.vert_flip_button = Button(
             self.button_frame, text="Vert Flip", width=button_width, height=button_height, command=self._change_vertical_flip_value)
-        self.vert_flip_button.grid(row=1, column=1, padx=5, pady=2, sticky="e", columnspan=2)
+        self.vert_flip_button.grid(
+            row=1, column=1, padx=5, pady=2, sticky="e", columnspan=2)
 
         self.rotate_button = Button(
             self.button_frame, text="Rotate", width=button_width, height=button_height, command=self._change_rotation_value)
-        self.rotate_button.grid(row=2, column=0, padx=5, pady=2, sticky="w", columnspan=2)
+        self.rotate_button.grid(row=2, column=0, padx=5,
+                                pady=2, sticky="w", columnspan=2)
 
         self.resize_button = Button(
             self.button_frame, text="Resize", width=button_width, height=button_height, command=self._open_resize_window)
@@ -48,45 +50,63 @@ class EditorOptions(Frame):
 
         self.apply_grayscale = Button(
             self.button_frame, text="GrayScale", width=button_width, height=button_height, command=self._change_grayscale_value)
-        self.apply_grayscale.grid(row=3, column=0, padx=5, pady=2, sticky="w", columnspan=2)
+        self.apply_grayscale.grid(
+            row=3, column=0, padx=5, pady=2, sticky="w", columnspan=2)
 
         self.apply_sepia = Button(
             self.button_frame, text="Sepia", width=button_width, height=button_height, command=self._change_sepia_value)
-        self.apply_sepia.grid(row=3, column=1, padx=5, pady=2, sticky="e", columnspan=2)
+        self.apply_sepia.grid(row=3, column=1, padx=5,
+                              pady=2, sticky="e", columnspan=2)
 
         self.clear_all_button = Button(
             self.button_frame, text="Clear All", width=button_width * 2 + 5, height=button_height, command=self._clear_all_edits_to_image)
-        self.clear_all_button.grid(row=4, column=0, padx=5, pady=2, sticky="we", columnspan=2)
+        self.clear_all_button.grid(
+            row=4, column=0, padx=5, pady=2, sticky="we", columnspan=2)
 
-
-        # New frame for metadata labels
-        self.metadata_frame = Frame(self, bg="#6b6b6b", width=15, highlightthickness=1, highlightbackground="white")
-        self.metadata_frame.grid(row=7, column=0, padx=1, pady=2, sticky="nsew")
+        # Frame for displaying image metadata
+        self.metadata_frame = Frame(
+            self, bg="#6b6b6b", width=15, highlightthickness=1, highlightbackground="white")
+        self.metadata_frame.grid(
+            row=7, column=0, padx=1, pady=2, sticky="nsew")
 
         # Labels for displaying image metadata
-        self.size_label = Label(self.metadata_frame, text="Size: ", bg="#6b6b6b", fg="white")
-        self.resolution_label = Label(self.metadata_frame, text="Resolution: ", bg="#6b6b6b", fg="white")
-        self.filename_label = Label(self.metadata_frame, text="File Name: ", bg="#6b6b6b", fg="white")
-        self.extension_label = Label(self.metadata_frame, text="Extension: ", bg="#6b6b6b", fg="white")
-        self.bytes_per_pixel_label = Label(self.metadata_frame, text="Bytes per Pixel: ", bg="#6b6b6b", fg="white")
-        self.zoom_resolution_label = Label(self.metadata_frame, text="Zoomed-in Resolution: ", bg="#6b6b6b", fg="white")
+        self.size_label = Label(self.metadata_frame,
+                                text="Size: ", bg="#6b6b6b", fg="white")
+        self.resolution_label = Label(
+            self.metadata_frame, text="Resolution: ", bg="#6b6b6b", fg="white")
+        self.filename_label = Label(
+            self.metadata_frame, text="File Name: ", bg="#6b6b6b", fg="white")
+        self.extension_label = Label(
+            self.metadata_frame, text="Extension: ", bg="#6b6b6b", fg="white")
+        self.bytes_per_pixel_label = Label(
+            self.metadata_frame, text="Bytes per Pixel: ", bg="#6b6b6b", fg="white")
+        self.zoom_resolution_label = Label(
+            self.metadata_frame, text="Zoomed-in Resolution: ", bg="#6b6b6b", fg="white")
 
         # Packing labels in the metadata frame
         self.size_label.grid(row=0, column=0, padx=5, pady=1, sticky="w")
         self.resolution_label.grid(row=1, column=0, padx=5, pady=1, sticky="w")
         self.filename_label.grid(row=2, column=0, padx=5, pady=1, sticky="w")
         self.extension_label.grid(row=3, column=0, padx=5, pady=1, sticky="w")
-        self.bytes_per_pixel_label.grid(row=4, column=0, padx=5, pady=1, sticky="w")
-        self.zoom_resolution_label.grid(row=5, column=0, padx=5, pady=1, sticky="w")
+        self.bytes_per_pixel_label.grid(
+            row=4, column=0, padx=5, pady=1, sticky="w")
+        self.zoom_resolution_label.grid(
+            row=5, column=0, padx=5, pady=1, sticky="w")
 
     def _open_advanced_edits(self):
-        # initializes the AdvancedEditorTools
+        """
+        Opens the advanced editor tools window.
+        """
         self.master.master._switch_crop_to_off()
         self.master.master.advanced_tools = AdvancedEditorTools(
             master=self.master)
         self.master.master.advanced_tools.grab_set()
 
     def _change_vertical_flip_value(self):
+        """
+        Changes the value of the is_flipped_vert property in self.master.master.image_properties.
+        Calls self._insert_into_history() to insert a new edit instance into the history array.
+        """
         self.master.master._switch_crop_to_off()
         if self.master.master.image_properties.is_flipped_vert:
             # If it's flipped, revert back to the original
@@ -102,6 +122,10 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_horizontal_flip_value(self):
+        """
+        Changes the value of the is_flipped_horz property in self.master.master.image_properties.
+        Calls self._insert_into_history() to insert a new edit instance into the history array.
+        """
         self.master.master._switch_crop_to_off()
         if self.master.master.image_properties.is_flipped_horz:
             # If it's flipped, revert back to the original
@@ -117,6 +141,10 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_grayscale_value(self):
+        """
+        Changes the value of the is_grayscaled property in self.master.master.image_properties.
+        Calls self._insert_into_history() to insert a new edit instance into the history array.
+        """
         self.master.master._switch_crop_to_off()
         if self.master.master.image_properties.is_sepia == False:
             if self.master.master.image_properties.is_grayscaled:
@@ -132,6 +160,10 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_sepia_value(self):
+        """
+        Changes the value of the is_sepia property in self.master.master.image_properties.
+        Calls self._insert_into_history() to insert a new edit instance into the history array.
+        """
         self.master.master._switch_crop_to_off()
         if self.master.master.image_properties.is_grayscaled == False:
             if self.master.master.image_properties.is_sepia:
@@ -147,6 +179,10 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _change_rotation_value(self):
+        """
+        Changes the value of the rotation property in self.master.master.image_properties.
+        Calls self._insert_into_history() to insert a new edit instance into the history array.
+        """
         self.master.master._switch_crop_to_off()
         if self.master.master.image_properties.rotation == 360:
             self.master.master.image_properties.rotation = 0
@@ -159,6 +195,9 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _reset_basic_image_properties(self):
+        """
+        Resets all basic image properties to their default values.
+        """
         self.master.master.image_properties.is_flipped_horz = False
         self.master.master.image_properties.is_flipped_vert = False
         self.master.master.image_properties.is_grayscaled = False
@@ -178,6 +217,9 @@ class EditorOptions(Frame):
         self.master.master.image_properties.crop_rectangle_height = 0
 
     def _reset_advanced_image_properties(self):
+        """
+        Resets all advanced image properties to their default values.
+        """
         self.master.master.image_properties.brightness = 50
         self.master.master.image_properties.contrast = 50
         self.master.master.image_properties.saturation = 0
@@ -185,6 +227,9 @@ class EditorOptions(Frame):
         self.master.master.image_properties.hue = 0
 
     def _clear_all_edits_to_image(self):
+        """
+        Clears all edits to the image.
+        """
         self.master.master._switch_crop_to_off()
         self._reset_basic_image_properties()
         self._reset_advanced_image_properties()
@@ -193,6 +238,9 @@ class EditorOptions(Frame):
         self.update_displayed_image()
 
     def _open_resize_window(self):
+        """
+        Opens a window for resizing the image.
+        """
         self.master.master._switch_crop_to_off()
         MAXIMUM_SIZE = 7680
         MINIMUM_SIZE = 1
@@ -245,9 +293,15 @@ class EditorOptions(Frame):
                command=_change_resize_values).pack()
 
     def update_displayed_image(self):
+        """
+        Updates the displayed image.
+        """
         self.master.master.image_viewer._apply_all_edits()
 
     def _initiate_crop_mode(self, event):
+        """
+        Initiates crop mode.
+        """
         if self.winfo_containing(event.x_root, event.y_root) == self.crop_button:
             if self.master.master.in_crop_mode:
                 self.master.master.image_viewer._deactive_crop_mode(event)
@@ -255,6 +309,9 @@ class EditorOptions(Frame):
                 self.master.master.image_viewer._active_crop_mode(event)
 
     def _check_undo_performed(self):
+        """
+        Checks if an undo has been performed. If so, clears the history after the edit.
+        """
         if self.master.master.undo_performed:
             self.master.master.history_of_edits._clear_after_edit()
 
@@ -262,10 +319,8 @@ class EditorOptions(Frame):
         """
         Inserts a new edit instance into the history array and updates the history listbox.
 
-        Args:
+        Parameters:
             title (str): Title for the edit instance.
-            property_name (str): Name of the property to be updated in self.master.master.image_properties.
-            new_value (any): New value to be set for the specified property.
 
         Returns:
             None
@@ -279,6 +334,12 @@ class EditorOptions(Frame):
     def _make_edit_instance(self, title):
         """
         Creates an edit instance with the current self.master.master.image_properties values.
+
+        Parameters:
+            title (str): Title for the edit instance.
+
+        Returns:
+            edit_instance (ImageProperties): An instance of the ImageProperties class.
         """
         edit_instance = ImageProperties(
             title=title,
@@ -319,9 +380,26 @@ class EditorOptions(Frame):
         return edit_instance
 
     def update_metadata_labels(self, file_size, resolution, file_name, file_extension, bytes_per_pixel, zoom_resolution):
+        """
+        Updates the metadata labels.
+
+        Parameters:
+            file_size (int): Size of the image file in bytes.
+            resolution (tuple): Resolution of the image.
+            file_name (str): Name of the image file.
+            file_extension (str): Extension of the image file.
+            bytes_per_pixel (int): Number of bytes per pixel in the image.
+            zoom_resolution (tuple): Resolution of the zoomed-in image.
+
+        Returns:
+            None
+        """
         self.size_label.config(text=f"Size: {file_size} Bytes ")
-        self.resolution_label.config(text=f"Resolution: {resolution[1]} x {resolution[0]}")
+        self.resolution_label.config(
+            text=f"Resolution: {resolution[1]} x {resolution[0]}")
         self.filename_label.config(text=f"File Name: {file_name} ")
         self.extension_label.config(text=f"Extension: {file_extension} ")
-        self.bytes_per_pixel_label.config(text=f"Color Depth: {bytes_per_pixel} Bytes ")
-        self.zoom_resolution_label.config(text=f"Zoomed-in Resolution: {zoom_resolution[1]} x {zoom_resolution[0]} ")
+        self.bytes_per_pixel_label.config(
+            text=f"Color Depth: {bytes_per_pixel} Bytes ")
+        self.zoom_resolution_label.config(
+            text=f"Zoomed-in Resolution: {zoom_resolution[1]} x {zoom_resolution[0]} ")

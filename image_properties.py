@@ -2,6 +2,9 @@ from dataclasses import dataclass
 
 @dataclass
 class ImageProperties:
+    """
+    Dataclass for storing image properties
+    """
     title: str=""
     time: str=""
 

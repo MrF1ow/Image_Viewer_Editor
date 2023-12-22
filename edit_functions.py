@@ -6,6 +6,16 @@ import numpy as np
 class AllEditFunctions:
     @staticmethod
     def _apply_horizontal_flip_image(img_properties=None, img=None):
+        """
+        Applies a horizontal flip to the image if the image_properties.is_flipped_horz is True
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be flipped
+
+        Returns:
+            numpy.ndarray: The flipped image
+        """
         image_properties = img_properties
         image = img
         image = Image.fromarray(image)
@@ -17,6 +27,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_vertical_flip_image(img_properties=None, img=None):
+        """
+        Applies a vertical flip to the image if the image_properties.is_flipped_vert is True
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be flipped
+
+        Returns:
+            numpy.ndarray: The flipped image
+        """
         image_properties = img_properties
         image = img
         image = Image.fromarray(image)
@@ -28,6 +48,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_grayscale_to_image(img_properties=None, img=None):
+        """
+        Applies a grayscale to the image if the image_properties.is_grayscaled is True
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be grayscaled
+
+        Returns:
+            numpy.ndarray: The grayscaled image
+        """
         image_properties = img_properties
         image = img
         grayscale_image = cv2.cvtColor(
@@ -36,6 +66,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_sepia_to_image(img_properties=None, img=None):
+        """
+        Applies a sepia filter to the image if the image_properties.is_sepia is True
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be sepia'd
+
+        Returns:
+            numpy.ndarray: The sepia'd image
+        """
         image_properties = img_properties
         image = img
         sepia_image = image
@@ -53,6 +93,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_rotation_to_image(img_properties=None, img=None):
+        """
+        Applies a rotation to the image if the image_properties.rotation is not 0
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be rotated
+
+        Returns:
+            numpy.ndarray: The rotated image
+        """
         image_properties = img_properties
         image = img
         angle = image_properties.rotation
@@ -76,6 +126,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_resize_to_image(img_properties=None, img=None):
+        """
+        Applies a resize to the image if the image_properties.is_resized is True
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be resized
+
+        Returns:
+            numpy.ndarray: The resized image
+        """
         image_properties = img_properties
         image = img
         resized_image = cv2.resize(image, (image_properties.altered_image_width,
@@ -84,6 +144,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_all_basic_edits(img_properties=None, img=None):
+        """
+        Applies all basic edits to the image
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be edited
+
+        Returns:
+            numpy.ndarray: The edited image
+        """
         image_properties = img_properties
         resize = image_properties.is_resized
         image = img
@@ -104,18 +174,37 @@ class AllEditFunctions:
 
     @staticmethod
     def _convert_brightness(num):
+        """
+        Converts the brightness value to a value that can be used by OpenCV
+        """
         return num * 2.54 - 127
 
     @staticmethod
     def _convert_contrast(num):
+        """
+        Converts the contrast value to a value that can be used by OpenCV
+        """
         return num * 0.02
 
     @staticmethod
     def _convert_hue(num):
+        """
+        Converts the hue value to a value that can be used by OpenCV
+        """
         return int(num * 1.79)
 
     @staticmethod
     def _apply_blur_to_image(img_properties=None, img=None):
+        """
+        Applies a blur to the image if the image_properties.blur is not 0
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be blurred
+
+        Returns:
+            numpy.ndarray: The blurred image
+        """
         image_properties = img_properties
         image = img
         blur_value = image_properties.blur
@@ -130,6 +219,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_hue_to_image(img_properties=None, img=None):
+        """
+        Applies a hue to the image if the image_properties.hue is not 0
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be hue'd
+
+        Returns:
+            numpy.ndarray: The hue'd image
+        """
         image_properties = img_properties
         image = img
         hue_value = AllEditFunctions._convert_hue(image_properties.hue)
@@ -145,6 +244,16 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_saturation_to_image(img_properties=None, img=None):
+        """
+        Applies a saturation to the image if the image_properties.saturation is not 0
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be saturation'd
+
+        Returns:
+            numpy.ndarray: The saturation'd image
+        """
         image_properties = img_properties
         image = img
         saturation_value = image_properties.saturation
@@ -162,12 +271,23 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_brightness_and_contrast_to_image(img_properties=None, img=None):
+        """
+        Applies a brightness and contrast to the image if the image_properties.brightness or image_properties.contrast is not 0
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be brightness'd and contrast'd
+
+        Returns:
+            numpy.ndarray: The brightness'd and contrast'd image
+        """
         image_properties = img_properties
         image = img
         brightness_value = image_properties.brightness
         contrast_value = image_properties.contrast
 
-        brightness_factor = AllEditFunctions._convert_brightness(brightness_value)
+        brightness_factor = AllEditFunctions._convert_brightness(
+            brightness_value)
         contrast_factor = AllEditFunctions._convert_contrast(contrast_value)
         # applies the actual brightness change
         image = cv2.convertScaleAbs(
@@ -176,12 +296,25 @@ class AllEditFunctions:
 
     @staticmethod
     def _apply_all_advanced_edits(img_properties=None, img=None):
+        """
+        Applies all advanced edits to the image
+
+        Parameters:
+            img_properties (ImageProperties): The image properties object
+            img (numpy.ndarray): The image to be edited
+
+        Returns:
+            numpy.ndarray: The edited image
+        """
         image_properties = img_properties
         image = img
         image = AllEditFunctions._apply_blur_to_image(image_properties, image)
-        image = AllEditFunctions._apply_brightness_and_contrast_to_image(image_properties, image)
+        image = AllEditFunctions._apply_brightness_and_contrast_to_image(
+            image_properties, image)
         if image_properties.is_grayscaled == False:
-            image = AllEditFunctions._apply_hue_to_image(image_properties, image)
-            image = AllEditFunctions._apply_saturation_to_image(image_properties, image)
+            image = AllEditFunctions._apply_hue_to_image(
+                image_properties, image)
+            image = AllEditFunctions._apply_saturation_to_image(
+                image_properties, image)
 
         return image

@@ -1,7 +1,6 @@
-from tkinter import Frame, Button, END, LEFT, DISABLED, Menu, Label, Scale, Toplevel, Text, ttk
+from tkinter import Frame, Button, END, LEFT, Menu, Toplevel, Text, ttk
 from file_manager import FileManager
 from image_properties import ImageProperties
-from settings import Settings
 import cv2
 import time
 import os
@@ -31,14 +30,6 @@ class AppOptions(Frame):
         self.edit_menu.add_command(
             label="Batch Processing", command=self.batch_processing_button_click)
 
-        # SETTINGS
-        # Creating the instance of Settings.
-        self.settings = Settings(master=master)
-        self.settings_menu_button = Button(
-            self, text="Settings", command=self._show_settings_menu)
-        self.settings_menu_button.pack(side="left")
-
-        # HELP MENU
         self.help_menu_items = [
             "General", # h2
             "Import Image",
@@ -135,7 +126,7 @@ class AppOptions(Frame):
             "History Selection":
                 "Access the history log on the homepage's right panel.Click on a history item to return to a specific point in your image's editing history. Items are labeled with the edit and time.",
 
-            "Access Meta Data": 
+            "Access Meta Data":
                 """Meta data is displayed for the loaded image on the bottom left of the homepage. The following information can be found: size (in Bytes), file name, extension, Bytes per pixel, and zoomed-in resolution."""
         }
 
@@ -144,10 +135,16 @@ class AppOptions(Frame):
         self.help_button.pack(side="left")
 
     def convert_index_to_end(self, index):
+        """
+        Converts an index to the end of the line
+        """
         line, column = index.split('.')
-        return f"{line}.end" 
+        return f"{line}.end"
 
     def _add_help_menu_items(self):
+        """
+        Adds the help menu items to the help text
+        """
         current_position = self.help_text.index("insert")
         end_index = self.convert_index_to_end(current_position)
         self.help_text.insert(END, "User Guide\n\n")
@@ -178,6 +175,9 @@ class AppOptions(Frame):
                 self.help_text.insert(END, f"{help_info}\n\n")
 
     def _show_help_menu(self, event=None):
+        """
+        Shows the help menu
+        """
         default_font = ("Arial", 12)
         screen_width = int(self.winfo_screenwidth() * 0.04)
         print(self.winfo_screenwidth())
@@ -198,17 +198,23 @@ class AppOptions(Frame):
         self.help_text.config(state="disabled")
 
     def _show_file_menu(self, event=None):
+        """
+        Shows the file dropdown menu: New, Save, Save As
+        """
         self.file_menu.post(self.file_options_button.winfo_rootx(
         ), self.file_options_button.winfo_rooty() + self.file_options_button.winfo_height())
 
     def _show_edit_menu(self, event=None):
+        """
+        Shows the edit dropdown menu: Batch Processing
+        """
         self.edit_menu.post(self.edit_options_button.winfo_rootx(
         ), self.edit_options_button.winfo_rooty() + self.edit_options_button.winfo_height())
 
-    def _show_settings_menu(self, event=None):
-        self.settings.toggle_visibility()
-
     def _update_app_title(self):
+        """
+        Updates the app title to the current file name
+        """
         if self.master.file_location is not None:
             self.master.master.title(
                 f"Image Editor - {os.path.basename(self.master.file_location)}")
@@ -216,6 +222,9 @@ class AppOptions(Frame):
             self.master.master.title("Image Editor")
 
     def new_button_click(self, event=None):
+        """
+        Opens a file dialog to select a new image
+        """
         fm = FileManager()
         fm.get_file()
         if fm.file is not None:
@@ -234,6 +243,9 @@ class AppOptions(Frame):
             self._update_app_title()
 
     def bytes_per_pixel(self, image):
+        """
+        Calculates the bytes per pixel of an image (color depth)
+        """
         try:
             if isinstance(image, np.ndarray):
                 channels = image.shape[-1] if len(image.shape) > 2 else 1
@@ -251,6 +263,9 @@ class AppOptions(Frame):
             return None
 
     def _update_metadata(self):
+        """
+        Updates the metadata labels when an image is imported
+        """
         fm = FileManager()
         path = self.master.file_location
         fm.find_file(path)
@@ -279,6 +294,9 @@ class AppOptions(Frame):
         self.master.master.editor_options.update_metadata_labels(file_size, resolution, file_name, file_extension, bytes_per_pixel, zoom_resolution)
 
     def _set_dimensions_of_image(self, img=None):
+        """
+        Sets the dimensions of the image when imported
+        """
         image = img
         height, width = image.shape[:2]
         self.master.master.image_properties.original_image_height = height
@@ -291,6 +309,9 @@ class AppOptions(Frame):
         self.master.master.image_properties.zoom_image_width = width
 
     def save_button_click(self, event=None):
+        """
+        Saves the image to the current file location
+        """
         fm = FileManager()
         path = self.master.file_location
         fm.find_file(path)
@@ -300,6 +321,9 @@ class AppOptions(Frame):
             self.master.master.is_saved = True
 
     def save_as_button_click(self, event=None):
+        """
+        Opens a file dialog to save the image as a new file
+        """
         fm = FileManager()
         path = self.master.file_location
         fm.find_file(path)
@@ -309,6 +333,9 @@ class AppOptions(Frame):
             self.master.master.is_saved = True
 
     def batch_processing_button_click(self, event=None):
+        """
+        Opens a file dialog to select multiple images or a folder containing multiple images for batch processing
+        """
         fm = FileManager()
         fm.get_files()
 
@@ -334,51 +361,12 @@ class AppOptions(Frame):
                     fm.save_file(self.master.master.processed_image)
                     self.master.master.is_saved = True
 
-    def _set_current_filters_as_default(self):
-        # call a function that applys all the current self.master.master.image_properties values to a config file
-        print("Default values updates")
-
-    def _show_zoom_slider(self):
-        # Creating the Zoom slider windo.
-        zoom_slider_window = Toplevel(self)
-        zoom_slider_window.title("Change Zoom Percentage")
-
-        # Initial Zoom value for the zoom scale. THIS VALUE SHOULD BE SET BASED ON THE CONFIG FILE ONCE THAT IS CREATED.
-        self.current_default_zoom_percentage = 10
-
-        # Creating the scale and specifying its attributes.
-        zoom_scale = Scale(zoom_slider_window, from_=10, to_=150,
-                           orient="horizontal", label="Zoom Percentage", resolution=10)
-        # Sets the initial Zoom value of the scale.
-        zoom_scale.set(self.current_default_zoom_percentage)
-        zoom_scale.pack()
-
-        # Creating a reset button for the scale.
-        # Using Lambda function to set the zoom scale to a dfault value and destroy the window.
-        # Once we have the config file, this value will not merely be 10. It will be the users default value from past use.
-        reset_button = Button(zoom_slider_window, text="Reset", command=lambda: [
-                              zoom_scale.set(10), zoom_slider_window.destroy()])
-        reset_button.pack(side="right")
-
-        # Creating an apply button for the scale.
-        # Using Lambda function to print the current zoom value (for testing purposed) and close the window. Once the config file is created, we may need a full function to update the config file. To be determined!
-        # Using lambda function to create a reference to the function to avoid errors in the function being called when the button is corrected instead of when the button is clicked.
-        apply_button = Button(zoom_slider_window, text="Apply", command=lambda: self._apply_new_default_zoom_percentage(
-            zoom_scale, zoom_slider_window))
-        apply_button.pack(side="right")
-
-    # This function saves the new zoom percentage and destroys the window when the user applys the zoom slider.
-    def _apply_new_default_zoom_percentage(self, zoom_scale, zoom_slider_window):
-        print(zoom_scale.get())  # Printing for testing.
-        # FAKE VARIABLE; use a real one when the config file is created.
-        # Setting the value in the config file to the new scale value.
-        configFileDefaultZoom = zoom_scale.get()
-        zoom_slider_window.destroy()  # Destroying the window
-
     def _insert_into_history(self, img=None):
+        """
+        Inserts the current image into the history array
+        """
         image = img
         height, width = image.shape[:2]
-        # Inserts the current self.master.master.image_properties into the history array
         title = "File Imported"
         import_instance = ImageProperties(
             title=title,
@@ -411,7 +399,9 @@ class AppOptions(Frame):
         self.master.master.history_of_edits.update_history_list()
 
     def _reset_all_edits(self):
-        # Resets all edits to the original image
+        """
+        Resets all edits to the original image
+        """
         self.master.master.processed_image = self.master.master.original_image
         self.master.master.image_viewer.display_image(
             self.master.master.processed_image)

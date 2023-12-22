@@ -1,9 +1,9 @@
-from tkinter import Frame, Button, END, LEFT, BOTH, YES, BOTTOM, X, TOP, CENTER, font as tkFont
+from tkinter import Frame, Button, END, LEFT, BOTH, YES, BOTTOM, X, TOP, CENTER
 from tkinter import ttk
+
 
 class History(Frame):
     def __init__(self, master=None):
-        # Initializes the History class, creating a frame to display history edits
 
         Frame.__init__(self, master=master, bg="#6b6b6b")
 
@@ -18,7 +18,8 @@ class History(Frame):
         history_frame.pack(side=TOP, fill=BOTH, expand=YES)
 
         # Sets up a Treeview widget for displaying history items
-        self.history_tree = ttk.Treeview(history_frame, columns=("Title", "Time"), show="headings", height=20)
+        self.history_tree = ttk.Treeview(history_frame, columns=(
+            "Title", "Time"), show="headings", height=20)
         self.history_tree.pack(side=TOP, fill=BOTH, expand=YES)
 
         # Configures columns and headings for the Treeview
@@ -47,12 +48,23 @@ class History(Frame):
         self.redo_edit_button.pack(side=LEFT)
 
     def _set_indices(self):
-        # Sets the current index and starting index
+        """
+        Sets the history length, current index, and starting index.
+        """
         self.history_length = len(self.history_arr)
         self.current_index = self.history_length - 1
         self.starting_index = 0
 
     def _set_image_properties(self, property_instance):
+        """
+        Sets the image properties to the values from the property instance.
+
+        Parameters:
+            property_instance (Property): The property instance to retrieve values from.
+
+        Returns:
+            None
+        """
         self.master.master.image_properties.title = property_instance.title
         self.master.master.image_properties.time = property_instance.time
         self.master.master.image_properties.is_flipped_horz = property_instance.is_flipped_horz
@@ -86,7 +98,15 @@ class History(Frame):
         self.master.master.image_properties.at_time_canvas_height = property_instance.at_time_canvas_height
 
     def undo_action(self, event=None):
-        # Handles the undo action by decrementing the current index and retrieving the property instance
+        """
+        Performs an undo action by decrementing the current index and retrieving the property instance.
+
+        Parameters:
+            event (tkinter.Event): The event that triggered the undo action.
+
+        Returns:
+            None
+        """
         if self.current_index > self.starting_index:
             self.master.master.undo_performed = True
             self.current_index -= 1
@@ -95,7 +115,15 @@ class History(Frame):
         self.update_displayed_image()
 
     def redo_action(self, event=None):
-        # Handles the redo action by incrementing the current index and retrieving the property instance
+        """
+        Performs a redo action by incrementing the current index and retrieving the property instance.
+
+        Parameters:
+            event (tkinter.Event): The event that triggered the redo action.
+
+        Returns:
+            None
+        """
         if self.current_index < self.history_length - 1:
             self.current_index += 1
             property_instance = self.history_arr[self.current_index]
@@ -105,7 +133,15 @@ class History(Frame):
             print("No undo action to redo")
 
     def _item_clicked(self, event=None):
-        # Handles a click on a history item by retrieving the property instance and setting the current index
+        """
+        Handles a click on a history item by retrieving the property instance and setting the current index.
+
+        Parameters:
+            event (tkinter.Event): The event that triggered the item click.
+
+        Returns:
+            None
+        """
         item = self.history_tree.selection()[0]
         index = self.history_tree.index(item)
         self.current_index = index
@@ -116,7 +152,10 @@ class History(Frame):
         self.update_displayed_image()
 
     def update_history_list(self):
-        # Clears the existing history items in the Treeview
+        """
+        Updates the history list by deleting all items and inserting new items from the updated history array.
+        """
+        # Deletes all items from the Treeview
         for item in self.history_tree.get_children():
             self.history_tree.delete(item)
 
@@ -125,6 +164,9 @@ class History(Frame):
             self.history_tree.insert("", END, values=(item.title, item.time))
 
     def _clear_after_edit(self):
+        """
+        Clears the history array after the current index.
+        """
         self.history_arr = self.history_arr[:self.current_index + 1]
         self.master.master.history = self.history_arr
         self.master.master.undo_performed = False
@@ -132,9 +174,15 @@ class History(Frame):
         self.update_history_list()
 
     def update_displayed_image(self):
+        """
+        Updates the displayed image by applying all edits to the original image.
+        """
         self.master.master.image_viewer._apply_all_edits()
 
     def _clear_history(self):
+        """
+        Clears the history array.
+        """
         self.history_arr.clear()
         self.master.master.history = self.history_arr
         self._set_indices()

@@ -1,7 +1,7 @@
 import os
-from tkinter import filedialog, simpledialog  # pip install tk
+from tkinter import filedialog, simpledialog
 import cv2 as cv
-import imageio  # pip install imageio
+import imageio
 import glob
 
 
@@ -11,6 +11,11 @@ class FileManager:
         self.batch_files = None  # Alternate variable for a list of batch processed files
 
     def get_file(self):
+        """
+        Prompts user to select an image file.
+        """
+
+        # Valid file types for image files supported by this application
         valid_file_types = [
             ("Image Files", "*.png *.jpeg *.jpg *.gif *.bmp *.tiff"),
             ("PNG files", "*.png"),
@@ -21,13 +26,14 @@ class FileManager:
             ("TIFF files", "*.tiff")
         ]
 
+        # Prompts user to select an image file
         file_path = filedialog.askopenfilename(
-            filetypes=valid_file_types)  # Prompt user to select image
+            filetypes=valid_file_types)
 
         if file_path:
             if file_path.endswith(".gif"):
 
-                # Gets the first frame from the gif
+                # Retrieves the first frame from the GIF
                 cap = cv.VideoCapture(file_path)
                 ret, first_frame = cap.read()
                 cap.release()
@@ -52,18 +58,44 @@ class FileManager:
             self.file = file_path  # Update file attribute with path of file selected
 
     def find_file(self, path):
-        # Get a file that already exists
+        """
+        Finds a file based on the path provided.
+
+        Parameters:
+            path (str): The path to the file.
+
+        Returns:
+            None
+        """
         file_path = path
         if file_path:
             self.file = file_path
 
     def save_file(self, content):
+        """
+        Saves the file with the edits made to it.
+
+        Parameters:
+            content (numpy.ndarray): The image to be saved.
+
+        Returns:
+            None
+        """
         if self.file:
             # Overwrites existing file with new edits
             cv.imwrite(self.file, content)
 
     @staticmethod
     def save_as_file(content):
+        """
+        Prompts user to save the file under the desired name and file format.
+
+        Parameters:
+            content (numpy.ndarray): The image to be saved.
+
+        Returns:
+            None
+        """
 
         valid_file_types = [
             ("Image Files", "*.png *.jpeg *.jpg *.gif *.bmp *.tiff"),
@@ -95,6 +127,12 @@ class FileManager:
                 cv.imwrite(file_path, content)
 
     def delete_file(self):
+        """
+        Deletes the file from the system.
+
+        Returns:
+            None
+        """
         if self.file:
             try:
                 os.remove(self.file)  # Removes file from system
@@ -103,6 +141,11 @@ class FileManager:
                 print(f"Error: {OSError}")
 
     def get_files(self):
+        """
+        Prompts user to select multiple image files.
+
+        Returns:
+            None"""
         answer = simpledialog.messagebox.askyesnocancel("Preparing to Select Folder",
                                                         "Would you rather select files manually? \n\nNote: A PNG will be created for the first frame of each GIF file.")
 
@@ -121,6 +164,7 @@ class FileManager:
             ("TIFF files", "*.tiff")
         ]
 
+        # Prompt user to select a folder if they choose to not select files manually
         if answer is False:
             folder_path = filedialog.askdirectory()
             if not folder_path:
