@@ -8,38 +8,37 @@ The Image Viewer and Editor application provides users with a seamless, lightwei
 
 ____________________________________________________________________________________________
 
-Hardware Requirements:
+## Hardware Requirements:
 
-    - At least 8GB of DDR4 RAM
-    - Internal Graphics or better
-    - 3.4 GHZ processor or better
+- At least 8GB of DDR4 RAM
+- Internal Graphics or better
+- 3.4 GHZ processor or better
 
-System Recommendations:
+## System Recommendations:
 
-    - Windows 10 or 11
-    - If using MAC ensure peripheral mouse to be used
+- Windows 10 or 11
+- If using MAC ensure peripheral mouse to be used
 
-Dependencies:
+## Dependencies:
 
-    - Python3 (https://www.python.org/downloads/)
-    - numpy (pip install numpy)
-    - OpenCV (pip install opencv-python)
-    - tkinter (pip install tk)
-    - Pillow (pip install Pillow)
-    - imageio (pip install imageio)
-    - glob (pip install glob2)
+- Python3 (https://www.python.org/downloads/)
+- numpy: ```pip install numpy```
+- OpenCV: ```pip install opencv-python```
+- tkinter: ```pip install tk```
+- Pillow: ```pip install Pillow```
+- imageio: ```pip install imageio```
+- glob ```pip install glob2```
+
+
+## Running Program:
+
+1. Clone Repository onto local environment
+2. Install dependencies listed above
+3. Run `init.py` file
 
 ____________________________________________________________________________________________
 
-Running Program:
-
-    1. Clone Repository onto local machine
-    2. Install dependencies listed above
-    3. Run `init.py` file
-
-____________________________________________________________________________________________
-
-We hope you enjoy the application!
+Enjoy!
 
 
 
